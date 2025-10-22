@@ -1,0 +1,363 @@
+[
+  {
+    "inmatriculaciones": 100004581,
+    "referencia": 100000003,
+    "placa": "CFD746",
+    "compradores": [
+      {
+        "tipoPersona": "2",
+        "tipoDocumento": "1",
+        "numDocumento": "20613370251",
+        "apellidoPaterno": "",
+        "apellidoMaterno": "",
+        "nombres": "",
+        "razonSocial": "FHT S.A.C.",
+        "telefonoFijo": "",
+        "celular": "986388881",
+        "correoElectronico": "luohongmei459@gmail.com",
+        "correoElectronicoAlternativo": "",
+        "fechaDeNacimiento": "",
+        "tieneRepresentante": "1",
+        "domicilioFiscal": {
+          "distrito": "30",
+          "direccion": "AV. ANGAMOS NRO.2073 URB. PRIMAVERA DE MONTERRICO"
+        },
+        "Representante": {
+          "tipoDeDocumento": "4",
+          "numDocumento": "000681736",
+          "apellidoPaterno": "LUO",
+          "apellidoMaterno": "",
+          "nombres": "HONGMEI",
+          "telefonoFijo": "",
+          "celular": "986388881",
+          "correoElectronico": "luohongmei459@gmail.com",
+          "fechaNacimiento": "",
+          "domicilioDeRelacionado": {
+            "distrito": "30",
+            "direccion": "AV. ANGAMOS NRO.2073 URB. PRIMAVERA DE MONTERRICO"
+          }
+        },
+        "adquisicion": {
+          "fecha_inscripcion": "2025-08-01",
+          "tipoDeAdquisicion": "1",
+          "fechasAdquisicion_factura_cancelacion": "2025-07-30",
+          "condicionDePropiedad": "5",
+          "moneda": "PEN",
+          "valorMonetario": "88394.27"
+        }
+      }
+    ],
+    "vehiculo": {
+      "categoriaMtc": "N1",
+      "carroceria": "PAN",
+      "anoModelo": "2024",
+      "modelo": "GXA5030XXYBEVD",
+      "version": "SINVERSION",
+      "marca": "LINXYS",
+      "nroMotor": "9004024004785",
+      "nAsientos": "2",
+      "combustible": "ELT",
+      "cilindraje": 0,
+      "formulaRodante": "4X4",
+      "pesoBruto": 3000,
+      "transmision": "AUT"
+    }
+  },
+  {
+    "inmatriculaciones": 100005083,
+    "referencia": 100000004,
+    "placa": "CUB478",
+    "compradores": [
+      {
+        "tipoPersona": "3",
+        "tipoDocumento": "4",
+        "numDocumento": "001639865",
+        "apellidoPaterno": "LUO",
+        "apellidoMaterno": "",
+        "nombres": "XI",
+        "razonSocial": "",
+        "celular": "900588699",
+        "correoElectronico": "powerericdroid@gmail.com",
+        "fechaDeNacimiento": "1984-05-29",
+        "domicilioFiscal": {
+          "distrito": "4",
+          "direccion": "EL SOL 335 - 355 DPTO 1302"
+        },
+        "adquisicion": {
+          "fecha_inscripcion": "2025-08-13",
+          "tipoDeAdquisicion": "1",
+          "fechasAdquisicion_factura_cancelacion": "2025-08-09",
+          "condicionDePropiedad": "5",
+          "moneda": "USD",
+          "valorMonetario": "25000"
+        }
+      },
+      {
+        "tipoPersona": "3",
+        "tipoDocumento": "4",
+        "numDocumento": "005766061",
+        "apellidoPaterno": "LIU",
+        "apellidoMaterno": "",
+        "nombres": "XING",
+        "razonSocial": "",
+        "celular": "955215392",
+        "correoElectronico": "shmimy_07@163.com",
+        "fechaDeNacimiento": "1984-02-11",
+        "domicilioFiscal": {
+          "distrito": "4",
+          "direccion": "EL SOL 335 - 355 DPTO 1302"
+        },
+        "adquisicion": {
+          "fecha_inscripcion": "2025-08-13",
+          "tipoDeAdquisicion": "1",
+          "fechasAdquisicion_factura_cancelacion": "2025-08-09",
+          "condicionDePropiedad": "5",
+          "moneda": "USD",
+          "valorMonetario": "25000"
+        }
+      }
+    ],
+    "vehiculo": {
+      "categoriaMtc": "M1",
+      "carroceria": "SED",
+      "anoModelo": "2025",
+      "modelo": "BJ7001A514BEV",
+      "version": "SINVERSION",
+      "marca": "ARCFOX",
+      "nroMotor": "FD50AS030300053",
+      "nAsientos": "5",
+      "combustible": "ELT",
+      "cilindraje": 0,
+      "formulaRodante": "4X2",
+      "pesoBruto": 2295,
+      "transmision": "AUT"
+    }
+  },
+  {
+    "inmatriculaciones": 100005648,
+    "referencia": 100000005,
+    "placa": "CFO813",
+    "compradores": [
+      {
+        "tipoPersona": "2",
+        "tipoDocumento": "1",
+        "numDocumento": "20614087081",
+        "apellidoPaterno": "",
+        "apellidoMaterno": "",
+        "nombres": "",
+        "razonSocial": "JUST IN TIME CUSTOMS & ESER S.A.C.",
+        "telefonoFijo": "",
+        "celular": "913407005",
+        "correoElectronico": "jg.cargo-operaciones@hotmail.com",
+        "correoElectronicoAlternativo": "",
+        "fechaDeNacimiento": "",
+        "tieneRepresentante": "1",
+        "domicilioFiscal": {
+          "distrito": "35",
+          "direccion": "CAL. B I-28-29 1 URB. FHILADELFIA - 1RA ETAPA"
+        },
+        "Representante": {
+          "tipoDeDocumento": "2",
+          "numDocumento": "41096735",
+          "apellidoPaterno": "PEREZ",
+          "apellidoMaterno": "FACHIN",
+          "nombres": "NESTOR",
+          "telefonoFijo": "",
+          "celular": "913407005",
+          "correoElectronico": "jg.cargo-operaciones@hotmail.com",
+          "fechaNacimiento": "",
+          "domicilioDeRelacionado": {
+            "distrito": "35",
+            "direccion": "CAL. B I-28-29 1 URB. FHILADELFIA - 1RA ETAPA"
+          }
+        },
+        "adquisicion": {
+          "fecha_inscripcion": "2025-08-26",
+          "tipoDeAdquisicion": "1",
+          "fechasAdquisicion_factura_cancelacion": "2025-08-18",
+          "condicionDePropiedad": "5",
+          "moneda": "USD",
+          "valorMonetario": "25000"
+        }
+      }
+    ],
+    "vehiculo": {
+      "categoriaMtc": "N1",
+      "carroceria": "PAN",
+      "anoModelo": "2024",
+      "modelo": "GXA5030XXYBEVD",
+      "version": "SINVERSION",
+      "marca": "LINXYS",
+      "nroMotor": "9004024005063",
+      "nAsientos": "2",
+      "combustible": "ELT",
+      "cilindraje": 0,
+      "formulaRodante": "4X4",
+      "pesoBruto": 3000,
+      "transmision": "AUT"
+    }
+  },
+  {
+    "inmatriculaciones": 100003522,
+    "referencia": 100000992,
+    "placa": "CTO549",
+    "compradores": [
+      {
+        "Representante": {
+          "tipoDeDocumento": "2",
+          "numDocumento": "42703703",
+          "apellidoPaterno": "EFFIO",
+          "apellidoMaterno": "SUCLUPE",
+          "nombres": "JOSUE ANTONIO",
+          "telefonoFijo": "",
+          "celular": "994251424",
+          "correoElectronico": "joan_1499@hotmail.com",
+          "fechaNacimiento": "",
+          "domicilioDeRelacionado": {
+            "distrito": "",
+            "direccion": ""
+          }
+        },
+        "adquisicion": {
+          "fecha_inscripcion": "2025-07-10",
+          "tipoDeAdquisicion": "1",
+          "fechasAdquisicion_factura_cancelacion": "2025-06-30",
+          "condicionDePropiedad": "5",
+          "moneda": "USD",
+          "valorMonetario": "28990"
+        }
+      }
+    ],
+    "vehiculo": {
+      "categoriaMtc": "M1",
+      "carroceria": "SUV",
+      "anoModelo": "2026",
+      "modelo": "CX-30",
+      "version": "CX-30 HIGH 2.0 AT 2WD IPM V E6b",
+      "marca": "MAZDA",
+      "nroMotor": "PE31825510",
+      "nAsientos": "5",
+      "combustible": "GSL",
+      "cilindraje": 1998,
+      "formulaRodante": "4X2",
+      "pesoBruto": 1936,
+      "transmision": "AUT"
+    }
+  },
+  {
+    "inmatriculaciones": 100006455,
+    "referencia": 100002769,
+    "placa": "CUL307",
+    "compradores": [
+      {
+        "tipoPersona": "3",
+        "tipoDocumento": "2",
+        "numDocumento": "09441966",
+        "apellidoPaterno": "HERRERA",
+        "apellidoMaterno": "HEREDIA",
+        "nombres": "EVA MARIA",
+        "razonSocial": "",
+        "celular": "952179594",
+        "correoElectronico": "PEPEIBARCENA@HOTMAIL.COM",
+        "fechaDeNacimiento": "1969-09-27",
+        "domicilioFiscal": {
+          "distrito": "1",
+          "direccion": "AVENIDA CL ELVIRA GARCIA Y GARCIA 2353 MZ F UR ELIO 001 URBANIZACION RESIDENCIAL"
+        },
+        "adquisicion": {
+          "fecha_inscripcion": "2025-09-04",
+          "tipoDeAdquisicion": "1",
+          "fechasAdquisicion_factura_cancelacion": "2025-08-29",
+          "condicionDePropiedad": "6",
+          "moneda": "USD",
+          "valorMonetario": "22113"
+        }
+      }
+    ],
+    "vehiculo": {
+      "categoriaMtc": "M1",
+      "carroceria": "SUV",
+      "anoModelo": "2026",
+      "modelo": "SELTOS",
+      "version": "1.5 CVT - LX ONE",
+      "marca": "KIA",
+      "nroMotor": "G4FLS1115677",
+      "nAsientos": "5",
+      "combustible": "GSL",
+      "cilindraje": 1497,
+      "formulaRodante": "4X2",
+      "pesoBruto": 1685,
+      "transmision": "CVT"
+    }
+  },
+  {
+    "inmatriculaciones": 100006639,
+    "referencia": 100002859,
+    "placa": "CUO274",
+    "compradores": [
+      {
+        "tipoPersona": "1",
+        "tipoDocumento": "2",
+        "numDocumento": "70270061",
+        "apellidoPaterno": "MENDOZA",
+        "apellidoMaterno": "EGUSQUIZA ",
+        "nombres": "VALENTINA",
+        "razonSocial": "",
+        "celular": null,
+        "correoElectronico": null,
+        "fechaDeNacimiento": "1999-02-24",
+        "domicilioFiscal": {
+          "distrito": "22",
+          "direccion": "FRANCISCO TUDELA Y VARELA Nro 215 Y CL SALAZAR 473 INT SS01 URB CHACARILLA SANTA CRUZ"
+        },
+        "adquisicion": {
+          "fecha_inscripcion": "2025-09-11",
+          "tipoDeAdquisicion": "1",
+          "fechasAdquisicion_factura_cancelacion": "2025-09-05",
+          "condicionDePropiedad": "6",
+          "moneda": "USD",
+          "valorMonetario": "22490"
+        }
+      },
+      {
+        "tipoPersona": "1",
+        "tipoDocumento": "2",
+        "numDocumento": "70270062",
+        "apellidoPaterno": "MENDOZA",
+        "apellidoMaterno": "EGUSQUIZA",
+        "nombres": "MICAELA",
+        "razonSocial": "",
+        "celular": "946208674",
+        "correoElectronico": "valentiname2402@gmail.com",
+        "fechaDeNacimiento": "1997-10-24",
+        "domicilioFiscal": {
+          "distrito": "22",
+          "direccion": "FRANCISCO TUDELA Y VARELA Nro 215 Y CL SALAZAR 473 INT SS01 URB CHACARILLA SANTA CRUZ"
+        },
+        "adquisicion": {
+          "fecha_inscripcion": "2025-09-11",
+          "tipoDeAdquisicion": "1",
+          "fechasAdquisicion_factura_cancelacion": "2025-09-05",
+          "condicionDePropiedad": "6",
+          "moneda": "USD",
+          "valorMonetario": "22490"
+        }
+      }
+    ],
+    "vehiculo": {
+      "categoriaMtc": "M1",
+      "carroceria": "SUV",
+      "anoModelo": "2026",
+      "modelo": "TERRITORY",
+      "version": "TREND",
+      "marca": "FORD",
+      "nroMotor": "S6G054876",
+      "nAsientos": "5",
+      "combustible": "GSL",
+      "cilindraje": 1490,
+      "formulaRodante": "4X2",
+      "pesoBruto": 2025,
+      "transmision": "AUT"
+    }
+  }
+]
