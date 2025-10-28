@@ -630,7 +630,7 @@ def encontrar_modelo2(page, modelo_buscado):
             best_match_ratio = -1
             best_match_index = -1
             best_match_value = None
-
+# aa
             # Buscar mejor coincidencia
             for i, valor_modelo in enumerate(lista_locator):
                 matcher = SequenceMatcher(None, modelo_buscado.upper(), valor_modelo.upper())
