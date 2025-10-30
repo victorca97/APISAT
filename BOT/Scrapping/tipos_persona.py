@@ -860,10 +860,10 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
             if not isinstance(pesoBruto,int):
                 raise ValueError(f"El campo peso bruto '{pesoBruto}' debe ser un número (entero). Se recibió: {repr(pesoBruto)}")
         
-            # if not isinstance(cilindraje,int):
-            #     raise ValueError(f"El campo  cilindraje'{cilindraje}' debe ser un número (entero). Se recibió: {repr(cilindraje)}")
+            if not isinstance(cilindraje,int):
+                raise ValueError(f"El campo  cilindraje'{cilindraje}' debe ser un número (entero). Se recibió: {repr(cilindraje)}")
 
-                # Validar longitud mínima de direcciones
+            # Validar longitud mínima de direcciones
             if len(direccion) < 10 :
                 Registrador.error(f"Su direccion esta mal digitada ya que tiene menos de 10 caracteres la inmatriculacion {inmatriculaciones} y referencia {referencia}")
                 raise ValueError(f"La dirección del Conyuje '{direccion}' es muy corta debe tener al menos 10 caracteres. El cliente es {nombre} con el DNI {num_documento}") 
@@ -880,6 +880,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 page.locator("input[name='txtDocuAdmi']").fill(num_documento)
 
                 page.locator("input[name='cmdBuscaDocuAdmi']").click()
+                
                 try:
                     page.on("dialog", lambda dialog: dialog.accept())
                 except:
@@ -895,8 +896,14 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
 
                 if Numerodni1 == num_documento:
 #                if num_documento == Numerodni1:                    
-                    print("Tengo los datos")
-
+                    print("Tengo los datos del comprador 1")
+                    
+                    if (Numerodni1 == num_documento and
+                        apellidoPaterno == apellido_paterno and
+                        apellidoMaterno == apellido_materno):
+                        print("Los datos coinciden el dni con los apellidos.")
+                    
+                    
                     page.locator("input[name='txtApePateAdmi']").fill(apellido_paterno)
                     if apellido_materno == "":
                         page.locator("input[name='txtApeMateAdmi']").fill("")
@@ -1044,13 +1051,6 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 page.locator("#lnkRegresar").click()
                 raise
             
-    
-            
-            
-                
-                
-                
-                
                 
             try:
                 #DATOS DEL VEHICULO-------------------------                    
@@ -1127,8 +1127,6 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
 
                 page.select_option("#ddlTipoTransferencia",value={tipodeadquisicion})
 
-
-                
 
                 fechaAdquisicion = datetime.strptime(fechasAdquisicion_factura_cancelacion, "%Y-%m-%d")
                 fecha_formateada1 = fechaAdquisicion.strftime("%d-%m-%Y")
