@@ -63,11 +63,11 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
         if not isinstance(pesoBruto,int):
             raise ValueError(f"El campo peso bruto '{pesoBruto}' debe ser un número (entero). Se recibió: {repr(pesoBruto)}")
         
-        # if not isinstance(cilindraje,int):
-        #     raise ValueError(f"El campo  cilindraje'{cilindraje}' debe ser un número (entero). Se recibió: {repr(cilindraje)}")
+        if not isinstance(cilindraje,int):
+            raise ValueError(f"El campo  cilindraje'{cilindraje}' debe ser un número (entero). Se recibió: {repr(cilindraje)}")
         
 
-        if len(direccion) < 10 :
+        if len(direccion) < 7 :
             Registrador.error(f"Su direccion esta mal digitada ya que tiene menos de 10 caracteres la inmatriculacion {inmatriculaciones} y referencia {referencia}")
             raise ValueError(f"La dirección de la Empresa '{direccion}' es muy corta debe tener al menos 10 caracteres. El cliente es {nombre} con el DNI {num_documento}")
         
@@ -172,7 +172,7 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
 
             
             page.wait_for_load_state()
-
+            time.sleep(20)
 
             #DATOS DEL VEHICULO------------------
             
@@ -204,7 +204,7 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             #page.locator("input[name='txtAnoFabrica']").fill(anoFabricacion)
 
             time.sleep(2)
-            page.locator("input[name='txtDesMarca']").press_sequentially(marcas,delay=100)
+            page.locator("input[name='txtDesMarca']").press_sequentially(marcas,delay=700)
             time.sleep(2)
 
             if not encontrar_marca(page,marcas):
@@ -212,16 +212,8 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
 
             v_modelos=f"{modelos}".strip()
             time.sleep(2)
-            page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=100)
-            # VALIDACION DE LA FUNCION COMBINAR MODELO CON VERSION INVALIDA
-            if (version and 
-                len(version.strip()) >= 2 and 
-                version.upper() not in ['SINVERSION', 'SIN VERSION' 'SIN VERSIÓN', 'NO APLICA']):
-                
-                v_modeloCompleto = combinar_modelo_version(modelos, version)
-            else:
-                v_modeloCompleto = modelos
-                print(f"Versión omitida: '{version}'")
+            page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=700)
+            v_modeloCompleto = combinar_modelo_version(modelos, version)
             
             time.sleep(2)
             encontrar_modelo(page,v_modeloCompleto)
@@ -236,7 +228,10 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             page.select_option("#ddlTraccion",value=str(formulaRodante1))
 
             #rpt_cilindraje=int(cilindraje)*1000
-            page.locator("input[name='txtCilindraje']").fill(str(cilindraje))
+            if cilindraje == 0:  # Si es cero
+                page.locator("#txtCilindraje").fill("1")
+            elif cilindraje > 0:  # Solo llenar si es positivo
+                page.locator("#txtCilindraje").fill(str(cilindraje))
 
 
             #rpt_pesobruto=int(pesoBruto) * 1000
@@ -448,14 +443,14 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
         if not isinstance(pesoBruto,int):
             raise ValueError(f"El campo peso bruto '{pesoBruto}' debe ser un número (entero). Se recibió: {repr(pesoBruto)}")
         
-        # if not isinstance(cilindraje,int):
-        #     raise ValueError(f"El campo  cilindraje'{cilindraje}' debe ser un número (entero). Se recibió: {repr(cilindraje)}")
+        if not isinstance(cilindraje,int):
+            raise ValueError(f"El campo  cilindraje'{cilindraje}' debe ser un número (entero). Se recibió: {repr(cilindraje)}")
 
-        if len(direccion) < 10:
+        if len(direccion) < 7:
             Registrador.error(f"Su direccion esta mal digitada ya que tiene menos de 10 caracteres la inmatriculacion {inmatriculaciones} y referencia {referencia}")
             raise ValueError(f"La dirección de la Empresa '{direccion}' es muy corta debe tener al menos 10 caracteres. El cliente es {nombre} con el DNI {num_documento}")
     
-        if len(direccionR)<10:
+        if len(direccionR)< 7:
             Registrador.error(f"Su direccion esta mal digitada ya que tiene menos de 10 caracteres la inmatriculacion {inmatriculaciones} y referencia {referencia}")
             raise ValueError(f"La dirección del representate '{direccion}' es muy corta debe tener al menos 10 caracteres. El cliente es {nombreR} con el DNI {num_documentoR}")
         
@@ -641,6 +636,8 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             
             formulaRodante1=encontrar_formulaRodante(formulaRodante)
             page.select_option("#ddlTraccion",value=str(formulaRodante1))
+            
+            
 
             #rpt_cilindraje=int(cilindraje)*1000
             # Después de las validaciones, llenar el campo en la página
@@ -649,9 +646,11 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             page.select_option("#ddlCatMTC", value=str(value_categoriaMtc))
 
             # CILINDRAJE Validacion en 0
-            
+            if cilindraje == 0:  # Si es cero
+                page.locator("#txtCilindraje").fill("1")
+            elif cilindraje > 0:  # Solo llenar si es positivo
+                page.locator("#txtCilindraje").fill(str(cilindraje))
                 
-            
             #rpt_pesobruto=int(pesoBruto) * 1000
             page.locator("input[name='txtPesoBruto']").fill(str(int(pesoBruto)))
             page.keyboard.press("Enter")
@@ -864,11 +863,11 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 raise ValueError(f"El campo  cilindraje'{cilindraje}' debe ser un número (entero). Se recibió: {repr(cilindraje)}")
 
             # Validar longitud mínima de direcciones
-            if len(direccion) < 10 :
+            if len(direccion) < 7 :
                 Registrador.error(f"Su direccion esta mal digitada ya que tiene menos de 10 caracteres la inmatriculacion {inmatriculaciones} y referencia {referencia}")
                 raise ValueError(f"La dirección del Conyuje '{direccion}' es muy corta debe tener al menos 10 caracteres. El cliente es {nombre} con el DNI {num_documento}") 
 
-            if len(direccion2)<10:
+            if len(direccion2) < 7:
                 Registrador.error(f"Su direccion esta mal digitada ya que tiene menos de 10 caracteres la inmatriculacion {inmatriculaciones} y referencia {referencia}")
                 raise ValueError(f"La dirección del Conyuje '{direccion2}' es muy corta debe tener al menos 10 caracteres. El cliente es {nombre2} con el DNI {num_documento2}")
 
@@ -1108,10 +1107,10 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
 
                 #rpt_cilindraje=int(cilindraje)*1000
                 # Después de las validaciones, llenar el campo en la página
-                if cilindraje >= 0:  # Solo llenar si es 0 o positivo
+                if cilindraje == 0:  # Si es cero
+                    page.locator("#txtCilindraje").fill("1")
+                elif cilindraje > 0:  # Solo llenar si es positivo
                     page.locator("#txtCilindraje").fill(str(cilindraje))
-                else:
-                    raise ValueError(f"El campo cilindraje '{cilindraje}' no puede ser negativo")
 
 
                 #rpt_pesobruto=int(pesoBruto) * 1000
@@ -1285,10 +1284,10 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
     if not isinstance(pesoBruto,int):
         raise ValueError(f"El campo peso bruto '{pesoBruto}' debe ser un número (entero). Se recibió: {repr(pesoBruto)}")
         
-    # if not isinstance(cilindraje,int):
-    #     raise ValueError(f"El campo  cilindraje'{cilindraje}' debe ser un número (entero). Se recibió: {repr(cilindraje)}")
+    if not isinstance(cilindraje,int):
+        raise ValueError(f"El campo  cilindraje'{cilindraje}' debe ser un número (entero). Se recibió: {repr(cilindraje)}")
 
-    if len(direccion) < 10 :
+    if len(direccion) < 7 :
         Registrador.error(f"Su direccion esta mal digitada ya que tiene menos de 10 caracteres la inmatriculacion {inmatriculaciones} y referencia {referencia}")
         raise ValueError(f"La dirección de la Empresa '{direccion}' es muy corta debe tener al menos 10 caracteres. El cliente es {nombre} con el DNI {num_documento}")
     try:
@@ -1445,7 +1444,10 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             page.select_option("#ddlTraccion",value=str(formulaRodante1))
 
             #rpt_cilindraje=int(cilindraje)*1000
-            page.locator("input[name='txtCilindraje']").fill(str(cilindraje))
+            if cilindraje == 0:  # Si es cero
+                page.locator("#txtCilindraje").fill("1")
+            elif cilindraje > 0:  # Solo llenar si es positivo
+                page.locator("#txtCilindraje").fill(str(cilindraje))
 
 
             #rpt_pesobruto=int(pesoBruto) * 1000
@@ -1461,8 +1463,6 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
 
             page.select_option("#ddlTipoTransferencia",value={tipodeadquisicion})
 
-
-            
 
             fechaAdquisicion = datetime.strptime(fechasAdquisicion_factura_cancelacion, "%Y-%m-%d")
             fecha_formateada1 = fechaAdquisicion.strftime("%d-%m-%Y")
@@ -1514,7 +1514,6 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             #page.select_option("#ddlClaseV", value="11")
 
 
-            
             page.locator("input[name='txtDesMarcaV']").press_sequentially(marcas,delay=200)
             time.sleep(2)
             if not encontrar_marca1(page,marcas):
@@ -1646,13 +1645,20 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             
             with page.expect_navigation(wait_until='load'):
                 page.locator("input[name='btnSiguiente']").click()
-            
-
+                
             comprador_infoes_list = compradores_array
             porcentaje=100
 
             longitud_comprador_infoes = len(comprador_infoes_list)
             print(longitud_comprador_infoes)
+            page.evaluate("""
+                let input = document.querySelector("input[name='txtNroAsientos']");
+                input.removeAttribute('disabled');
+                input.value = '';
+                """)
+            # Llenar el nuevo valor
+            page.locator("input[name='txtNroAsientos']").fill(nAsientos)
+            
             if longitud_comprador_infoes > 1:
                 valorporcentaje = porcentaje / longitud_comprador_infoes
                 porcentaje =int(valorporcentaje)
@@ -1670,9 +1676,6 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
 
             Guardar_Archivos(page,browser,inmatriculaciones,num_documento)
 
-
-
-    
     except Exception as e:
         destinos = ["practicantes.sistemas@notariapaino.pe", "jmallqui@notariapaino.pe","jmallqui@autohub.pe","administracion@autohub.pe"]
         asunto=f"ERROR BOT SAT-AUTOHUB Inmatriculaciones N°{inmatriculaciones} con la referencia {referencia}"

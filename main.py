@@ -38,6 +38,7 @@ def SAT():
 
         try:
             page.goto(enlace , timeout=500000)
+            
             Registrador.info("BOT SAT-AUTOHUB INICIADO...........")
             satScrapper.login(usuario, contra)
             Registrador.info("Logeado en SAT")
@@ -207,6 +208,7 @@ def SAT():
             Registrador.error(f"Hubo un error al iniciar sesión o navegar a la sección de trámites en el SAT. Error: {e}")
             print(traceback.format_exc())
             enviar_email_Api(destinos, asunto, error_message)
+        
 
         finally:
             browser.close()
