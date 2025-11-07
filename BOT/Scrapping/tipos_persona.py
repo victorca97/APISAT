@@ -322,12 +322,12 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             
         with page.expect_navigation(wait_until='load'):
             page.locator("input[name='btnAceptarV']").click()
-        
+            time.sleep(2)
         try:
             page.on("dialog", lambda dialog: dialog.accept())
         except:
             pass
-
+        time.sleep(2) 
 
         Guardar_Archivos(page,browser,inmatriculaciones,num_documento)
 
@@ -724,12 +724,12 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
         
         with page.expect_navigation(wait_until='load'):
             page.locator("input[name='btnAceptarV']").click()
-        
+            time.sleep(2)
         try:
             page.on("dialog", lambda dialog: dialog.accept())
         except:
             pass
-        
+        time.sleep(2)
         
 
         Guardar_Archivos(page,browser,inmatriculaciones,num_documento)
@@ -1196,6 +1196,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 page.on("dialog", lambda dialog: dialog.accept())
             except:
                 pass
+            time.sleep(2)
 
             Guardar_Archivos(page,browser,inmatriculaciones,num_documento)
 
@@ -1542,7 +1543,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
                 page.on("dialog", lambda dialog: dialog.accept())
             except:
                 pass
-
+            time.sleep(2)
             Guardar_Archivos(page,browser,inmatriculaciones,num_documento)
 
 
@@ -1672,7 +1673,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
                 page.on("dialog", lambda dialog: dialog.accept())
             except:
                 pass
-
+            time.sleep(2)    
 
             Guardar_Archivos(page,browser,inmatriculaciones,num_documento)
 
