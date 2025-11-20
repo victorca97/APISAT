@@ -493,74 +493,144 @@ def encontrar_carroceria(page,carroceria_buscada):
 
 
 
-def encontrar_modelo(page, modelos_buscado):
+def encontrar_modelo(page, modelos_buscado, version_buscada=None, clase_vehiculo=None):
     """
     Busca y selecciona un modelo en una lista desplegable web (#ui-id-2).
-    Usa `SequenceMatcher` para encontrar la mejor coincidencia:
-    - Si el ratio ≥ 0.95 → Selecciona directamente
-    - Si no hay ratio ≥ 0.95 pero hay alguna coincidencia → Muestra advertencia y selecciona la mejor
-    - Si no hay coincidencias → Devuelve None
+    Versión mejorada que:
+    - Concatena modelo y versión en la búsqueda inicial SIN guiones
+    - Ignora guiones y caracteres especiales
+    - Maneja búsqueda flexible
+    - Clasifica en OTROS MODELOS según tracción para camionetas
 
     :param page: Objeto page de Playwright
     :param modelos_buscado: Nombre del modelo a buscar
+    :param version_buscada: Versión del vehículo (opcional)
+    :param clase_vehiculo: Clase del vehículo (para determinar tracción)
     :return: Nombre del modelo coincidente o None si no hay coincidencias
     """
     try:
         time.sleep(5)
 
-        # Verificar si existe la lista de modelos
+        # CONCATENAR MODELO Y VERSIÓN para la búsqueda inicial SIN guiones
+        texto_busqueda_completo = limpiar_texto_busqueda(modelos_buscado)
+        if version_buscada:
+            texto_busqueda_completo = f"{limpiar_texto_busqueda(modelos_buscado)} {limpiar_texto_busqueda(version_buscada)}"
+        
+        print(f"🔍 Búsqueda concatenada (sin guiones): '{texto_busqueda_completo}'")
+
+        # Primero intentar la búsqueda con el texto concatenado y limpio
+        page.locator("#txtDesModelo").fill("")
+        time.sleep(2)
+        page.locator("#txtDesModelo").press_sequentially(texto_busqueda_completo, delay=500)
+        time.sleep(5)
+
+        # Verificar si existe la lista de modelos después de la búsqueda
         try:
-            page.wait_for_selector("#ui-id-2 > li", timeout=10000)
+            page.wait_for_selector("#ui-id-2 > li", timeout=15000)
             time.sleep(10)
             hay_lista = True
         except:
-            print("❌ No se encontró la lista de modelos. Procediendo con 'OTROS MODELOS'...")
+            print("❌ No se encontró la lista de modelos después de búsqueda concatenada. Procediendo con verificación...")
             hay_lista = False
 
-        # Si hay lista, hacer la búsqueda normal
+        # Si hay lista, hacer la búsqueda mejorada
         if hay_lista:
             opciones = page.query_selector_all("#ui-id-2 > li")
             lista_locator = [opcion.inner_text().strip() for opcion in opciones]
-            print("Lista modelo:", lista_locator)
-            print("Modelo a buscar:", modelos_buscado)
+            print("Lista modelo encontrada:", lista_locator)
+            print("Texto buscado concatenado:", texto_busqueda_completo)
+            if clase_vehiculo:
+                print("Clase vehículo:", clase_vehiculo)
 
             best_match_ratio = -1
             best_match_index = -1
             best_match_value = None
 
-            # Buscar mejor coincidencia
+            # Búsqueda mejorada que considera el texto concatenado
             for i, valor_modelo in enumerate(lista_locator):
-                matcher = SequenceMatcher(None, modelos_buscado.upper(), valor_modelo.upper())
-                ratio = matcher.ratio()
-                if ratio > best_match_ratio:
-                    best_match_ratio = ratio
+                # Limpiar textos para comparación
+                texto_limpio_buscado = limpiar_texto(texto_busqueda_completo)
+                texto_limpio_modelo = limpiar_texto(valor_modelo)
+                
+                # Estrategia 1: Comparar por número de palabras coincidentes
+                palabras_busqueda = texto_limpio_buscado.split()
+                palabras_modelo = texto_limpio_modelo.split()
+                
+                # Contar palabras coincidentes (ignorando orden)
+                palabras_coincidentes = sum(1 for palabra in palabras_busqueda 
+                                          if any(palabra_modelo.startswith(palabra) or palabra.startswith(palabra_modelo) or
+                                                 palabra in palabra_modelo or palabra_modelo in palabra
+                                                 for palabra_modelo in palabras_modelo))
+                
+                # Calcular ratio basado en palabras coincidentes
+                ratio_palabras = palabras_coincidentes / max(len(palabras_busqueda), len(palabras_modelo))
+                
+                # Estrategia 2: SequenceMatcher tradicional
+                matcher = SequenceMatcher(None, texto_limpio_buscado, texto_limpio_modelo)
+                ratio_tradicional = matcher.ratio()
+                
+                # Combinar ambos ratios
+                ratio_combinado = (ratio_tradicional * 0.7) + (ratio_palabras * 0.3)
+                
+                # Bonus si todas las palabras del modelo buscado están en el resultado
+                palabras_modelo_buscado = limpiar_texto(modelos_buscado).split()
+                todas_palabras_modelo_encontradas = all(
+                    any(palabra_b in palabra_m for palabra_m in palabras_modelo)
+                    for palabra_b in palabras_modelo_buscado
+                )
+                
+                if todas_palabras_modelo_encontradas:
+                    ratio_combinado += 0.2
+                    print(f"🎯 Todas las palabras del modelo encontradas en '{valor_modelo}'")
+                
+                if ratio_combinado > best_match_ratio:
+                    best_match_ratio = ratio_combinado
                     best_match_index = i
                     best_match_value = valor_modelo
 
             if best_match_value:
-                if best_match_ratio >= 0.99:
-                    print(f"✅ Coincidencia alta encontrada: '{best_match_value}' con ratio {best_match_ratio:.2f}")
+                if best_match_ratio >= 0.95:  # Umbral reducido por búsqueda más flexible
+                    print(f"✅ Coincidencia encontrada: '{best_match_value}' con ratio {best_match_ratio:.2f}")
+                    
                     indice_css = best_match_index + 1
                     page.click(f"#ui-id-2 > li:nth-child({indice_css})")
                     page.keyboard.press("Enter")
                     return best_match_value
                 else:
-                    print("⚠️ Baja coincidencia. Buscando 'OTROS MODELOS'...")
+                    print(f"⚠️ Baja coincidencia (ratio: {best_match_ratio:.2f}). Buscando 'OTROS MODELOS'...")
             else:
-                print("❌ Sin coincidencias. Forzando 'OTROS MODELOS'...")
+                print("❌ Sin coincidencias. Buscando 'OTROS MODELOS'...")
         else:
-            print("⚠️ Lista no disponible. Forzando 'OTROS MODELOS'...")
+            print("⚠️ Lista no disponible. Buscando 'OTROS MODELOS'...")
 
-        # Bloque común para cuando hay que usar "OTROS MODELOS"
+        # Bloque para "OTROS MODELOS" cuando no se encuentra coincidencia
         max_reintentos = 5
         encontrado = False
         intento = 0
 
         while not encontrado and intento < max_reintentos:
             intento += 1
-            print(f"🔄 Reintento {intento} para encontrar 'OTROS MODELOS'")
-            variableotros = "OTROS MODELOS"
+            print(f"🔄 Reintento {intento} para encontrar opción de OTROS MODELOS")
+            
+            # Determinar qué tipo de "OTROS MODELOS" usar según la clase y tracción
+            variableotros = "OTROS MODELOS"  # Valor por defecto para AUTOMÓVIL
+            
+            # Lógica según la tabla proporcionada
+            if clase_vehiculo and "camioneta" in clase_vehiculo.lower():
+                es_traccion_doble = determinar_traccion_camioneta(modelos_buscado, version_buscada)
+                
+                if es_traccion_doble:
+                    variableotros = "OTROS MODELOS TRACCIÓN DOBLE"
+                    print("🚙 Usando OTROS MODELOS TRACCIÓN DOBLE para camioneta (4WD, AWD, 4x4, Quattro)")
+                else:
+                    variableotros = "OTROS MODELOS TRACCIÓN SIMPLE" 
+                    print("🚙 Usando OTROS MODELOS TRACCIÓN SIMPLE para camioneta (2WD)")
+            else:
+                # Para AUTOMÓVIL (y otras clases que no sean camioneta)
+                variableotros = "OTROS MODELOS"
+                print("🚗 Usando OTROS MODELOS estándar para automóvil (4x2)")
 
+            # Limpiar y buscar la opción de OTROS MODELOS
             page.locator("#txtDesModelo").fill("")
             time.sleep(2)
             page.locator("#txtDesModelo").press_sequentially(variableotros, delay=500)
@@ -570,26 +640,45 @@ def encontrar_modelo(page, modelos_buscado):
             opciones2 = page.query_selector_all("#ui-id-2 > li")
             lista_locator2 = [opcion.inner_text().strip() for opcion in opciones2]
 
-            # Buscar "OTROS MODELOS"
+            # Buscar la opción correspondiente
+            opcion_encontrada = False
             for i, opcion in enumerate(opciones2):
                 texto = opcion.inner_text().strip()
-                if texto.upper() == "OTROS MODELOS":
-                    print("✅ Opción encontrada: OTROS MODELOS")
+                if texto.upper() == variableotros.upper():
+                    print(f"✅ Opción encontrada: {variableotros}")
                     indice_css = i + 1
                     page.click(f"#ui-id-2 > li:nth-child({indice_css})")
                     encontrado = True
+                    opcion_encontrada = True
                     break
+
+            if not opcion_encontrada:
+                # Si no encuentra la opción específica, buscar alternativas
+                print(f"⚠️ No se encontró '{variableotros}', buscando alternativas...")
+                
+                # Buscar cualquier opción que contenga "OTROS MODELOS"
+                for i, opcion in enumerate(opciones2):
+                    texto = opcion.inner_text().strip()
+                    if "OTROS MODELOS" in texto.upper():
+                        print(f"✅ Alternativa encontrada: {texto}")
+                        indice_css = i + 1
+                        page.click(f"#ui-id-2 > li:nth-child({indice_css})")
+                        encontrado = True
+                        variableotros = texto  # Usar el texto exacto encontrado
+                        break
 
             if not encontrado:
                 print("No encontrado aún. Reintentando...")
                 time.sleep(3)
 
         if encontrado:
-            print("✅ 'OTROS MODELOS' seleccionado correctamente.")
+            print(f"✅ '{variableotros}' seleccionado correctamente.")
             page.locator("#chkNueModelo").check()
             time.sleep(3)
             page.locator("#txtDesModeloReal").fill("")
-            page.locator("#txtDesModeloReal").press_sequentially(modelos_buscado, delay=500)
+            # Escribir modelo + versión concatenados y limpios en el campo real
+            texto_real_limpio = texto_busqueda_completo  # Ya está limpio sin guiones
+            page.locator("#txtDesModeloReal").press_sequentially(texto_real_limpio, delay=500)
             return variableotros
         else:
             print("❌ No se pudo seleccionar 'OTROS MODELOS' después de varios intentos.")
@@ -598,6 +687,82 @@ def encontrar_modelo(page, modelos_buscado):
     except Exception as e:
         print(f"⚠️ Error al buscar modelos: {e}")
         return None
+
+
+def limpiar_texto_busqueda(texto):
+    """
+    Limpia el texto para búsqueda eliminando guiones y caracteres especiales.
+    Más agresiva que limpiar_texto() para la entrada de búsqueda.
+    """
+    if not texto:
+        return ""
+    
+    # Eliminar guiones, puntos, comas, underscores y caracteres especiales
+    caracteres_a_eliminar = ['-']
+    texto_limpio = texto
+    
+    for char in caracteres_a_eliminar:
+        texto_limpio = texto_limpio.replace(char, ' ')
+    
+    # Eliminar espacios múltiples y normalizar
+    texto_limpio = ' '.join(texto_limpio.split())
+    
+    return texto_limpio.upper().strip()
+
+
+def limpiar_texto(texto):
+    """
+    Limpia el texto eliminando guiones, caracteres especiales y normalizando.
+    Para comparación interna (menos agresiva).
+    """
+    if not texto:
+        return ""
+    
+    # Eliminar guiones, puntos, comas y caracteres especiales
+    texto_limpio = texto.replace('-', ' ').replace('.', ' ').replace(',', ' ').replace('_', ' ')
+    
+    # Eliminar espacios múltiples y normalizar
+    texto_limpio = ' '.join(texto_limpio.split())
+    
+    return texto_limpio.upper()
+
+
+def determinar_traccion_camioneta(modelo, version):
+    """
+    Determina si una camioneta es de tracción doble basado en modelo y versión.
+    Según la tabla:
+    - TRACCIÓN SIMPLE: 2WD, 4x2
+    - TRACCIÓN DOBLE: 4WD, AWD, 4x4, Quattro
+    """
+    if not modelo and not version:
+        return False  # Por defecto tracción simple
+    
+    # Concatenar y limpiar texto para búsqueda
+    texto_completo = f"{modelo} {version}" if version else modelo
+    texto_busqueda = limpiar_texto(texto_completo)
+    
+    # Palabras clave para tracción DOBLE (camionetas)
+    palabras_traccion_doble = ['4WD', 'AWD', '4X4', 'QUATTRO', '4×4']
+    
+    # Palabras clave para tracción SIMPLE (camionetas) 
+    palabras_traccion_simple = ['2WD', '4X2']
+
+    # Primero buscar tracción doble
+    for palabra in palabras_traccion_doble:
+        if palabra in texto_busqueda:
+            print(f"🔍 Detectada tracción DOBLE en camioneta por palabra: {palabra}")
+            return True
+    
+    # Luego buscar tracción simple
+    for palabra in palabras_traccion_simple:
+        if palabra in texto_busqueda:
+            print(f"🔍 Detectada tracción SIMPLE en camioneta por palabra: {palabra}")
+            return False
+    
+    # Si no se detecta nada, usar tracción simple por defecto para camionetas
+    print("🔍 No se detectó tipo de tracción específica en camioneta, usando TRACCIÓN SIMPLE por defecto")
+    return False
+
 
 def agregarcompradores(page):
 
@@ -607,88 +772,192 @@ def agregarcompradores(page):
     page.locator("#dgDeclaraciones_lnkPorcentaje_0 > img").click()
 
 
-def encontrar_modelo2(page, modelo_buscado):
-    try:
-        time.sleep(2)
+def encontrar_modelo2(page, modelos_buscado, version_buscada=None, clase_vehiculo=None):
+    """
+    Busca y selecciona un modelo en una lista desplegable web (#ui-id-2).
+    Versión mejorada que:
+    - Concatena modelo y versión en la búsqueda inicial SIN guiones
+    - Ignora guiones y caracteres especiales
+    - Maneja búsqueda flexible
+    - Clasifica en OTROS MODELOS según tracción para camionetas
 
-        # Verificar si existe la lista de modelos
+    :param page: Objeto page de Playwright
+    :param modelos_buscado: Nombre del modelo a buscar
+    :param version_buscada: Versión del vehículo (opcional)
+    :param clase_vehiculo: Clase del vehículo (para determinar tracción)
+    :return: Nombre del modelo coincidente o None si no hay coincidencias
+    """
+    try:
+        time.sleep(5)
+
+        # CONCATENAR MODELO Y VERSIÓN para la búsqueda inicial SIN guiones
+        texto_busqueda_completo = limpiar_texto_busqueda(modelos_buscado)
+        if version_buscada:
+            texto_busqueda_completo = f"{limpiar_texto_busqueda(modelos_buscado)} {limpiar_texto_busqueda(version_buscada)}"
+        
+        print(f"🔍 Búsqueda concatenada (sin guiones): '{texto_busqueda_completo}'")
+
+        # Primero intentar la búsqueda con el texto concatenado y limpio
+        page.locator("#txtDesModeloV").fill("")
+        time.sleep(2)
+        page.locator("#txtDesModeloV").press_sequentially(texto_busqueda_completo, delay=500)
+        time.sleep(5)
+
+        # Verificar si existe la lista de modelos después de la búsqueda
         try:
-            page.wait_for_selector("#ui-id-6 > li", timeout=6000)
+            page.wait_for_selector("#ui-id-2 > li", timeout=15000)
             time.sleep(10)
             hay_lista = True
         except:
-            print("❌ No se encontró la lista '#ui-id-6 > li'. Procediendo con 'OTROS MODELOS'...")
+            print("❌ No se encontró la lista de modelos después de búsqueda concatenada. Procediendo con verificación...")
             hay_lista = False
 
-        # Si hay lista, hacer búsqueda normal
+        # Si hay lista, hacer la búsqueda mejorada
         if hay_lista:
-            opciones = page.query_selector_all("#ui-id-6 > li")
+            opciones = page.query_selector_all("#ui-id-2 > li")
             lista_locator = [opcion.inner_text().strip() for opcion in opciones]
-            print("Lista modelo:", lista_locator)
-            print("Modelo a buscar:", modelo_buscado)
+            print("Lista modelo encontrada:", lista_locator)
+            print("Texto buscado concatenado:", texto_busqueda_completo)
+            if clase_vehiculo:
+                print("Clase vehículo:", clase_vehiculo)
 
             best_match_ratio = -1
             best_match_index = -1
             best_match_value = None
-# aa
-            # Buscar mejor coincidencia
+
+            # Búsqueda mejorada que considera el texto concatenado
             for i, valor_modelo in enumerate(lista_locator):
-                matcher = SequenceMatcher(None, modelo_buscado.upper(), valor_modelo.upper())
-                ratio = matcher.ratio()
-                if ratio > best_match_ratio:
-                    best_match_ratio = ratio
+                # Limpiar textos para comparación
+                texto_limpio_buscado = limpiar_texto(texto_busqueda_completo)
+                texto_limpio_modelo = limpiar_texto(valor_modelo)
+                
+                # Estrategia 1: Comparar por número de palabras coincidentes
+                palabras_busqueda = texto_limpio_buscado.split()
+                palabras_modelo = texto_limpio_modelo.split()
+                
+                # Contar palabras coincidentes (ignorando orden)
+                palabras_coincidentes = sum(1 for palabra in palabras_busqueda 
+                                          if any(palabra_modelo.startswith(palabra) or palabra.startswith(palabra_modelo) or
+                                                 palabra in palabra_modelo or palabra_modelo in palabra
+                                                 for palabra_modelo in palabras_modelo))
+                
+                # Calcular ratio basado en palabras coincidentes
+                ratio_palabras = palabras_coincidentes / max(len(palabras_busqueda), len(palabras_modelo))
+                
+                # Estrategia 2: SequenceMatcher tradicional
+                matcher = SequenceMatcher(None, texto_limpio_buscado, texto_limpio_modelo)
+                ratio_tradicional = matcher.ratio()
+                
+                # Combinar ambos ratios
+                ratio_combinado = (ratio_tradicional * 0.7) + (ratio_palabras * 0.3)
+                
+                # Bonus si todas las palabras del modelo buscado están en el resultado
+                palabras_modelo_buscado = limpiar_texto(modelos_buscado).split()
+                todas_palabras_modelo_encontradas = all(
+                    any(palabra_b in palabra_m for palabra_m in palabras_modelo)
+                    for palabra_b in palabras_modelo_buscado
+                )
+                
+                if todas_palabras_modelo_encontradas:
+                    ratio_combinado += 0.2
+                    print(f"🎯 Todas las palabras del modelo encontradas en '{valor_modelo}'")
+                
+                if ratio_combinado > best_match_ratio:
+                    best_match_ratio = ratio_combinado
                     best_match_index = i
                     best_match_value = valor_modelo
 
             if best_match_value:
-                if best_match_ratio >= 0.99:
-                    print(f"✅ Coincidencia alta encontrada: '{best_match_value}' con ratio {best_match_ratio:.2f}")
+                if best_match_ratio >= 0.95:  # Umbral reducido por búsqueda más flexible
+                    print(f"✅ Coincidencia encontrada: '{best_match_value}' con ratio {best_match_ratio:.2f}")
+                    
                     indice_css = best_match_index + 1
-                    page.click(f"#ui-id-6 > li:nth-child({indice_css})")
+                    page.click(f"#ui-id-2 > li:nth-child({indice_css})")
+                    page.keyboard.press("Enter")
                     return best_match_value
                 else:
-                    print("⚠️ Baja coincidencia. Forzando 'OTROS MODELOS'...")
+                    print(f"⚠️ Baja coincidencia (ratio: {best_match_ratio:.2f}). Buscando 'OTROS MODELOS'...")
             else:
-                print("❌ Sin coincidencias. Forzando 'OTROS MODELOS'...")
-
+                print("❌ Sin coincidencias. Buscando 'OTROS MODELOS'...")
         else:
-            print("⚠️ Lista no disponible. Forzando 'OTROS MODELOS'.")
+            print("⚠️ Lista no disponible. Buscando 'OTROS MODELOS'...")
 
-        # Bloque común para cuando hay que usar "OTROS MODELOS"
+        # Bloque para "OTROS MODELOS" cuando no se encuentra coincidencia
         max_reintentos = 5
         encontrado = False
         intento = 0
 
         while not encontrado and intento < max_reintentos:
             intento += 1
-            print(f"🔄 Reintento {intento} para encontrar 'OTROS MODELOS'")
-            variableotros = "OTROS MODELOS"
+            print(f"🔄 Reintento {intento} para encontrar opción de OTROS MODELOS")
+            
+            # Determinar qué tipo de "OTROS MODELOS" usar según la clase y tracción
+            variableotros = "OTROS MODELOS"  # Valor por defecto para AUTOMÓVIL
+            
+            # Lógica según la tabla proporcionada
+            if clase_vehiculo and "camioneta" in clase_vehiculo.lower():
+                es_traccion_doble = determinar_traccion_camioneta2(modelos_buscado, version_buscada)
+                
+                if es_traccion_doble:
+                    variableotros = "OTROS MODELOS TRACCIÓN DOBLE"
+                    print("🚙 Usando OTROS MODELOS TRACCIÓN DOBLE para camioneta (4WD, AWD, 4x4, Quattro)")
+                else:
+                    variableotros = "OTROS MODELOS TRACCIÓN SIMPLE" 
+                    print("🚙 Usando OTROS MODELOS TRACCIÓN SIMPLE para camioneta (2WD, 4x2)")
+            else:
+                # Para AUTOMÓVIL (y otras clases que no sean camioneta)
+                variableotros = "OTROS MODELOS"
+                print("🚗 Usando OTROS MODELOS estándar para automóvil")
 
-            page.locator("#txtDesModeloV").fill("")
+            # Limpiar y buscar la opción de OTROS MODELOS
+            page.locator("#txtDesModelo").fill("")
             time.sleep(2)
-            page.locator("#txtDesModeloV").press_sequentially(variableotros, delay=500)
+            page.locator("#txtDesModelo").press_sequentially(variableotros, delay=500)
             time.sleep(5)
 
             # Actualizar lista después de escribir
-            opciones2 = page.query_selector_all("#ui-id-6 > li")
+            opciones2 = page.query_selector_all("#ui-id-2 > li")
             lista_locator2 = [opcion.inner_text().strip() for opcion in opciones2]
 
-            # Buscar "OTROS MODELOS"
+            # Buscar la opción correspondiente
+            opcion_encontrada = False
             for i, opcion in enumerate(opciones2):
                 texto = opcion.inner_text().strip()
-                if texto.upper() == "OTROS MODELOS":
-                    print("✅ Opción encontrada: OTROS MODELOS")
+                if texto.upper() == variableotros.upper():
+                    print(f"✅ Opción encontrada: {variableotros}")
                     indice_css = i + 1
-                    page.click(f"#ui-id-6 > li:nth-child({indice_css})")
+                    page.click(f"#ui-id-2 > li:nth-child({indice_css})")
                     encontrado = True
+                    opcion_encontrada = True
                     break
 
+            if not opcion_encontrada:
+                # Si no encuentra la opción específica, buscar alternativas
+                print(f"⚠️ No se encontró '{variableotros}', buscando alternativas...")
+                
+                # Buscar cualquier opción que contenga "OTROS MODELOS"
+                for i, opcion in enumerate(opciones2):
+                    texto = opcion.inner_text().strip()
+                    if "OTROS MODELOS" in texto.upper():
+                        print(f"✅ Alternativa encontrada: {texto}")
+                        indice_css = i + 1
+                        page.click(f"#ui-id-2 > li:nth-child({indice_css})")
+                        encontrado = True
+                        variableotros = texto  # Usar el texto exacto encontrado
+                        break
+
             if not encontrado:
-                print("⏳ No encontrado aún. Reintentando...")
+                print("No encontrado aún. Reintentando...")
                 time.sleep(3)
 
         if encontrado:
-            print("✅ 'OTROS MODELOS' seleccionado correctamente.")
+            print(f"✅ '{variableotros}' seleccionado correctamente.")
+            page.locator("#chkNueModelo").check()
+            time.sleep(3)
+            page.locator("#txtDesModeloReal").fill("")
+            # Escribir modelo + versión concatenados y limpios en el campo real
+            texto_real_limpio = texto_busqueda_completo  # Ya está limpio sin guiones
+            page.locator("#txtDesModeloReal").press_sequentially(texto_real_limpio, delay=500)
             return variableotros
         else:
             print("❌ No se pudo seleccionar 'OTROS MODELOS' después de varios intentos.")
@@ -697,6 +966,87 @@ def encontrar_modelo2(page, modelo_buscado):
     except Exception as e:
         print(f"⚠️ Error al buscar modelos: {e}")
         return None
+
+
+def limpiar_texto_busqueda(texto):
+    """
+    Limpia el texto para búsqueda eliminando guiones y caracteres especiales.
+    Más agresiva que limpiar_texto() para la entrada de búsqueda.
+    """
+    if not texto:
+        return ""
+    
+    # Eliminar guiones, puntos, comas, underscores y caracteres especiales
+    caracteres_a_eliminar = ['-']
+    texto_limpio = texto
+    
+    for char in caracteres_a_eliminar:
+        texto_limpio = texto_limpio.replace(char, ' ')
+    
+    # Eliminar espacios múltiples y normalizar
+    texto_limpio = ' '.join(texto_limpio.split())
+    
+    return texto_limpio.upper().strip()
+
+
+def limpiar_texto(texto):
+    """
+    Limpia el texto eliminando guiones, caracteres especiales y normalizando.
+    Para comparación interna (menos agresiva).
+    """
+    if not texto:
+        return ""
+    
+    # Eliminar guiones, puntos, comas y caracteres especiales
+    texto_limpio = texto.replace('-', ' ').replace('.', ' ').replace(',', ' ').replace('_', ' ')
+    
+    # Eliminar espacios múltiples y normalizar
+    texto_limpio = ' '.join(texto_limpio.split())
+    
+    return texto_limpio.upper()
+
+
+def determinar_traccion_camioneta2(modelo, version):
+    """
+    Determina si una camioneta es de tracción doble basado en modelo y versión.
+    Según la tabla:
+    - TRACCIÓN SIMPLE: 2WD, 4X2
+    - TRACCIÓN DOBLE: 4WD, AWD, 4x4, Quattro
+    """
+    if not modelo and not version:
+        return False  # Por defecto tracción simple
+    
+    texto_busqueda = f"{modelo} {version}".upper()
+    
+    # Palabras clave para tracción DOBLE (camionetas)
+    palabras_traccion_doble = ['4WD', 'AWD', '4X4', 'QUATTRO', '4×4']
+    
+    # Palabras clave para tracción SIMPLE (camionetas) 
+    palabras_traccion_simple = ['2WD', '4X2']
+
+    # Primero buscar tracción doble
+    for palabra in palabras_traccion_doble:
+        if palabra in texto_busqueda:
+            print(f"🔍 Detectada tracción DOBLE en camioneta por palabra: {palabra}")
+            return True
+    
+    # Luego buscar tracción simple
+    for palabra in palabras_traccion_simple:
+        if palabra in texto_busqueda:
+            print(f"🔍 Detectada tracción SIMPLE en camioneta por palabra: {palabra}")
+            return False
+    
+    # Si no se encuentra ninguna indicación específica, buscar patrones más generales
+    if any(word in texto_busqueda for word in ['4X4', 'FOUR WHEEL', 'ALL WHEEL']):
+        print("🔍 Detectada tracción DOBLE por patrón general")
+        return True
+    elif any(word in texto_busqueda for word in ['2WD', 'TWO WHEEL']):
+        print("🔍 Detectada tracción SIMPLE por patrón general")
+        return False
+    
+    # Si no se detecta nada, usar tracción simple por defecto para camionetas
+    print("🔍 No se detectó tipo de tracción específica en camioneta, usando TRACCIÓN SIMPLE por defecto")
+    return False
     
 
 
@@ -1036,4 +1386,4 @@ def combinar_modelo_version(modelo, version):
             return version.strip()
         else:
             return f"{modelo} {version}".strip()
-    return version or modelo or "" 
+    return version or modelo or ""  

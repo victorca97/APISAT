@@ -1,0 +1,318 @@
+[
+  {
+    "fecha_registro": "2025-08-25",
+    "inmatriculaciones": 100005800,
+    "referencia": 100000006,
+    "placa": "CFW748",
+    "compradores": [
+      {
+        "orden": 1,
+        "tipoPersona": "1",
+        "tipoDocumento": "2",
+        "numDocumento": "71336579",
+        "apellidoPaterno": "RAMOS",
+        "apellidoMaterno": "MENDOZA",
+        "nombres": "CAMILO VALENTINO",
+        "razonSocial": "",
+        "celular": "999095725",
+        "correoElectronico": "mendozacamilo426@gmail.com",
+        "fechaDeNacimiento": "1997-04-05",
+        "domicilioFiscal": {
+          "distrito": "31",
+          "direccion": "CALLE DEAN VALDIVIA 207 213 DPTO. 1501 URB. JARDIN"
+        },
+        "adquisicion": {
+          "fecha_inscripcion": false,
+          "tipoDeAdquisicion": "1",
+          "fechasAdquisicion_factura_cancelacion": "2025-09-04",
+          "condicionDePropiedad": "5",
+          "moneda": "USD",
+          "valorMonetario": "83921"
+        }
+      }
+    ],
+    "vehiculo": {
+      "categoriaMtc": "N3",
+      "carroceria": "COB",
+      "anoModelo": "2024",
+      "modelo": "EQ1185LJ9CDE",
+      "version": "SINVERSION",
+      "marca": "DONG FENG",
+      "nroMotor": "93222956",
+      "nAsientos": "3",
+      "combustible": "DSL",
+      "cilindraje": 6200000,
+      "formulaRodante": "4X2",
+      "pesoBruto": 18000,
+      "transmision": "MEC"
+    }
+  },
+  {
+    "fecha_registro": "2025-10-01",
+    "inmatriculaciones": 100007665,
+    "referencia": 100000009,
+    "placa": "CUU623",
+    "compradores": [
+      {
+        "orden": 1,
+        "tipoPersona": "3",
+        "tipoDocumento": "2",
+        "numDocumento": "06681388",
+        "apellidoPaterno": "LOO",
+        "apellidoMaterno": "CARDENAS ",
+        "nombres": "CESAR",
+        "razonSocial": "",
+        "celular": "997580246",
+        "correoElectronico": "cesarloo1@hotmail.com",
+        "fechaDeNacimiento": "1962-10-27",
+        "domicilioFiscal": {
+          "distrito": "31",
+          "direccion": "CALLE 20 186  CORPAC"
+        },
+        "adquisicion": {
+          "fecha_inscripcion": "2025-10-03",
+          "tipoDeAdquisicion": "1",
+          "fechasAdquisicion_factura_cancelacion": "2025-10-01",
+          "condicionDePropiedad": "5",
+          "moneda": "USD",
+          "valorMonetario": "45000"
+        }
+      },
+      {
+        "orden": 2,
+        "tipoPersona": "3",
+        "tipoDocumento": "2",
+        "numDocumento": "47939770",
+        "apellidoPaterno": "IONG",
+        "apellidoMaterno": "DE LOO",
+        "nombres": "IOC LENG",
+        "razonSocial": "",
+        "celular": "997580246",
+        "correoElectronico": "cesarloo1@hotmail.com",
+        "fechaDeNacimiento": "1966-02-05",
+        "domicilioFiscal": {
+          "distrito": "31",
+          "direccion": "CALLE 20 186 URB. CORPAC"
+        },
+        "adquisicion": {
+          "fecha_inscripcion": "2025-10-03",
+          "tipoDeAdquisicion": "1",
+          "fechasAdquisicion_factura_cancelacion": "2025-10-01",
+          "condicionDePropiedad": "5",
+          "moneda": "USD",
+          "valorMonetario": "45000"
+        }
+      }
+    ],
+    "vehiculo": {
+      "categoriaMtc": "M1",
+      "carroceria": "SUV",
+      "anoModelo": "2025",
+      "modelo": "CA6483HA6TD",
+      "version": "SINVERSION",
+      "marca": "HONGQI",
+      "nroMotor": "303450",
+      "nAsientos": "5",
+      "combustible": "GSL",
+      "cilindraje": 1989,
+      "formulaRodante": "4X2",
+      "pesoBruto": 2270,
+      "transmision": "AUT"
+    }
+  },
+  {
+    "fecha_registro": "2025-10-23",
+    "inmatriculaciones": 100008823,
+    "referencia": 100000010,
+    "placa": "CHL744",
+    "compradores": [
+      {
+        "tipoPersona": "2",
+        "tipoDocumento": "1",
+        "numDocumento": "20608928538",
+        "apellidoPaterno": "",
+        "apellidoMaterno": "",
+        "nombres": "",
+        "razonSocial": "GRUPO ENJOY PERU S.A.C.",
+        "telefonoFijo": "",
+        "celular": "987766436",
+        "correoElectronico": "administracion@goenjoyperu.com",
+        "correoElectronicoAlternativo": "",
+        "fechaDeNacimiento": "",
+        "tieneRepresentante": "1",
+        "domicilioFiscal": {
+          "distrito": "40",
+          "direccion": "ASOC.PROP.VIV.FAP JORGE CHAVEZ 63-101"
+        },
+        "Representante": {
+          "tipoDeDocumento": "2",
+          "numDocumento": "09874457",
+          "apellidoPaterno": "ROLDAN",
+          "apellidoMaterno": "PEREYRA",
+          "nombres": "LUIS CESAR",
+          "telefonoFijo": "",
+          "celular": "987766436",
+          "correoElectronico": "administracion@goenjoyperu.com",
+          "fechaNacimiento": "",
+          "domicilioDeRelacionado": {
+            "distrito": "40",
+            "direccion": "ASOC.PROP.VIV.FAP JORGE CHAVEZ 63-101"
+          }
+        },
+        "adquisicion": {
+          "fecha_inscripcion": "2025-10-24",
+          "tipoDeAdquisicion": "1",
+          "fechasAdquisicion_factura_cancelacion": "2025-10-22",
+          "condicionDePropiedad": "5",
+          "moneda": "USD",
+          "valorMonetario": "14000"
+        }
+      }
+    ],
+    "vehiculo": {
+      "categoriaMtc": "N1",
+      "carroceria": "PAN",
+      "anoModelo": "2025",
+      "modelo": "HEX20XYEV05",
+      "version": "SINVERSION",
+      "marca": "KAZOKU",
+      "nroMotor": "HCAC7D700111",
+      "nAsientos": "2",
+      "combustible": "ELT",
+      "cilindraje": 0,
+      "formulaRodante": "4X2",
+      "pesoBruto": 1450,
+      "transmision": "AUT"
+    }
+  },
+  {
+    "fecha_registro": "2025-10-23",
+    "inmatriculaciones": 100008827,
+    "referencia": 100000011,
+    "placa": "CHM793",
+    "compradores": [
+      {
+        "tipoPersona": "2",
+        "tipoDocumento": "1",
+        "numDocumento": "20608928538",
+        "apellidoPaterno": "",
+        "apellidoMaterno": "",
+        "nombres": "",
+        "razonSocial": "GRUPO ENJOY PERU S.A.C.",
+        "telefonoFijo": "",
+        "celular": "987766436",
+        "correoElectronico": "administracion@goenjoyperu.com",
+        "correoElectronicoAlternativo": "",
+        "fechaDeNacimiento": "",
+        "tieneRepresentante": "1",
+        "domicilioFiscal": {
+          "distrito": "40",
+          "direccion": "ASOC.PROP.VIV.FAP JORGE CHAVEZ 63-101"
+        },
+        "Representante": {
+          "tipoDeDocumento": "2",
+          "numDocumento": "09874457",
+          "apellidoPaterno": "ROLDAN",
+          "apellidoMaterno": "PEREYRA",
+          "nombres": "LUIS CESAR",
+          "telefonoFijo": "",
+          "celular": "987766436",
+          "correoElectronico": "administracion@goenjoyperu.com",
+          "fechaNacimiento": "",
+          "domicilioDeRelacionado": {
+            "distrito": "40",
+            "direccion": "ASOC.PROP.VIV.FAP JORGE CHAVEZ 63-101"
+          }
+        },
+        "adquisicion": {
+          "fecha_inscripcion": false,
+          "tipoDeAdquisicion": "1",
+          "fechasAdquisicion_factura_cancelacion": "2025-10-22",
+          "condicionDePropiedad": "5",
+          "moneda": "USD",
+          "valorMonetario": "14000"
+        }
+      }
+    ],
+    "vehiculo": {
+      "categoriaMtc": "N1",
+      "carroceria": "PAN",
+      "anoModelo": "2025",
+      "modelo": "HEJ20CYEV01",
+      "version": "SINVERSION",
+      "marca": "KAZOKU",
+      "nroMotor": "HCAC7B500112",
+      "nAsientos": "2",
+      "combustible": "ELT",
+      "cilindraje": 0,
+      "formulaRodante": "4X2",
+      "pesoBruto": 1450,
+      "transmision": "AUT"
+    }
+  },
+  {
+    "fecha_registro": "2025-10-24",
+    "inmatriculaciones": 100008905,
+    "referencia": 100000012,
+    "placa": "CVE564",
+    "compradores": [
+      {
+        "tipoPersona": "2",
+        "tipoDocumento": "1",
+        "numDocumento": "20602455123",
+        "apellidoPaterno": "",
+        "apellidoMaterno": "",
+        "nombres": "",
+        "razonSocial": "JINHUI INVERSIONES S.A.C.",
+        "telefonoFijo": "",
+        "celular": "918515258",
+        "correoElectronico": "jeniferli1976@hotmail.com",
+        "correoElectronicoAlternativo": "",
+        "fechaDeNacimiento": "",
+        "tieneRepresentante": "1",
+        "domicilioFiscal": {
+          "distrito": "30",
+          "direccion": "CAL. LOPEZ DE AYALA NRO.1098 DPTO.-502 URB. SAN BORJA SUR"
+        },
+        "Representante": {
+          "tipoDeDocumento": "4",
+          "numDocumento": "000130586",
+          "apellidoPaterno": "LI",
+          "apellidoMaterno": "",
+          "nombres": "JINHUI",
+          "telefonoFijo": "",
+          "celular": "918515258",
+          "correoElectronico": "jeniferli1976@hotmail.com",
+          "fechaNacimiento": "",
+          "domicilioDeRelacionado": {
+            "distrito": "30",
+            "direccion": "CAL. LOPEZ DE AYALA NRO.1098 DPTO.-502 URB. SAN BORJA SUR"
+          }
+        },
+        "adquisicion": {
+          "fecha_inscripcion": "2025-10-27",
+          "tipoDeAdquisicion": "1",
+          "fechasAdquisicion_factura_cancelacion": "2025-10-16",
+          "condicionDePropiedad": "5",
+          "moneda": "USD",
+          "valorMonetario": "30000"
+        }
+      }
+    ],
+    "vehiculo": {
+      "categoriaMtc": "M1",
+      "carroceria": "SUV",
+      "anoModelo": "2024",
+      "modelo": "BJ6470A502BEV",
+      "version": "SINVERSION",
+      "marca": "ARCFOX",
+      "nroMotor": "FD71KR092705233",
+      "nAsientos": "5",
+      "combustible": "ELT",
+      "cilindraje": 0,
+      "formulaRodante": "4X2",
+      "pesoBruto": 2430,
+      "transmision": "AUT"
+    }
+  }
+]

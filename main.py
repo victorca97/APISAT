@@ -51,7 +51,7 @@ def SAT():
                 inmatriculaciones_fallidas = []
                 #100000108 no se hace porque no aparece el campo cambio domicilio
                 #100000082 no se hace porque no aparece el campo cambio domicilio
-                referencias_a_saltar = {100000082,100000108}
+                referencias_a_saltar = {100000082,100000108, 100003500, 100003512, 100003525, 100003528, 100003570, 100003806, 100003952, 100004025, 100004030, 100004088, 100004235}
 
                 for item in data_list:
                     inmatriculaciones = item.get('inmatriculaciones', 'N/A')
