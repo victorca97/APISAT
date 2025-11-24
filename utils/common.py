@@ -498,7 +498,7 @@ def encontrar_carroceria(page,carroceria_buscada):
 
 def obtener_token_sinonimo(palabra):
     """ Convierte variantes técnicas en TOKENS ÚNICOS. """
-    p = palabra.upper().replace(".", "").strip()
+    p = palabra.upper().replace("-", " ").strip()
     
     # TRACCIÓN
     if p in ["4X2", "2WD", "SIMPLE", "S-AWD", "TRACCION SIMPLE", "TRACCIÓN SIMPLE"]: return "TOKEN_TRACCION_SIMPLE"
