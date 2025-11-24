@@ -516,7 +516,7 @@ def obtener_token_sinonimo(palabra):
 def normalizar_texto(texto):
     """ Limpia texto y estandariza tokens. """
     if not texto: return set()
-    texto_limpio = texto.upper().replace("-", " ").replace("/", " ").replace(".", " ").strip()
+    texto_limpio = texto.upper().replace("-", " ").replace("/", " ").strip()
     palabras_estandarizadas = set()
     for palabra in texto_limpio.split():
         palabras_estandarizadas.add(obtener_token_sinonimo(palabra))
@@ -543,7 +543,7 @@ def limpiar_texto_para_input(texto):
     # porque causan que la lista se vacíe.
     palabras_prohibidas_typing = ["DLX", "LTD", "STD", "AUT", "MEC", "FULL"] 
     
-    texto_limpio = texto.upper().replace("-", " ").replace("/", " ").replace(".", " ")
+    texto_limpio = texto.upper().replace("-", " ").replace("/", " ")
     palabras = texto_limpio.split()
     
     palabras_seguras = []
@@ -623,7 +623,7 @@ def interactuar_y_buscar(page, texto_original, selector_input, selector_items_li
             # TOKEN_DELUXE == TOKEN_DELUXE -> ¡MATCH!
             if tokens_buscados.issubset(tokens_opcion):
                 print(f"✅ Coincidencia encontrada: '{texto_opcion}'")
-                time.sleep(0.5) 
+                time.sleep(1) 
                 op.click()
                 return True
                 
@@ -644,7 +644,7 @@ def flujo_seleccionar_otros(page, tipo_otros, nombre_real, selectores):
         if selectores.get('input_real'):
             real_inp = page.locator(selectores['input_real'])
             real_inp.fill("")
-            real_inp.press_sequentially(nombre_real, delay=100)
+            real_inp.press_sequentially(nombre_real, delay=200)
         
         return tipo_otros
     return None
@@ -694,8 +694,6 @@ def encontrar_modelo2(page, modelo, version):
     print("⚠️ No encontrado en Popup. Intentando 'OTROS'...")
     tipo_otros = detectar_tipo_otros_modelos(page) 
     return flujo_seleccionar_otros(page, tipo_otros, nombre_busqueda, sel)
-
-
 
 
 def enviar_inmatriculacion(inmatriculacion, dni, archivo_domicilio, archivo_declaracionJurada):
