@@ -164,6 +164,7 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             
             page.select_option("#ddlTipoRelacionado",value="0")
 
+            input("Corrige la direccion si es necesario y presiona Enter para continuar...")
             Registrador.info("Termine la primera hoja")
             # input("Corrige y Presiona Enter para continuar...")
 
@@ -211,13 +212,6 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             if not encontrar_marca(page,marcas):
                 raise ValueError("Marca no encontrada")
 
-            v_modelos=f"{modelos}".strip()
-            time.sleep(2)
-            page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=700)
-            v_modeloCompleto = combinar_modelo_version(modelos, version)
-            
-            time.sleep(2)
-            encontrar_modelo(page,v_modeloCompleto)
             time.sleep(2)
             page.locator("input[name='txtMotor']").fill(nroMotor)
             page.locator("input[name='txtNroAsientos']").fill(nAsientos)
@@ -244,12 +238,25 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             page.select_option("#ddlTransmision",value=str(value_T))
 
             page.locator("#btnDetermClaseCat").click
-
-
-            page.select_option("#ddlTipoTransferencia",value={tipodeadquisicion})
-
-
+            page.wait_for_timeout(2000)
+        
+            # Opcional: Solo para tu control en consola (no afecta la lógica)
+            clase_vehiculo = page.locator("#ddlClase").input_value()
+            print(f"ℹ️ Clase detectada antes de buscar modelo: {clase_vehiculo}")
             
+            # Seleccionar modelo ULTIMO PASO
+            v_modelos=f"{modelos}".strip()
+            time.sleep(2)
+            page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=700)
+            v_modeloCompleto = combinar_modelo_version(modelos, version)
+            
+            time.sleep(2)
+            encontrar_modelo(page, modelos, version)
+            
+
+
+            #DATOS DE LA ADQUISICION------------------
+            page.select_option("#ddlTipoTransferencia",value={tipodeadquisicion})
 
             fechaAdquisicion = datetime.strptime(fechasAdquisicion_factura_cancelacion, "%Y-%m-%d")
             fecha_formateada1 = fechaAdquisicion.strftime("%d-%m-%Y")
@@ -306,9 +313,7 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             raise ValueError("Marca no encontrada")
         time.sleep(2)
 
-        page.locator("input[name='txtDesModeloV']").press_sequentially(v_modelos,delay=200)
-        time.sleep(2)
-        encontrar_modelo2(page,v_modeloCompleto)
+        encontrar_modelo2(page,modelos, version)
         time.sleep(2)
         
         
@@ -333,9 +338,6 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
         time.sleep(2) 
 
         Guardar_Archivos(page,browser,inmatriculaciones,num_documento)
-
-
-
 
 
     except Exception as e:
@@ -621,21 +623,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             if not encontrar_marca(page,marcas):
                 raise ValueError("Marca no encontrada")
 
-            v_modelos=f"{modelos}".strip()
-            time.sleep(2)
-            page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=100)
-            # VALIDACION DE LA FUNCION COMBINAR MODELO CON VERSION INVALIDA
-            if (version and 
-                len(version.strip()) >= 2 and 
-                version.upper() not in ['SINVERSION', 'SIN VERSION' 'SIN VERSIÓN', 'NO APLICA']):
-                
-                v_modeloCompleto = combinar_modelo_version(modelos, version)
-            else:
-                v_modeloCompleto = modelos
-                print(f" Versión omitida: '{version}'")
             
-            time.sleep(2)
-            encontrar_modelo(page,v_modeloCompleto)
             time.sleep(2)
             page.locator("input[name='txtMotor']").fill(nroMotor)
             page.locator("input[name='txtNroAsientos']").fill(nAsientos)
@@ -669,8 +657,22 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             page.select_option("#ddlTransmision",value=str(value_T))
 
             page.locator("#btnDetermClaseCat").click
-
-
+            page.wait_for_timeout(2000)
+        
+            # Opcional: Solo para tu control en consola (no afecta la lógica)
+            clase_vehiculo = page.locator("#ddlClase").input_value()
+            print(f"ℹ️ Clase detectada antes de buscar modelo: {clase_vehiculo}")
+            
+            # Seleccionar modelo ULTIMO PASO
+            v_modelos=f"{modelos}".strip()
+            time.sleep(2)
+            page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=700)
+            v_modeloCompleto = combinar_modelo_version(modelos, version)
+            
+            time.sleep(2)
+            encontrar_modelo(page, modelos, version)
+            
+            #DATOS DE LA ADQUISICION------------------
             page.select_option("#ddlTipoTransferencia",value={tipodeadquisicion})
 
 
@@ -718,9 +720,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             raise ValueError("Marca no encontrada")
         time.sleep(2)
 
-        page.locator("input[name='txtDesModeloV']").press_sequentially(v_modelos,delay=200)
-        time.sleep(2)
-        encontrar_modelo2(page,v_modeloCompleto)
+        encontrar_modelo2(page,modelos, version)
         time.sleep(2)
         
         
@@ -1094,21 +1094,8 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 if not encontrar_marca(page,marcas):
                     raise ValueError("Marca no encontrada")
 
-                v_modelos=f"{modelos}".strip()
                 time.sleep(2)
-                page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=100)
-                # VALIDACION DE LA FUNCION COMBINAR MODELO CON VERSION INVALIDA
-                if (version and 
-                    len(version.strip()) >= 2 and 
-                    version.upper() not in ['SINVERSION', 'SIN VERSION' 'SIN VERSIÓN', 'NO APLICA']):
-                    
-                    v_modeloCompleto = combinar_modelo_version(modelos, version)
-                else:
-                    v_modeloCompleto = modelos
-                    print(f"🔸 Versión omitida: '{version}'")
-                time.sleep(2)
-                encontrar_modelo(page,v_modeloCompleto)
-
+                
                 page.locator("input[name='txtMotor']").fill(nroMotor)
                 page.locator("input[name='txtNroAsientos']").fill(nAsientos)
 
@@ -1135,8 +1122,23 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 page.select_option("#ddlTransmision",value=str(value_T))
 
                 page.locator("#btnDetermClaseCat").click
+                page.wait_for_timeout(2000)
+            
+                # Opcional: Solo para tu control en consola (no afecta la lógica)
+                clase_vehiculo = page.locator("#ddlClase").input_value()
+                print(f"ℹ️ Clase detectada antes de buscar modelo: {clase_vehiculo}")
+                
+                # Seleccionar modelo ULTIMO PASO
+                v_modelos=f"{modelos}".strip()
+                time.sleep(2)
+                page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=700)
+                v_modeloCompleto = combinar_modelo_version(modelos, version)
+                
+                time.sleep(2)
+                encontrar_modelo(page, modelos, version)
 
 
+                #DATOS DE LA ADQUISICION------------------  
                 page.select_option("#ddlTipoTransferencia",value={tipodeadquisicion})
 
 
@@ -1186,11 +1188,11 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
             time.sleep(2)
             if not encontrar_marca1(page,marcas):
                 raise ValueError("Marca no encontrada")
-
-
-            page.locator("input[name='txtDesModeloV']").press_sequentially(v_modelos,delay=200)
             time.sleep(2)
-            encontrar_modelo2(page,v_modeloCompleto)
+
+
+            encontrar_modelo2(page,modelos, version)
+            time.sleep(2)
 
             
             page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
@@ -1204,13 +1206,13 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
             
             with page.expect_navigation(wait_until='load'):
                 page.locator("input[name='btnAceptarV']").click()
-                time.sleep(2)
+            time.sleep(2)
 
             try:
                 page.on("dialog", lambda dialog: dialog.accept())
             except:
                 pass
-            time.sleep(2)
+
 
             Guardar_Archivos(page,browser,inmatriculaciones,num_documento)
 
@@ -1436,18 +1438,8 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
 
             v_modelos=f"{modelos}".strip()
             time.sleep(2)
-            page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=100)
-            # VALIDACION DE LA FUNCION COMBINAR MODELO CON VERSION INVALIDA
-            if (version and 
-                len(version.strip()) >= 2 and 
-                version.upper() not in ['SINVERSION', 'SIN VERSION' 'SIN VERSIÓN', 'NO APLICA']):
-                
-                v_modeloCompleto = combinar_modelo_version(modelos, version)
-            else:
-                v_modeloCompleto = modelos
-                print(f"🔸 Versión omitida: '{version}'")
-            time.sleep(2)
-            encontrar_modelo(page,v_modeloCompleto)
+            
+            
 
             page.locator("input[name='txtMotor']").fill(nroMotor)
             page.locator("input[name='txtNroAsientos']").fill(nAsientos)
@@ -1469,15 +1461,29 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             page.locator("input[name='txtPesoBruto']").fill(str(int(pesoBruto)))
             page.keyboard.press("Enter")
 
-
             value_T=encontrar_transmision(transmision)
             page.select_option("#ddlTransmision",value=str(value_T))
 
             page.locator("#btnDetermClaseCat").click
+            page.wait_for_timeout(2000)
+        
+            # Opcional: Solo para tu control en consola (no afecta la lógica)
+            clase_vehiculo = page.locator("#ddlClase").input_value()
+            print(f"ℹ️ Clase detectada antes de buscar modelo: {clase_vehiculo}")
+            
+            # Seleccionar modelo ULTIMO PASO
+            v_modelos=f"{modelos}".strip()
+            time.sleep(2)
+            page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=700)
+            v_modeloCompleto = combinar_modelo_version(modelos, version)
+            
+            time.sleep(2)
+            encontrar_modelo(page, modelos, version)
+            
 
-
+            #DATOS DE LA ADQUISICION------------------
+            # TIPO TRANSFERENCIA
             page.select_option("#ddlTipoTransferencia",value={tipodeadquisicion})
-
 
             fechaAdquisicion = datetime.strptime(fechasAdquisicion_factura_cancelacion, "%Y-%m-%d")
             fecha_formateada1 = fechaAdquisicion.strftime("%d-%m-%Y")
@@ -1534,11 +1540,10 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             time.sleep(2)
             if not encontrar_marca1(page,marcas):
                 raise ValueError("Marca no encontrada")
-
-
-            page.locator("input[name='txtDesModeloV']").press_sequentially(v_modelos,delay=200)
             time.sleep(2)
-            encontrar_modelo2(page,v_modeloCompleto)
+            
+            encontrar_modelo2(page,modelos, version)
+            time.sleep(2)
 
             
             
