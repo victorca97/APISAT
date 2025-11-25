@@ -493,33 +493,42 @@ def encontrar_carroceria(page,carroceria_buscada):
 
 
 # ==========================================
-# 1. LÓGICA DE SINÓNIMOS (TOKENS)
+# 1. LÓGICA DE SINÓNIMOS Y NORMALIZACIÓN
 # ==========================================
 
 def obtener_token_sinonimo(palabra):
     """ Convierte variantes técnicas en TOKENS ÚNICOS. """
-    p = palabra.upper().replace("-", " ").strip()
+    p = palabra.upper().strip() # Respetamos el punto (1.4 se queda como 1.4)
     
     # TRACCIÓN
     if p in ["4X2", "2WD", "SIMPLE", "S-AWD", "TRACCION SIMPLE", "TRACCIÓN SIMPLE"]: return "TOKEN_TRACCION_SIMPLE"
     if p in ["4X4", "AWD", "4WD", "QUATTRO", "DOBLE", "XDRIVE", "TRACCION DOBLE", "TRACCIÓN DOBLE"]: return "TOKEN_TRACCION_DOBLE"
 
-    # ABREVIATURAS DE VERSIONES (Para que DLX sea igual a DELUXE)
+    # ABREVIATURAS
     if p in ["DLX", "DELUXE"]: return "TOKEN_DELUXE"
     if p in ["LTD", "LIMITED"]: return "TOKEN_LIMITED"
     if p in ["STD", "STANDARD"]: return "TOKEN_STANDARD"
-    if p in ["AUT", "AUTOMATICO", "AT"]: return "TOKEN_AUTOMATICO" # Ejemplo extra
-    if p in ["MEC", "MECANICO", "MT"]: return "TOKEN_MECANICO"   # Ejemplo extra
+    if p in ["AUT", "AUTOMATICO", "AT"]: return "TOKEN_AUTOMATICO"
+    if p in ["MEC", "MECANICO", "MT"]: return "TOKEN_MECANICO"
 
     return p 
 
 def normalizar_texto(texto):
-    """ Limpia texto y estandariza tokens. """
+    """ 
+    Normaliza respetando PUNTOS (1.4) y unifica sinónimos.
+    """
     if not texto: return set()
-    texto_limpio = texto.upper().replace("-", " ").replace("/", " ").strip()
+    
+    # Reemplazamos guiones por espacio, pero mantenemos puntos
+    texto_limpio = texto.upper().replace("-", " ").strip()
+    
+    palabras = texto_limpio.split()
     palabras_estandarizadas = set()
-    for palabra in texto_limpio.split():
-        palabras_estandarizadas.add(obtener_token_sinonimo(palabra))
+    
+    for palabra in palabras:
+        token = obtener_token_sinonimo(palabra)
+        palabras_estandarizadas.add(token)
+        
     return palabras_estandarizadas
 
 def formatear_nombre_busqueda(modelo, version):
@@ -529,30 +538,17 @@ def formatear_nombre_busqueda(modelo, version):
     return f"{m} {v}".strip()
 
 # ==========================================
-# 2. LÓGICA DE ESCRITURA SEGURA (NUEVO)
+# 2. ESCRITURA SEGURA
 # ==========================================
 
 def limpiar_texto_para_input(texto):
-    """
-    Elimina palabras que sabemos que la web filtra mal.
-    Ej: Si escribimos 'DLX', la web oculta 'DELUXE'. Mejor no escribimos 'DLX'.
-    """
+    """ Elimina palabras 'peligrosas' para el filtro web. """
     if not texto: return ""
+    palabras_prohibidas = ["DLX", "LTD", "STD", "AUT", "MEC", "FULL", "GLP", "GNV"] 
     
-    # Lista de palabras que NO debemos escribir en el navegador
-    # porque causan que la lista se vacíe.
-    palabras_prohibidas_typing = ["DLX", "LTD", "STD", "AUT", "MEC", "FULL"] 
-    
-    texto_limpio = texto.upper().replace("-", " ").replace("/", " ")
+    texto_limpio = texto.upper().replace("-", " ")
     palabras = texto_limpio.split()
-    
-    palabras_seguras = []
-    for p in palabras:
-        if p not in palabras_prohibidas_typing:
-            palabras_seguras.append(p)
-            
-    # Retornamos el texto sin las abreviaturas conflictivas
-    return " ".join(palabras_seguras)
+    return " ".join([p for p in palabras if p not in palabras_prohibidas])
 
 # ==========================================
 # 3. DETECCIÓN DE CLASE
@@ -561,92 +557,122 @@ def limpiar_texto_para_input(texto):
 def detectar_tipo_otros_modelos(page):
     try:
         val_clase = page.locator("#ddlClase").input_value()
-        
         if val_clase == "1": return "OTROS MODELOS"
         elif val_clase == "11": 
-            txt_traccion = ""
-            try: txt_traccion = page.locator("#ddlTraccion option:checked").inner_text().upper()
+            txt = ""
+            try: txt = page.locator("#ddlTraccion option:checked").inner_text().upper()
             except: pass
             
-            keywords_doble = ["4X4", "AWD", "4WD", "QUATTRO", "DOBLE"]
-            if any(k in txt_traccion for k in keywords_doble):
-                return "OTROS MODELOS TRACCION DOBLE"
+            if any(k in txt for k in ["4X4", "AWD", "4WD", "QUATTRO", "DOBLE"]):
+                return "OTROS MODELOS TRACCIÓN DOBLE"
             else:
                 return "OTROS MODELOS TRACCIÓN SIMPLE"
         return "OTROS MODELOS"
     except: return "OTROS MODELOS"
 
 # ==========================================
-# 4. MOTOR DE BÚSQUEDA
+# 4. MOTOR DE BÚSQUEDA (MÁS LENTO Y EXACTO)
 # ==========================================
 
 def interactuar_y_buscar(page, texto_original, selector_input, selector_items_lista):
     """
-    1. Genera un 'Texto Seguro' (sin DLX, LTD, etc).
-    2. Escribe el Texto Seguro.
-    3. Compara usando el Texto Original COMPLETO (usando tokens).
+    Escribe, espera con calma, y selecciona la opción más exacta.
     """
-    # Paso A: Generar texto que no rompa el filtro de la web
-    texto_para_escribir = limpiar_texto_para_input(texto_original)
-    
-    print(f"✍️ Escribiendo (Filtro Seguro): '{texto_para_escribir}'")
-    # (El texto original sigue siendo '... DLX', pero escribimos '...')
+    texto_input = limpiar_texto_para_input(texto_original)
+    print(f"✍️ Escribiendo: '{texto_input}'")
     
     try:
         inp = page.locator(selector_input)
         inp.fill("")
-        inp.press_sequentially(texto_para_escribir, delay=100)
+        inp.press_sequentially(texto_input, delay=150) # Un poco más lento al escribir
     except: return False
 
-    print("⏳ Esperando lista...")
+    print("⏳ Esperando actualización de lista (4s)...")
+    # AUMENTO DE TIEMPO: Esperamos 4 segundos fijos para que el filtro termine
+    time.sleep(4) 
+    
     try:
         page.wait_for_selector(selector_items_lista, state="visible", timeout=5000)
-        time.sleep(2) 
     except:
-        print(f"⚠️ La lista no apareció para '{texto_para_escribir}'.")
         return False
 
-    # Paso B: Buscar usando el TEXTO ORIGINAL (El que tiene DLX)
+    # BÚSQUEDA DE CANDIDATOS
     try:
-        opciones = page.query_selector_all(selector_items_lista)
-        
-        # Aquí convertimos "DLX" a "TOKEN_DELUXE"
-        tokens_buscados = normalizar_texto(texto_original)
-        print(f"🧩 Tokens buscados: {tokens_buscados}")
+        # Reintentamos la lectura un par de veces si no hay coincidencia exacta inmediata
+        for intento in range(2): 
+            opciones = page.query_selector_all(selector_items_lista)
+            tokens_buscados = normalizar_texto(texto_original)
+            print(f"🧩 Tokens buscados: {tokens_buscados}")
 
-        for op in opciones:
-            texto_opcion = op.inner_text().strip()
-            
-            # Aquí convertimos "DELUXE" a "TOKEN_DELUXE"
-            tokens_opcion = normalizar_texto(texto_opcion)
+            candidatos = []
+            for op in opciones:
+                texto_opcion = op.inner_text().strip()
+                tokens_opcion = normalizar_texto(texto_opcion)
 
-            # TOKEN_DELUXE == TOKEN_DELUXE -> ¡MATCH!
-            if tokens_buscados.issubset(tokens_opcion):
-                print(f"✅ Coincidencia encontrada: '{texto_opcion}'")
-                time.sleep(1) 
-                op.click()
+                if tokens_buscados.issubset(tokens_opcion):
+                    # Diferencia 0 = Coincidencia Exacta (Ideal)
+                    # Diferencia > 0 = Tiene palabras extra (Ej: GLP)
+                    diff = len(tokens_opcion) - len(tokens_buscados)
+                    candidatos.append({'e': op, 't': texto_opcion, 'd': diff})
+
+            if candidatos:
+                # Ordenamos: Primero los de diferencia 0 (Exactos), luego el resto
+                candidatos.sort(key=lambda x: x['d'])
+                
+                mejor = candidatos[0]
+                
+                # Lógica de seguridad: Si el mejor candidato no es perfecto (diff > 0)
+                # y estamos en el primer intento, esperamos un poco más por si aparece el exacto.
+                if mejor['d'] > 0 and intento == 0:
+                    print(f"⚠️ Mejor opción actual ('{mejor['t']}') no es exacta. Esperando...")
+                    time.sleep(2)
+                    continue # Vuelve a leer la lista
+                
+                print(f"✅ Selección Final: '{mejor['t']}' (Sobrantes: {mejor['d']})")
+                time.sleep(1) # Pausa visual antes del click
+                mejor['e'].click()
                 return True
+            else:
+                print(f"⚠️ Intento {intento+1}: Sin coincidencias.")
+                time.sleep(2) # Espera antes de reintentar lectura
+        
+        print(f"❌ No se encontró coincidencia válida para: {texto_original}")
                 
     except Exception as e:
-        print(f"⚠️ Error comparando: {e}")
+        print(f"⚠️ Error búsqueda: {e}")
 
     return False
 
 def flujo_seleccionar_otros(page, tipo_otros, nombre_real, selectores):
+    """
+    Selecciona 'OTROS MODELOS...' respetando los selectores (None = No acción).
+    """
     print(f"🔄 Activando fallback: '{tipo_otros}'")
     
     if interactuar_y_buscar(page, tipo_otros, selectores['input'], selectores['lista_items']):
+        
         time.sleep(1)
-        if selectores.get('check'):
-            chk = page.locator(selectores['check'])
-            if chk.is_visible() and not chk.is_checked(): chk.check()
+        
+        # Si me pasaron un selector de Check, lo uso
+        if selectores.get('check') is not None:
+            try:
+                chk = page.locator(selectores['check'])
+                if chk.is_visible() and not chk.is_checked():
+                    chk.check()
+                    print("☑️ Check marcado.")
+            except: pass
 
-        if selectores.get('input_real'):
-            real_inp = page.locator(selectores['input_real'])
-            real_inp.fill("")
-            real_inp.press_sequentially(nombre_real, delay=200)
+        # Si me pasaron un selector de Input Real, lo uso
+        if selectores.get('input_real') is not None:
+            try:
+                real_inp = page.locator(selectores['input_real'])
+                real_inp.fill("")
+                real_inp.press_sequentially(nombre_real, delay=100)
+                print(f"📝 Nombre real escrito: {nombre_real}")
+            except: pass
         
         return tipo_otros
+        
     return None
 
 # ==========================================
@@ -654,11 +680,12 @@ def flujo_seleccionar_otros(page, tipo_otros, nombre_real, selectores):
 # ==========================================
 
 def encontrar_modelo(page, modelo, version):
+    """ Principal: Marca Check y escribe Real """
     sel = {
         'input': "#txtDesModelo", 
         'lista_items': "#ui-id-2 > li",
-        'check': "#chkNueModelo",
-        'input_real': "#txtDesModeloReal"
+        'check': "#chkNueModelo",       
+        'input_real': "#txtDesModeloReal" 
     }
     nombre_busqueda = formatear_nombre_busqueda(modelo, version)
     
@@ -679,11 +706,12 @@ def agregarcompradores(page):
 
 
 def encontrar_modelo2(page, modelo, version):
+    """ Popup: SOLO selecciona de lista (Check/Real = None) """
     sel = {
         'input': "#txtDesModeloV", 
         'lista_items': "#ui-id-6 > li",
-        'check': None,
-        'input_real': None
+        'check': None,      
+        'input_real': None  
     }
     nombre_busqueda = formatear_nombre_busqueda(modelo, version)
     print(f"🔎 [Popup] Buscando: '{nombre_busqueda}'")
@@ -694,6 +722,7 @@ def encontrar_modelo2(page, modelo, version):
     print("⚠️ No encontrado en Popup. Intentando 'OTROS'...")
     tipo_otros = detectar_tipo_otros_modelos(page) 
     return flujo_seleccionar_otros(page, tipo_otros, nombre_busqueda, sel)
+
 
 
 def enviar_inmatriculacion(inmatriculacion, dni, archivo_domicilio, archivo_declaracionJurada):
