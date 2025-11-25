@@ -38,8 +38,16 @@ def SAT():
 
         try:
             page.goto(enlace , timeout=500000)
-            
             Registrador.info("BOT SAT-AUTOHUB INICIADO...........")
+            
+            # Buscamos el botón por su clase CSS ".close-btn" visible en tu captura
+            # Le damos un timeout corto (ej. 5s) por si la web carga lento o el popup ya no sale
+            if page.is_visible("button.close-btn"):
+                page.click("button.close-btn")
+                Registrador.info("Popup informativo cerrado correctamente.")
+            else:
+                Registrador.info("No se detectó el popup, continuando...")
+            
             satScrapper.login(usuario, contra)
             Registrador.info("Logeado en SAT")
 
@@ -51,7 +59,7 @@ def SAT():
                 inmatriculaciones_fallidas = []
                 #100000108 no se hace porque no aparece el campo cambio domicilio
                 #100000082 no se hace porque no aparece el campo cambio domicilio
-                referencias_a_saltar = {100000082,100000108, 100003500, 100003512, 100003525, 100003528, 100003570, 100003806, 100003952, 100004025, 100004030, 100004088, 100004235}
+                referencias_a_saltar = {100000082,100000108, 100003500, 100003512, 100003525, 100003528, 100003570, 100003806, 100003952, 100004025, 100004030, 100004088, 100000256, 100002946}
 
                 for item in data_list:
                     inmatriculaciones = item.get('inmatriculaciones', 'N/A')
