@@ -164,17 +164,14 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             
             page.select_option("#ddlTipoRelacionado",value="0")
 
-            input("Corrige la direccion si es necesario y presiona Enter para continuar...")
+            input("Corrige la direccion u otro dato si es necesario y presiona Enter para continuar...")
             Registrador.info("Termine la primera hoja")
-            # input("Corrige y Presiona Enter para continuar...")
 
             with page.expect_navigation(wait_until='load'):
                 page.locator("input[name='btnSiguiente']").click()
 
-
-            
             page.wait_for_load_state()
-            time.sleep(20)
+            time.sleep(5)
 
             #DATOS DEL VEHICULO------------------
             
@@ -298,14 +295,11 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             # Parte final
             page.locator("input[name='btnValidar']").click()
             
-            time.sleep(3)
+            time.sleep(2)
             
         except Exception as e:
             page.locator("#btnCancelar").click()
             raise
-            
-
-        #page.select_option("#ddlClaseV", value="11")
         
         page.locator("input[name='txtDesMarcaV']").press_sequentially(marcas,delay=200)
         time.sleep(2)
@@ -313,29 +307,23 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             raise ValueError("Marca no encontrada")
         time.sleep(2)
 
-        encontrar_modelo2(page,modelos, version)
-        time.sleep(2)
-        
+        encontrar_modelo2(page,modelos, version)        
+        input("Corrige el modelo...")
         
         page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
-
         page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
-
         page.select_option("#ddlTipoMonedaV",value=valueM)
 
-        input("Corrige el modelo...")
         Registrador.info("Termine la parte final de la hoja")
-        # input("Corrige Presiona Enter para continuar...")
-
             
         with page.expect_navigation(wait_until='load'):
             page.locator("input[name='btnAceptarV']").click()
-            time.sleep(2)
+            time.sleep(1)
         try:
             page.on("dialog", lambda dialog: dialog.accept())
         except:
             pass
-        time.sleep(2) 
+        time.sleep(1) 
 
         Guardar_Archivos(page,browser,inmatriculaciones,num_documento)
 
@@ -713,16 +701,12 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             page.locator("#btnCancelar").click()
             raise
 
-        
         page.locator("input[name='txtDesMarcaV']").press_sequentially(marcas,delay=200)
         time.sleep(2)
         if not encontrar_marca1(page,marcas):
             raise ValueError("Marca no encontrada")
-        time.sleep(2)
-
         encontrar_modelo2(page,modelos, version)
-        time.sleep(2)
-        
+        input("Corrige el modelo...")
         
         page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
 
@@ -730,7 +714,6 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
 
         page.select_option("#ddlTipoMonedaV",value=valueM)
 
-        input("Corrige el modelo...")
         Registrador.info("Termine la parte final de la hoja")
         
         with page.expect_navigation(wait_until='load'):
@@ -1147,8 +1130,8 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 fecha_formateada1 = fecha_formateada1.replace("-", "/")
                 print(fecha_formateada1)
                 page.locator("input[name='txtFechaAdqui']").fill(fecha_formateada1)
-
-
+#
+                # input("Ingresar fecha de adquisicion...")
 
                 page.select_option("#ddlTipoPropiedad",value="5")
 
@@ -1183,25 +1166,19 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 raise
 
             
-            
             page.locator("input[name='txtDesMarcaV']").press_sequentially(marcas,delay=200)
             time.sleep(2)
             if not encontrar_marca1(page,marcas):
                 raise ValueError("Marca no encontrada")
             time.sleep(2)
 
-
             encontrar_modelo2(page,modelos, version)
-            time.sleep(2)
+            input("Corrige el modelo...")
 
-            
             page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
-
             page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
-
             page.select_option("#ddlTipoMonedaV",value=valueM)
             
-            input("Presiona Enter para continuar...")
             Registrador.info("Termine la parte final de la hoja")
             
             with page.expect_navigation(wait_until='load'):
@@ -1384,7 +1361,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
 
 
                 correo_valor = correoElectronico if correoElectronico is not None else ""
-                page.locator("input[name='txtCorreoElectronico2']").fill(correo_valor)
+                page.locator("input[name='txtCorreoElectronico']").fill(correo_valor)
                 #page.locator("input[name='txtCorreoElectronico2']").fill(correoElectronicoAlternativo)
 
                 if fecha_nacimiento:
@@ -1401,7 +1378,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
                     page.select_option("#ddlDistrito",value=distrito)
                     page.locator("input[name='txtDireccion']").fill(direccion)
 
-            
+            input("Corrige y Presiona Enter para continuar...")
             Registrador.info("Termine la primera hoja")
 
 
@@ -1541,20 +1518,18 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             if not encontrar_marca1(page,marcas):
                 raise ValueError("Marca no encontrada")
             time.sleep(2)
-            
-            encontrar_modelo2(page,modelos, version)
-            time.sleep(2)
 
-            
+            encontrar_modelo2(page,modelos, version)
+            input("Corrige el modelo...")
+
             
             page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
-
             page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
-
             page.select_option("#ddlTipoMonedaV",value=valueM)
 
-            # input("Terminar modelo...")
             Registrador.info("Termine la parte final de la hoja")
+            
+            time.sleep(2)
             
             with page.expect_navigation(wait_until='load'):
                 page.locator("input[name='btnAceptarV']").click()
