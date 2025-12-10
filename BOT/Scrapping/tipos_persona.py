@@ -1173,7 +1173,6 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
             time.sleep(2)
 
             encontrar_modelo2(page,modelos, version)
-            input("Corrige el modelo...")
 
             page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
             page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
@@ -1457,7 +1456,6 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             time.sleep(2)
             encontrar_modelo(page, modelos, version)
             
-
             #DATOS DE LA ADQUISICION------------------
             # TIPO TRANSFERENCIA
             page.select_option("#ddlTipoTransferencia",value={tipodeadquisicion})
