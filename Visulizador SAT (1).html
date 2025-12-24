@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Vehículos Pendientes</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        .search-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .select-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .select-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .select-group select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: white;
+            color: #333;
+            cursor: pointer;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232c3e50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+
+        .select-group select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .select-group select:hover {
+            border-color: #3498db;
+        }
+
+        /* Para navegadores WebKit (Chrome, Safari) */
+        .select-group select::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .select-group select::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .select-group select::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .select-group select::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .card-section {
+            margin-bottom: 15px;
+        }
+
+        .card-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .card-section h3 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .comprador-list {
+            margin-top: 10px;
+        }
+
+        .comprador-item {
+            background-color: #90b5da;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .comprador-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .error {
+            background-color: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .btn-recibos {
+            background-color: #27ae60;
+            margin-top: 0;
+        }
+
+        .btn-recibos:hover {
+            background-color: #219653;
+        }
+
+        .recibos-section {
+            margin-top: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .recibo-item {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border-left: 4px solid #27ae60;
+        }
+
+        .recibo-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .recibo-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-ver,
+        .btn-descargar {
+            padding: 5px 10px;
+            font-size: 14px;
+            border-radius: 3px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-ver {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-descargar {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        .btn-ver:hover,
+        .btn-descargar:hover {
+            opacity: 0.9;
+        }
+
+        .recibo-loading {
+            text-align: center;
+            padding: 10px;
+            font-style: italic;
+            color: #7f8c8d;
+        }
+
+        @media (max-width: 768px) {
+            .results {
+                grid-template-columns: 1fr;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .btn-recibos {
+                margin-top: 10px;
+            }
+
+            .recibo-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .recibo-actions {
+                margin-top: 5px;
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Consulta de Vehículos Pendientes</h1>
+            <p>Ingrese un número para consultar los vehículos pendientes</p>
+        </header>
+
+        <section class="search-section">
+            <div class="select-group">
+                <label for="empresa">Empresa:</label>
+                <select id="empresa">
+                    <option value="">Seleccionar</option>
+                    <option value="AUTOLAND">Autoland</option>
+                    <option value="REVOSHOP">Revoshop</option>
+                    <option value="EUROSHOP">Euroshop</option>
+                    <option value="MAQUINARIAS">Maquinarias</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="numero">Número:</label>
+                <input type="number" id="numero" placeholder="Ingrese un número" min="1">
+            </div>
+            <button id="consultar">Consultar</button>
+        </section>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Cargando datos...</p>
+        </div>
+
+        <div id="error-message" class="error" style="display: none;"></div>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        const distritos = {
+            "2": "ANCON",
+            "3": "ATE",
+            "4": "BARRANCO",
+            "5": "BREÑA",
+            "6": "CARABAYLLO",
+            "7": "CHACLACAYO",
+            "8": "CHORRILLOS",
+            "9": "CIENEGUILLA",
+            "10": "COMAS",
+            "11": "EL AGUSTINO",
+            "12": "INDEPENDENCIA",
+            "13": "JESUS MARIA",
+            "14": "LA MOLINA",
+            "15": "LA VICTORIA",
+            "1": "LIMA",
+            "16": "LINCE",
+            "17": "LOS OLIVOS",
+            "18": "LURIGANCHO",
+            "19": "LURIN",
+            "20": "MAGDALENA DEL MAR",
+            "22": "MIRAFLORES",
+            "23": "PACHACAMAC",
+            "24": "PUCUSANA",
+            "21": "PUEBLO LIBRE",
+            "25": "PUENTE PIEDRA",
+            "26": "PUNTA HERMOSA",
+            "27": "PUNTA NEGRA",
+            "28": "RIMAC",
+            "29": "SAN BARTOLO",
+            "30": "SAN BORJA",
+            "31": "SAN ISIDRO",
+            "32": "SAN JUAN DE LURIGANCHO",
+            "33": "SAN JUAN DE MIRAFLORES",
+            "34": "SAN LUIS",
+            "35": "SAN MARTIN DE PORRES",
+            "36": "SAN MIGUEL",
+            "37": "SANTA ANITA",
+            "38": "SANTA MARIA DEL MAR",
+            "39": "SANTA ROSA",
+            "40": "SANTIAGO DE SURCO",
+            "44": "STA MARÍA DE HUACHIPA LURIGANCHO",
+            "41": "SURQUILLO",
+            "42": "VILLA EL SALVADOR",
+            "43": "VILLA MARIA DEL TRIUNFO",
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const consultarBtn = document.getElementById('consultar');
+            const numeroInput = document.getElementById('numero');
+            const empresaInput = document.getElementById('empresa')
+            const resultsDiv = document.getElementById('results');
+            const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('error-message');
+
+            consultarBtn.addEventListener('click', function () {
+                const numero = numeroInput.value.trim();
+                const empresa = empresaInput.value
+
+                if (!numero) {
+                    showError('Por favor, ingrese un número');
+                    return;
+                }
+
+                if (!empresa) {
+                    showError('Por favor, seleccione una empresa');
+                    return;
+                }
+
+                consultarAPI(empresa, numero);
+            });
+
+            function consultarAPI(empresa, numero) {
+                // Mostrar loading
+                loadingDiv.style.display = 'block';
+                resultsDiv.innerHTML = '';
+                errorDiv.style.display = 'none';
+
+                // Hacer la petición a la API
+                fetch(`http://161.132.52.82:4006/api/sat/pendientes/${empresa}/${numero}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error en la respuesta de la API');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        loadingDiv.style.display = 'none';
+                        mostrarResultados(data);
+                    })
+                    .catch(error => {
+                        loadingDiv.style.display = 'none';
+                        showError('Error al consultar la API: ' + error.message);
+                        console.error('Error:', error);
+                    });
+            }
+
+            function mostrarResultados(data) {
+                if (!data || data.length === 0) {
+                    resultsDiv.innerHTML = '<div class="no-results">No se encontraron resultados</div>';
+                    return;
+                }
+
+                resultsDiv.innerHTML = '';
+
+                data.forEach(item => {
+                    const card = crearTarjeta(item);
+                    resultsDiv.appendChild(card);
+                });
+            }
+
+            function crearTarjeta(item) {
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                // Crear header de la tarjeta
+                const header = document.createElement('div');
+                header.className = 'card-header';
+                header.innerHTML = `
+                    <div>
+                        <h2>Placa: ${item.placa}</h2>
+                        <p>Referencia: ${item.referencia}</p>
+                    </div>
+                    <button class="btn-recibos" data-placa="${item.placa}" data-referencia="${item.referencia}" data-inmatriculaciones="${item.inmatriculaciones}">Ver Recibos</button>
+                `;
+
+                // Crear cuerpo de la tarjeta
+                const body = document.createElement('div');
+                body.className = 'card-body';
+
+                // Información general
+                const infoGeneral = document.createElement('div');
+                infoGeneral.className = 'card-section';
+                infoGeneral.innerHTML = `
+                    <h3>Información General</h3>
+                    <div class="info-row">
+                        <span class="info-label">Fecha de Registro:</span>
+                        <span class="info-value">${item.fecha_registro}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Inmatriculaciones:</span>
+                        <span class="info-value">${item.inmatriculaciones}</span>
+                    </div>
+                `;
+
+                // Compradores
+                const compradoresSection = document.createElement('div');
+                compradoresSection.className = 'card-section';
+                compradoresSection.innerHTML = '<h3>Compradores</h3>';
+
+                const compradoresList = document.createElement('div');
+                compradoresList.className = 'comprador-list';
+
+                item.compradores.forEach(comprador => {
+                    const compradorItem = document.createElement('div');
+                    compradorItem.className = 'comprador-item';
+
+                    let compradorHTML = '';
+
+                    if (comprador.razonSocial) {
+                        compradorHTML += `
+                            <div class="info-row">
+                                <span class="info-label">Razón Social:</span>
+                                <span class="info-value">${comprador.razonSocial}</span>
+                            </div>
+                        `;
+                    } else {
+                        compradorHTML += `
+                            <div class="info-row">
+                                <span class="info-label">Nombre:</span>
+                                <span class="info-value">${comprador.apellidoPaterno} ${comprador.apellidoMaterno} ${comprador.nombres}</span>
+                            </div>
+                        `;
+                    }
+
+                    compradorHTML += `
+                        <div class="info-row">
+                            <span class="info-label">Documento:</span>
+                            <span class="info-value">${comprador.numDocumento}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Dirección:</span>
+                            <span class="info-value">${comprador?.domicilioFiscal?.direccion ?? ''}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Distrito:</span>
+                            <span class="info-value">${comprador?.domicilioFiscal?.distrito ? distritos[`${comprador.domicilioFiscal.distrito}`] : ''}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Teléfono:</span>
+                            <span class="info-value">${comprador.celular}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">E-mail:</span>
+                            <span class="info-value">${comprador.correoElectronico}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">F. Nacimiento:</span>
+                            <span class="info-value">${comprador.fechaDeNacimiento}</span>
+                        </div>                        
+                        
+                    `;
+
+                    // Información de adquisición
+                    if (comprador.adquisicion) {
+                        compradorHTML += `
+                            <div class="info-row">
+                                <span class="info-label">Fecha Inscripción:</span>
+                                <span class="info-value">${comprador.adquisicion.fecha_inscripcion}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Valor:</span>
+                                <span class="info-value">${comprador.adquisicion.moneda} ${comprador.adquisicion.valorMonetario}</span>
+                            </div>
+                        `;
+                    }
+
+                    compradorItem.innerHTML = compradorHTML;
+                    compradoresList.appendChild(compradorItem);
+                });
+
+                compradoresSection.appendChild(compradoresList);
+
+                // Información del vehículo
+                const vehiculoInfo = document.createElement('div');
+                vehiculoInfo.className = 'card-section';
+                vehiculoInfo.innerHTML = `
+                    <h3>Vehículo</h3>
+                    <div class="info-row">
+                        <span class="info-label">Categoria:</span>
+                        <span class="info-value">${item.vehiculo.categoriaMtc}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Marca:</span>
+                        <span class="info-value">${item.vehiculo.marca}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Modelo:</span>
+                        <span class="info-value">${item.vehiculo.modelo} ${item.vehiculo.version}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Formula Rodante</span>
+                        <span class="info-value">${item.vehiculo.formulaRodante}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Año:</span>
+                        <span class="info-value">${item.vehiculo.anoModelo}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Asientos:</span>
+                        <span class="info-value">${item.vehiculo.nAsientos}</span>
+                    </div>                    
+                    <div class="info-row">
+                        <span class="info-label">Carroceria:</span>
+                        <span class="info-value">${item.vehiculo.carroceria}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Cilindraje:</span>
+                        <span class="info-value">${item.vehiculo.cilindraje}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Peso Bruto:</span>
+                        <span class="info-value">${item.vehiculo.pesoBruto}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">transmision:</span>
+                        <span class="info-value">${item.vehiculo.transmision}</span>
+                    </div>                    
+                    <div class="info-row">
+                        <span class="info-label">Motor:</span>
+                        <span class="info-value">${item.vehiculo.nroMotor}</span>
+                    </div>
+                `;
+
+                // Sección para mostrar los recibos (inicialmente vacía)
+                const recibosSection = document.createElement('div');
+                recibosSection.className = 'recibos-section';
+                recibosSection.style.display = 'none';
+                recibosSection.innerHTML = '<h3>Recibos</h3>';
+
+                // Agregar todas las secciones al cuerpo de la tarjeta
+                body.appendChild(infoGeneral);
+                body.appendChild(compradoresSection);
+                body.appendChild(vehiculoInfo);
+                body.appendChild(recibosSection);
+
+                // Agregar header y body a la tarjeta
+                card.appendChild(header);
+                card.appendChild(body);
+
+                // Agregar evento al botón de recibos
+                const btnRecibos = header.querySelector('.btn-recibos');
+                btnRecibos.addEventListener('click', function () {
+                    const placa = this.getAttribute('data-placa');
+                    const referencia = this.getAttribute('data-referencia');
+                    const inmatriculaciones = this.getAttribute('data-inmatriculaciones');
+
+                    obtenerRecibos(placa, referencia, inmatriculaciones, recibosSection);
+                });
+
+                return card;
+            }
+
+            function obtenerRecibos(placa, referencia, inmatriculaciones, recibosSection) {
+                // Si ya se mostraron los recibos, solo alternar la visibilidad
+                if (recibosSection.style.display === 'block') {
+                    recibosSection.style.display = 'none';
+                    return;
+                }
+
+                // Mostrar sección de recibos
+                recibosSection.style.display = 'block';
+
+                // Limpiar contenido previo (excepto el título)
+                const elementosRecibos = recibosSection.querySelectorAll('.recibo-item, .recibo-loading, .error');
+                elementosRecibos.forEach(el => el.remove());
+
+                // Mostrar indicador de carga
+                const loadingElement = document.createElement('div');
+                loadingElement.className = 'recibo-loading';
+                loadingElement.textContent = 'Cargando recibos...';
+                recibosSection.appendChild(loadingElement);
+
+                // Preparar datos para la solicitud
+                const datosSolicitud = {
+                    TramitId: inmatriculaciones,
+                    TramitArchNomCom: `Recibo_servicio_${referencia}.pdf`
+                };
+
+                // Hacer la petición a la API de recibos
+                fetch('https://autohub.madrisqui.com/api/archivo/obtenerArchivo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datosSolicitud)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error en la respuesta de la API de recibos');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Eliminar indicador de carga
+                        loadingElement.remove();
+
+                        // Verificar si la respuesta fue exitosa
+                        if (data.status === 1 && data.archivo) {
+                            mostrarRecibo(data.archivo, recibosSection);
+                        } else {
+                            mostrarErrorRecibo('No se encontraron recibos para este vehículo', recibosSection);
+                        }
+                    })
+                    .catch(error => {
+                        // Eliminar indicador de carga
+                        loadingElement.remove();
+
+                        mostrarErrorRecibo('Error al cargar los recibos: ' + error.message, recibosSection);
+                        console.error('Error al obtener recibos:', error);
+                    });
+            }
+
+            function mostrarRecibo(archivo, recibosSection) {
+                const reciboItem = document.createElement('div');
+                reciboItem.className = 'recibo-item';
+
+                reciboItem.innerHTML = `
+                    <div class="recibo-info">
+                        <div>
+                            <strong>${archivo.Nom_archv}</strong>
+                            <div>Fecha: ${archivo.Fch_creac}</div>
+                            <div>Peso: ${archivo.Peso} KB</div>
+                        </div>
+                        <div class="recibo-actions">
+                            <a href="${archivo.url}" target="_blank" class="btn-ver">Ver Recibo</a>
+                            <a href="${archivo.url}" download="${archivo.Nom_archv}" class="btn-descargar">Descargar</a>
+                        </div>
+                    </div>
+                `;
+
+                recibosSection.appendChild(reciboItem);
+            }
+
+            function mostrarErrorRecibo(mensaje, recibosSection) {
+                const errorElement = document.createElement('div');
+                errorElement.className = 'error';
+                errorElement.textContent = mensaje;
+                recibosSection.appendChild(errorElement);
+            }
+
+            function showError(message) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+                resultsDiv.innerHTML = '';
+            }
+        });
+    </script>
+</body>
+
+</html>

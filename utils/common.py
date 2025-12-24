@@ -491,121 +491,130 @@ def encontrar_carroceria(page,carroceria_buscada):
         print(f"No se encontró una coincidencia cercana para '{carroceria_buscada}'.")
         return None
 
-
 # ==============================================================================
-# 1. HERRAMIENTAS DE TEXTO
+# 1. HERRAMIENTAS DE PROCESAMIENTO DE TEXTO (CEREBRO)
 # ==============================================================================
 
-def obtener_token_sinonimo(palabra):
-    """ Estandariza palabras clave (Tokens). """
+def separar_sufijos_conocidos(texto):
+    """ Separa 'X70FL' -> 'X70 FL' """
+    if not texto: return ""
+    t = texto.upper()
+    patron = r"([A-Z0-9]+)(FL|PLUS|PRO|MAX|SPORT|LIMITED)\b"
+    t_separado = re.sub(patron, r"\1 \2", t)
+    return t_separado
+
+def fusionar_modelo_version(modelo, version):
+    """ Une Modelo y Version, separa sufijos y elimina duplicados. """
+    m_raw = (modelo or "").strip().upper().replace("-", " ")
+    v_raw = (version or "").strip().upper().replace("-", " ")
+    
+    # Separamos sufijos pegados antes de nada
+    m = separar_sufijos_conocidos(m_raw)
+    v = separar_sufijos_conocidos(v_raw)
+    
+    if v in ["SIN VERSION", "S/V", "", "NO APLICA"]: return m
+
+    palabras_brutas = m.split() + v.split()
+    palabras_unicas = []
+    vistos = set()
+    
+    for p in palabras_brutas:
+        p_limpia = p.strip()
+        if p_limpia not in vistos:
+            palabras_unicas.append(p_limpia)
+            vistos.add(p_limpia)
+            
+    return " ".join(palabras_unicas)
+
+def obtener_token_comparacion(palabra):
+    """ Normaliza tokens (1.5L == 1.5). """
     p = palabra.upper().strip()
-    
-    # --- REGLA: CILINDRADA (1.5L -> 1.5) ---
-    if re.match(r"^\d+(\.\d+)?L$", p):
-        return p[:-1] 
-
-    # --- REGLA: ABREVIATURAS Y TRACCIÓN ---
-    if p in ["4X2", "2WD", "SIMPLE", "S-AWD", "TRACCION SIMPLE", "TRACCIÓN SIMPLE"]: return "TOKEN_TRACCION_SIMPLE"
-    if p in ["4X4", "AWD", "4WD", "QUATTRO", "DOBLE", "XDRIVE", "TRACCION DOBLE", "TRACCIÓN DOBLE"]: return "TOKEN_TRACCION_DOBLE"
-    
+    if re.match(r"^\d+(\.\d+)?L$", p): return p[:-1] 
     if p in ["DLX", "DELUXE"]: return "TOKEN_DELUXE"
     if p in ["LTD", "LIMITED"]: return "TOKEN_LIMITED"
     if p in ["STD", "STANDARD"]: return "TOKEN_STANDARD"
     if p in ["AUT", "AUTOMATICO", "AT"]: return "TOKEN_AUTOMATICO"
     if p in ["MEC", "MECANICO", "MT"]: return "TOKEN_MECANICO"
-
+    if p in ["4X2", "2WD", "SIMPLE", "S-AWD"]: return "TOKEN_TRACCION_SIMPLE"
+    if p in ["4X4", "AWD", "4WD", "QUATTRO", "DOBLE"]: return "TOKEN_TRACCION_DOBLE"
     return p 
 
-def normalizar_texto(texto):
-    """ 
-    Convierte texto en tokens únicos.
-    Separa 'MAZDA3' en 'MAZDA' y '3' para que coincida con 'MAZDA 3'.
-    """
-    if not texto: return set()
-    
-    # Limpieza inicial
-    texto_limpio = texto.upper().replace("-", " ").strip()
-    
-    tokens = set()
-    palabras = texto_limpio.split()
-    
-    for palabra in palabras:
-        # A. Intentar obtener sinónimo
-        token_sinonimo = obtener_token_sinonimo(palabra)
-        
-        if token_sinonimo != palabra or token_sinonimo.startswith("TOKEN_"):
-            tokens.add(token_sinonimo)
-            continue
-            
-        # B. REGLA MAZDA3: Separar Letras de Números
-        # Si es "MAZDA3" -> guarda "MAZDA" y "3"
-        match_separacion = re.match(r"^([A-Z]+)(\d+)$", palabra)
-        
-        if match_separacion:
-            tokens.add(match_separacion.group(1)) # Letras
-            tokens.add(match_separacion.group(2)) # Números
-        else:
-            tokens.add(palabra)
-            
-    return tokens
-
-def formatear_nombre_busqueda(modelo, version):
-    """ Une Modelo y Versión (Ignora 'SIN VERSION'). """
-    m = (modelo or "").strip().upper()
-    v = (version or "").strip().upper()
-    
-    if v in ["SIN VERSION", "SIN VERSIÓN", "S/V", "SIN V", "NO APLICA"]:
-        return m
-
-    # Si el modelo ya está incluido en la versión, usamos solo la versión
-    if m.replace("-", " ") in v.replace("-", " "):
-        return v
-        
-    return f"{m} {v}".strip()
+def normalizar_texto_lista(texto):
+    """ Retorna lista de tokens para comparación estricta. """
+    if not texto: return []
+    texto_pre = separar_sufijos_conocidos(texto)
+    texto_limpio = texto_pre.upper().replace("-", " ").strip()
+    lista_tokens = []
+    for palabra in texto_limpio.split():
+        token = obtener_token_comparacion(palabra)
+        match_sep = re.match(r"^([A-Z]+)(\d+)$", palabra)
+        if token.startswith("TOKEN_"): lista_tokens.append(token)
+        elif match_sep:
+            lista_tokens.append(match_sep.group(1))
+            lista_tokens.append(match_sep.group(2))
+        else: lista_tokens.append(token)
+    return lista_tokens
 
 def limpiar_texto_para_input(texto):
-    """ 
-    Prepara el texto para escribirlo.
-    NUEVO: Elimina palabras DUPLICADAS (Ej: 'MAZDA3 MAZDA3' -> 'MAZDA3').
-    """
+    """ Prepara texto para escribir (sin duplicados, respeta L). """
     if not texto: return ""
-    
-    texto_upper = texto.upper()
-    
-    # 1. Quitar 'L' de litros
-    texto_sin_litros = re.sub(r"\b(\d+(\.\d+)?)L\b", r"\1", texto_upper)
-    
-    palabras_prohibidas = ["DLX", "LTD", "STD", "AUT", "MEC", "FULL", "GLP", "GNV"] 
-    
-    texto_limpio = texto_sin_litros.replace("-", " ")
-    palabras = texto_limpio.split()
-    
-    # 2. DEDUPLICACIÓN: Usamos un set auxiliar 'vistos' para no repetir palabras
-    palabras_unicas = []
-    vistos = set()
-    
-    for p in palabras:
-        if p not in palabras_prohibidas and p not in vistos:
-            palabras_unicas.append(p)
-            vistos.add(p)
-    
-    return " ".join(palabras_unicas)
+    texto_upper = texto.upper().replace("-", " ").strip()
+    palabras_prohibidas = ["DLX", "LTD", "STD", "AUT", "MEC", "GLP", "GNV"] 
+    palabras_finales = []
+    for p in texto_upper.split():
+        if p not in palabras_prohibidas: palabras_finales.append(p)
+    return " ".join(palabras_finales)
 
 # ==============================================================================
-# 2. HERRAMIENTAS DE NAVEGACIÓN
+# 2. MOTOR DE BÚSQUEDA
 # ==============================================================================
+
+def interactuar_y_buscar(page, texto_original, selector_input, selector_items_lista):
+    texto_escribir = limpiar_texto_para_input(texto_original)
+    print(f"✍️  Buscando: '{texto_escribir}'")
+    
+    try:
+        page.locator(selector_input).fill("")
+        page.locator(selector_input).press_sequentially(texto_escribir, delay=100)
+    except: return False
+
+    tiempo = 3 if "ui-autocomplete" in selector_items_lista else 4
+    print(f"⏳ Esperando resultados ({tiempo}s)...")
+    time.sleep(tiempo)
+    
+    try:
+        if not page.is_visible(selector_items_lista): return False
+    except: return False
+
+    try:
+        opciones = page.query_selector_all(selector_items_lista)
+        lista_buscada = normalizar_texto_lista(texto_original)
+        print(f"🧩 Patrón buscado: {lista_buscada}")
+
+        for op in opciones:
+            texto_opcion = op.inner_text().strip()
+            lista_opcion = normalizar_texto_lista(texto_opcion)
+
+            if lista_buscada == lista_opcion:
+                print(f"✅ Coincidencia EXACTA: '{texto_opcion}'")
+                time.sleep(0.5)
+                op.click()
+                return True
+                
+        print(f"⚠️ Ninguna opción coincide exactamente.")
+        return False
+    except Exception as e:
+        print(f"⚠️ Error comparando: {e}")
+        return False
 
 def detectar_tipo_otros_modelos(page):
     try:
         val_clase = page.locator("#ddlClase").input_value()
-        
-        if val_clase == "1": return "OTROS MODELOS" # Automóvil
-        
-        elif val_clase == "11": # Camioneta
+        if val_clase == "1": return "OTROS MODELOS"
+        elif val_clase == "11": 
             txt = ""
             try: txt = page.locator("#ddlTraccion option:checked").inner_text().upper()
             except: pass
-            
             if any(k in txt for k in ["4X4", "AWD", "4WD", "QUATTRO", "DOBLE"]):
                 return "OTROS MODELOS TRACCIÓN DOBLE"
             else:
@@ -613,113 +622,55 @@ def detectar_tipo_otros_modelos(page):
         return "OTROS MODELOS"
     except: return "OTROS MODELOS"
 
-def interactuar_y_buscar(page, texto_original, selector_input, selector_items_lista):
-    """ Escribe, espera y selecciona. """
-    
-    # 1. Escribir (Texto limpio y sin duplicados)
-    texto_seguro = limpiar_texto_para_input(texto_original)
-    print(f"✍️ Escribiendo: '{texto_seguro}' en {selector_input}")
-    
-    try:
-        page.locator(selector_input).fill("")
-        page.locator(selector_input).press_sequentially(texto_seguro, delay=100)
-    except: return False
-
-    # 2. Esperar
-    tiempo = 2 if "ui-autocomplete" in selector_items_lista else 4
-    print(f"⏳ Esperando lista ({tiempo}s)...")
-    time.sleep(tiempo)
-    
-    try:
-        if not page.is_visible(selector_items_lista): return False
-    except: return False
-
-    # 3. Buscar Mejor Candidato
-    try:
-        opciones = page.query_selector_all(selector_items_lista)
-        tokens_buscados = normalizar_texto(texto_original)
-        candidatos = []
-
-        for op in opciones:
-            texto_opcion = op.inner_text().strip()
-            # Aquí 'MAZDA 3' se convierte en {MAZDA, 3} igual que tu input
-            tokens_opcion = normalizar_texto(texto_opcion)
-
-            if tokens_buscados.issubset(tokens_opcion):
-                diff = len(tokens_opcion) - len(tokens_buscados)
-                candidatos.append({'elem': op, 'txt': texto_opcion, 'diff': diff})
-
-        if candidatos:
-            candidatos.sort(key=lambda x: x['diff'])
-            mejor = candidatos[0]
-            print(f"✅ Coincidencia: '{mejor['txt']}'")
-            time.sleep(0.5)
-            mejor['elem'].click()
-            return True
-        else:
-            print(f"⚠️ No se encontró: {texto_original}")
-
-    except Exception as e:
-        print(f"⚠️ Error búsqueda: {e}")
-
-    return False
-
-def flujo_seleccionar_otros(page, tipo_otros, nombre_real, selectores):
-    print(f"🔄 Activando fallback: '{tipo_otros}'")
-    
+def flujo_seleccionar_otros(page, tipo_otros, nombre_completo, selectores):
+    print(f"🔄 Usando '{tipo_otros}' para llenado manual...")
     if not interactuar_y_buscar(page, tipo_otros, selectores['input'], selectores['lista_items']):
         return None
-        
     time.sleep(1)
-    
-    # Búsqueda en Input Real
     if selectores.get('input_real'):
-        print(f"🔎 Buscando '{nombre_real}' en catálogo secundario...")
         lista_secundaria = "ul.ui-autocomplete:visible > li"
-        
-        if interactuar_y_buscar(page, nombre_real, selectores['input_real'], lista_secundaria):
-            print("🎉 Encontrado en lista secundaria.")
+        if interactuar_y_buscar(page, nombre_completo, selectores['input_real'], lista_secundaria):
             return tipo_otros 
-
-    # Crear Nuevo
     if selectores.get('check'):
         try:
             chk = page.locator(selectores['check'])
             if chk.is_visible() and not chk.is_checked(): chk.check()
         except: pass
-
     if selectores.get('input_real'):
         try:
             real_inp = page.locator(selectores['input_real'])
             real_inp.fill("")
-            # Aquí también limpiamos duplicados al escribir el nombre final
-            nombre_limpio_final = limpiar_texto_para_input(nombre_real)
-            real_inp.press_sequentially(nombre_limpio_final, delay=100)
-            print(f"📝 Nombre escrito manualmente: {nombre_limpio_final}")
+            texto_manual = limpiar_texto_para_input(nombre_completo)
+            real_inp.press_sequentially(texto_manual, delay=100)
+            print(f"📝 Escrito manualmente: {texto_manual}")
         except: pass
-    
-    return tipo_otros
-
-
+    return tipo_otros # Retorna "OTROS MODELOS..." para que lo sepa la siguiente función
 
 # ==============================================================================
-# 3. FUNCIONES PRINCIPALES
+# 3. FUNCIONES PRINCIPALES (CON LÓGICA DE MEMORIA)
 # ==============================================================================
 
 def encontrar_modelo(page, modelo, version):
+    """
+    Retorna el nombre del modelo encontrado O la categoría de 'Otros Modelos'.
+    """
     sel = {
         'input': "#txtDesModelo", 
         'lista_items': "#ui-id-2 > li",
         'check': "#chkNueModelo",       
         'input_real': "#txtDesModeloReal" 
     }
-    nombre_busqueda = formatear_nombre_busqueda(modelo, version)
+    nombre_busqueda = fusionar_modelo_version(modelo, version)
     
+    # 1. Búsqueda normal
     if interactuar_y_buscar(page, nombre_busqueda, sel['input'], sel['lista_items']):
-        return nombre_busqueda
+        return nombre_busqueda # Retorna "TOYOTA YARIS" (éxito)
     
-    print("⚠️ No encontrado. Pasando a Otros...")
+    # 2. Si falla, detecta qué tipo de 'Otros' es y lo selecciona
+    print("⚠️ Pasando a manual...")
     tipo_otros = detectar_tipo_otros_modelos(page)
+    
+    # Retorna "OTROS MODELOS TRACCIÓN SIMPLE", etc.
     return flujo_seleccionar_otros(page, tipo_otros, nombre_busqueda, sel)
 
 def agregarcompradores(page):
@@ -730,20 +681,37 @@ def agregarcompradores(page):
     page.locator("#dgDeclaraciones_lnkPorcentaje_0 > img").click()
 
 
-def encontrar_modelo2(page, modelo, version):
+def encontrar_modelo2(page, modelo, version, seleccion_previa=None):
+    """
+    AHORA RECIBE 'seleccion_previa'.
+    Si seleccion_previa es 'OTROS MODELOS...', se salta la búsqueda y va directo al grano.
+    """
     sel = {
         'input': "#txtDesModeloV", 
         'lista_items': "#ui-id-6 > li",
         'check': None,      
         'input_real': None  
     }
-    nombre_busqueda = formatear_nombre_busqueda(modelo, version)
-    print(f"🔎 [Popup] Buscando: '{nombre_busqueda}'")
+    nombre_busqueda = fusionar_modelo_version(modelo, version)
 
+    # ========================================================================
+    # 1. ATAJO INTELIGENTE (LA VALIDACIÓN QUE PEDISTE)
+    # ========================================================================
+    if seleccion_previa and "OTROS MODELOS" in seleccion_previa.upper():
+        print(f"⏩ ATAJO ACTIVADO: La selección previa fue '{seleccion_previa}'.")
+        print("   -> No buscaré el modelo. Seleccionaré 'Otros' directamente.")
+        
+        # Saltamos directo a la función manual pasándole la categoría exacta que usamos antes
+        return flujo_seleccionar_otros(page, seleccion_previa, nombre_busqueda, sel)
+
+    # ========================================================================
+    # 2. BÚSQUEDA NORMAL (Solo si en el paso 1 encontramos el modelo real)
+    # ========================================================================
+    print(f"🔎 [Popup] Buscando: '{nombre_busqueda}'")
     if interactuar_y_buscar(page, nombre_busqueda, sel['input'], sel['lista_items']):
         return nombre_busqueda
     
-    print("⚠️ No encontrado en Popup. Seleccionando Otros...")
+    print("⚠️ Pasando a manual en Popup...")
     tipo_otros = detectar_tipo_otros_modelos(page) 
     return flujo_seleccionar_otros(page, tipo_otros, nombre_busqueda, sel)
 

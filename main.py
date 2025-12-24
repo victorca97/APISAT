@@ -59,7 +59,26 @@ def SAT():
                 inmatriculaciones_fallidas = []
                 #100000108 no se hace porque no aparece el campo cambio domicilio
                 #100000082 no se hace porque no aparece el campo cambio domicilio
-                referencias_a_saltar = {100000082,100000108, 100003500, 100003512, 100003525, 100003528, 100003570, 100003806, 100003952, 100004025, 100004030, 100004088, 100000256, 100002946}
+                referencias_a_saltar = {
+                     100000108, 100003528,
+                                        
+                                        100003500, 100003512, 100003525, 100003528, 100003570, 100003806, 100004025, 100004088, 100000256, 
+                                        100001372, 100004757, 100004889, 100004772, 100004791, 100004933, 100004953, 100002516, 100002534,
+                # Errores especificos tomo la placa que no era
+                                        100001757, 100001924,
+                # cocompradores procesar en la tarde
+                                        100001104, 100001164, 100001198, 100001240, 100001309, 100001341, 100001372, 100001454,
+                                        
+                                        # casos especiales transmision null
+                                        
+                                        # AGOSTO - OCTUBRE
+                                        100003014 , 100004757, 100002939, 100002947, 100002951, 100002952,
+                                        
+                                        
+                                        #REVOSHOP 11 - ITEM 5
+                                        100001978, 100001979, 100001982, 100001983, 100001984, 100001992, 100001994, 100001999, 100002002, 100002005, 100002007
+                                        
+                                        }
 
                 for item in data_list:
                     inmatriculaciones = item.get('inmatriculaciones', 'N/A')

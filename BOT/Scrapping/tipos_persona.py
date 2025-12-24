@@ -5,7 +5,7 @@ import time
 from utils.common import *
 from middleware.re_email import enviar_email_Api
 import traceback
-from playwright.sync_api import Page
+from playwright.sync_api import Page, expect
 
 #-----------------------------------------------PERSONA NATURAL SIN REPRESENTANTE-------------------------------------------------
 def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,browser,inmatriculaciones,compradores_array):
@@ -220,10 +220,21 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             page.select_option("#ddlTraccion",value=str(formulaRodante1))
 
             #rpt_cilindraje=int(cilindraje)*1000
-            if cilindraje == 0:  # Si es cero
+            try:
+                cilindraje_int = int(cilindraje)
+            except ValueError:
+                cilindraje_int = 0  # Manejo de error si no es número
+
+            # 2. APLICAMOS LA CORRECCIÓN DE CEROS EXTRAS
+            # Si es mayor a 20,000 (ningún auto normal pasa de 10k-12k cc), asumimos error de formato
+            if cilindraje_int > 50000: 
+                cilindraje_int = cilindraje_int // 1000  # División entera: 1995000 -> 1995
+
+            # 3. Tu lógica de llenado (usando la variable corregida)
+            if cilindraje_int == 0:
                 page.locator("#txtCilindraje").fill("1")
-            elif cilindraje > 0:  # Solo llenar si es positivo
-                page.locator("#txtCilindraje").fill(str(cilindraje))
+            elif cilindraje_int > 0:
+                page.locator("#txtCilindraje").fill(str(cilindraje_int))
 
 
             #rpt_pesobruto=int(pesoBruto) * 1000
@@ -248,7 +259,7 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             v_modeloCompleto = combinar_modelo_version(modelos, version)
             
             time.sleep(2)
-            encontrar_modelo(page, modelos, version)
+            resultado_seleccion = encontrar_modelo(page, modelos, version)
             
 
 
@@ -307,7 +318,7 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             raise ValueError("Marca no encontrada")
         time.sleep(2)
 
-        encontrar_modelo2(page,modelos, version)        
+        encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion)      
         input("Corrige el modelo...")
         
         page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
@@ -318,12 +329,12 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             
         with page.expect_navigation(wait_until='load'):
             page.locator("input[name='btnAceptarV']").click()
-            time.sleep(1)
+            time.sleep(2)
         try:
             page.on("dialog", lambda dialog: dialog.accept())
         except:
             pass
-        time.sleep(1) 
+        time.sleep(2) 
 
         Guardar_Archivos(page,browser,inmatriculaciones,num_documento)
 
@@ -631,10 +642,21 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             page.select_option("#ddlCatMTC", value=str(value_categoriaMtc))
 
             # CILINDRAJE Validacion en 0
-            if cilindraje == 0:  # Si es cero
+            try:
+                cilindraje_int = int(cilindraje)
+            except ValueError:
+                cilindraje_int = 0  # Manejo de error si no es número
+
+            # 2. APLICAMOS LA CORRECCIÓN DE CEROS EXTRAS
+            # Si es mayor a 20,000 (ningún auto normal pasa de 10k-12k cc), asumimos error de formato
+            if cilindraje_int > 50000: 
+                cilindraje_int = cilindraje_int // 1000  # División entera: 1995000 -> 1995
+
+            # 3. Tu lógica de llenado (usando la variable corregida)
+            if cilindraje_int == 0:
                 page.locator("#txtCilindraje").fill("1")
-            elif cilindraje > 0:  # Solo llenar si es positivo
-                page.locator("#txtCilindraje").fill(str(cilindraje))
+            elif cilindraje_int > 0:
+                page.locator("#txtCilindraje").fill(str(cilindraje_int))
                 
             #rpt_pesobruto=int(pesoBruto) * 1000
             page.locator("input[name='txtPesoBruto']").fill(str(int(pesoBruto)))
@@ -658,7 +680,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             v_modeloCompleto = combinar_modelo_version(modelos, version)
             
             time.sleep(2)
-            encontrar_modelo(page, modelos, version)
+            resultado_seleccion = encontrar_modelo(page, modelos, version)
             
             #DATOS DE LA ADQUISICION------------------
             page.select_option("#ddlTipoTransferencia",value={tipodeadquisicion})
@@ -701,33 +723,96 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             page.locator("#btnCancelar").click()
             raise
 
-        page.locator("input[name='txtDesMarcaV']").press_sequentially(marcas,delay=200)
+        # 1. LLENADO DE DATOS
+        # ---------------------------------------------------------
+        page.locator("input[name='txtDesMarcaV']").press_sequentially(marcas, delay=200)
         time.sleep(2)
-        if not encontrar_marca1(page,marcas):
+
+        if not encontrar_marca1(page, marcas):
             raise ValueError("Marca no encontrada")
-        encontrar_modelo2(page,modelos, version)
-        input("Corrige el modelo...")
+
+        encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion)
         
+        input("Corrige... el mdelo si es necesario y presiona Enter para continuar...") 
         page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
-
         page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
+        page.select_option("#ddlTipoMonedaV", value=valueM)
 
-        page.select_option("#ddlTipoMonedaV",value=valueM)
+        Registrador.info("Termine la parte final de la hoja. Intentando guardar...")
 
-        Registrador.info("Termine la parte final de la hoja")
-        
-        with page.expect_navigation(wait_until='load'):
-            page.locator("input[name='btnAceptarV']").click()
-            time.sleep(2)
+        # 2. PREPARACIÓN DE SEGURIDAD (ANTES DEL CLIC)
+        # ---------------------------------------------------------
+        print("---- INICIANDO INTENTO DE CLIC FINAL ----")
+
+        # Listener de Alertas: Lo ponemos ANTES para que esté "escuchando" cuando demos clic.
+        def manejar_dialogo(dialog):
+            print(f"🔔 ALERTA SAT DETECTADA: {dialog.message}")
+            dialog.accept()
+
+        # Activamos el listener
+        page.on("dialog", manejar_dialogo)
+
+        # 3. INTENTO DE GUARDADO (TRY-CATCH DIAGNÓSTICO)
+        # ---------------------------------------------------------
         try:
-            page.on("dialog", lambda dialog: dialog.accept())
-        except:
-            pass
-        time.sleep(2)
-        
+            # A. Definimos el botón
+            boton = page.locator("input[name='btnAceptarV']")
 
-        Guardar_Archivos(page,browser,inmatriculaciones,num_documento)
+            # B. Verificación: ¿Existe y está habilitado?
+            print("1. Buscando botón...")
+            boton.wait_for(state="visible", timeout=5000)
             
+            print("2. Verificando si está habilitado...")
+            expect(boton).to_be_enabled(timeout=5000)
+
+            # C. EL CLIC ÚNICO (Sin expect_navigation)
+            print("3. Dando Clic...")
+            boton.click(timeout=5000)
+            print("✅ Clic enviado.")
+
+            # 4. VERIFICACIÓN DEL RESULTADO
+            # -----------------------------------------------------
+            print("⏳ Esperando respuesta del servidor...")
+            
+            # Esperamos a que el Popup (#txtDesModeloV) desaparezca.
+            # Si desaparece -> Se guardó bien.
+            # Si sigue ahí -> Hubo error.
+            try:
+                page.locator("#txtDesModeloV").wait_for(state="detached", timeout=10000)
+                print("🎉 ÉXITO: El popup se cerró.")
+                
+                # Pausa de seguridad y guardado de archivos
+                time.sleep(2)
+                Guardar_Archivos(page, browser, inmatriculaciones, num_documento)
+
+            except:
+                # Si entra aquí, es que pasaron 10 segundos y el popup SIGUE ABIERTO
+                print("⚠️ ALERTA: El popup no se cerró. El SAT rechazó los datos.")
+                
+                # Tomamos la foto del error
+                page.screenshot(path="ERROR_DETECTADO.png")
+                print("📸 FOTO DEL ERROR GUARDADA: 'ERROR_DETECTADO.png'")
+                
+                # Buscamos mensaje rojo en pantalla
+                try:
+                    msg = page.locator("span[style*='Red'], .ErrorMessage, #lblError").first.inner_text()
+                    print(f"❌ MENSAJE EN PANTALLA: {msg}")
+                except:
+                    print("❌ No se encontró texto de error, pero el formulario sigue abierto.")
+
+        except Exception as e:
+            # Captura errores técnicos (Botón no encontrado, crash, etc.)
+            print("\n" + "█"*50)
+            print("🔴 ¡ERROR TÉCNICO CAPTURADO!")
+            print(f"MENSAJE: {e}")
+            print("█"*50 + "\n")
+            page.screenshot(path="ERROR_CRITICO.png")
+
+        finally:
+            # Limpieza: Dejamos de escuchar alertas para no afectar otros procesos
+            page.remove_listener("dialog", manejar_dialogo)
+                
+
     
     except Exception as e:
         destinos = ["practicantes.sistemas@notariapaino.pe", "jmallqui@notariapaino.pe","jmallqui@autohub.pe","administracion@autohub.pe"]
@@ -1037,7 +1122,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                         page.select_option("#ddlDistritoRela",value=distrito2)
                         page.locator("input[name='txtDireccionRela']").fill(direccion2)
                         
-                input("Corrige la direccion si es necesario y presiona Enter para continuar...")
+                    input("Corrige la direccion si es necesario y presiona Enter para continuar...")
 
                 with page.expect_navigation(wait_until='load'):
                     page.locator("input[name='btnSiguiente']").click()
@@ -1090,10 +1175,21 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
 
                 #rpt_cilindraje=int(cilindraje)*1000
                 # Después de las validaciones, llenar el campo en la página
-                if cilindraje == 0:  # Si es cero
+                try:
+                    cilindraje_int = int(cilindraje)
+                except ValueError:
+                    cilindraje_int = 0  # Manejo de error si no es número
+
+                # 2. APLICAMOS LA CORRECCIÓN DE CEROS EXTRAS
+                # Si es mayor a 20,000 (ningún auto normal pasa de 10k-12k cc), asumimos error de formato
+                if cilindraje_int > 50000: 
+                    cilindraje_int = cilindraje_int // 1000  # División entera: 1995000 -> 1995
+
+                # 3. Tu lógica de llenado (usando la variable corregida)
+                if cilindraje_int == 0:
                     page.locator("#txtCilindraje").fill("1")
-                elif cilindraje > 0:  # Solo llenar si es positivo
-                    page.locator("#txtCilindraje").fill(str(cilindraje))
+                elif cilindraje_int > 0:
+                    page.locator("#txtCilindraje").fill(str(cilindraje_int))
 
 
                 #rpt_pesobruto=int(pesoBruto) * 1000
@@ -1118,7 +1214,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 v_modeloCompleto = combinar_modelo_version(modelos, version)
                 
                 time.sleep(2)
-                encontrar_modelo(page, modelos, version)
+                resultado_seleccion = encontrar_modelo(page, modelos, version)
 
 
                 #DATOS DE LA ADQUISICION------------------  
@@ -1130,7 +1226,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 fecha_formateada1 = fecha_formateada1.replace("-", "/")
                 print(fecha_formateada1)
                 page.locator("input[name='txtFechaAdqui']").fill(fecha_formateada1)
-#
+
                 # input("Ingresar fecha de adquisicion...")
 
                 page.select_option("#ddlTipoPropiedad",value="5")
@@ -1170,16 +1266,15 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
             time.sleep(2)
             if not encontrar_marca1(page,marcas):
                 raise ValueError("Marca no encontrada")
-            time.sleep(2)
 
-            encontrar_modelo2(page,modelos, version)
-            input("Corrige el modelo...")
+            encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion)
 
             page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
             page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
             page.select_option("#ddlTipoMonedaV",value=valueM)
-            
+            input("Corrige el modelo...")
             Registrador.info("Termine la parte final de la hoja")
+            
             
             with page.expect_navigation(wait_until='load'):
                 page.locator("input[name='btnAceptarV']").click()
@@ -1189,8 +1284,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 page.on("dialog", lambda dialog: dialog.accept())
             except:
                 pass
-
-
+            time.sleep(2)
             Guardar_Archivos(page,browser,inmatriculaciones,num_documento)
 
 
@@ -1428,11 +1522,21 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             page.select_option("#ddlTraccion",value=str(formulaRodante1))
 
             #rpt_cilindraje=int(cilindraje)*1000
-            if cilindraje == 0:  # Si es cero
-                page.locator("#txtCilindraje").fill("1")
-            elif cilindraje > 0:  # Solo llenar si es positivo
-                page.locator("#txtCilindraje").fill(str(cilindraje))
+            try:
+                cilindraje_int = int(cilindraje)
+            except ValueError:
+                cilindraje_int = 0  # Manejo de error si no es número
 
+            # 2. APLICAMOS LA CORRECCIÓN DE CEROS EXTRAS
+            # Si es mayor a 20,000 (ningún auto normal pasa de 10k-12k cc), asumimos error de formato
+            if cilindraje_int > 50000: 
+                cilindraje_int = cilindraje_int // 1000  # División entera: 1995000 -> 1995
+
+            # 3. Tu lógica de llenado (usando la variable corregida)
+            if cilindraje_int == 0:
+                page.locator("#txtCilindraje").fill("1")
+            elif cilindraje_int > 0:
+                page.locator("#txtCilindraje").fill(str(cilindraje_int))
 
             #rpt_pesobruto=int(pesoBruto) * 1000
             page.locator("input[name='txtPesoBruto']").fill(str(int(pesoBruto)))
@@ -1455,9 +1559,8 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             v_modeloCompleto = combinar_modelo_version(modelos, version)
             
             time.sleep(2)
-            encontrar_modelo(page, modelos, version)
+            resultado_seleccion = encontrar_modelo(page, modelos, version)
             
-
             #DATOS DE LA ADQUISICION------------------
             # TIPO TRANSFERENCIA
             page.select_option("#ddlTipoTransferencia",value={tipodeadquisicion})
@@ -1519,7 +1622,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
                 raise ValueError("Marca no encontrada")
             time.sleep(2)
 
-            encontrar_modelo2(page,modelos, version)
+            encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion)
             input("Corrige el modelo...")
 
             
@@ -1529,7 +1632,6 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
 
             Registrador.info("Termine la parte final de la hoja")
             
-            time.sleep(2)
             
             with page.expect_navigation(wait_until='load'):
                 page.locator("input[name='btnAceptarV']").click()
@@ -1539,6 +1641,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
                 page.on("dialog", lambda dialog: dialog.accept())
             except:
                 pass
+            time.sleep(2)
 
             Guardar_Archivos(page,browser,inmatriculaciones,num_documento)
 
