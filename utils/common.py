@@ -505,47 +505,41 @@ def separar_sufijos_conocidos(texto):
 
 def fusionar_modelo_version(modelo, version):
     """
-    Une Modelo y Versión con inteligencia de orden.
-    
-    CASO 1 (SWIFT): 
-       Modelo: "SWIFT"
-       Versión: "NEW SWIFT GLX"
-       -> Como "SWIFT" ya está en la versión, retorna SOLO la versión: "NEW SWIFT GLX".
-    
-    CASO 2 (SUPERVAN):
-       Modelo: "GRAND NEW SUPERVAN"
-       Versión: "GRAND SUPERVAN PLUS"
-       -> Como falta "NEW" en la versión, concatena y limpia: "GRAND NEW SUPERVAN PLUS".
+    ALGORITMO MAESTRO DE FUSIÓN:
+    1. Separa sufijos pegados (X70FL -> X70 FL).
+    2. Decide si usar SOLO la Versión (Caso SWIFT/CS35) o FUSIONAR (Caso Supervan).
     """
-    # 1. Limpieza y separación de sufijos (X70FL -> X70 FL)
+    # 1. Limpieza y separación de sufijos (Vital para X70FL)
     m_raw = separar_sufijos_conocidos((modelo or "").strip().upper().replace("-", " "))
     v_raw = separar_sufijos_conocidos((version or "").strip().upper().replace("-", " "))
     
+    # Si no hay versión, devolvemos el modelo directo
     if v_raw in ["SIN VERSION", "S/V", "", "NO APLICA"]: return m_raw
 
-    # Convertimos a listas de palabras para analizar
+    # Preparamos las listas de palabras
     palabras_m = m_raw.split()
     palabras_v = v_raw.split()
+    set_v = set(palabras_v) # Usamos un set para buscar rápido
     
     # ----------------------------------------------------------------------
-    # LÓGICA NUEVA: VERIFICACIÓN DE INCLUSIÓN (Para arreglar el caso SWIFT)
+    # PASO A: ¿ES REDUNDANTE? (Caso SWIFT / CS35)
     # ----------------------------------------------------------------------
     # Verificamos si TODAS las palabras del modelo ya existen en la versión.
-    set_v = set(palabras_v) # Conjunto de palabras de la versión para búsqueda rápida
-    
-    modelo_incluido_en_version = True
+    modelo_incluido = True
     for pm in palabras_m:
         if pm not in set_v:
-            modelo_incluido_en_version = False
+            modelo_incluido = False
             break
             
-    # CASO A: El modelo es un subconjunto de la versión (Ej: SWIFT está en NEW SWIFT)
-    # Usamos la versión pura para mantener el orden correcto ("NEW SWIFT").
-    if modelo_incluido_en_version:
+    # Si el modelo ya está incluido dentro de la versión,
+    # ignoramos el modelo para respetar el orden perfecto de la versión.
+    if modelo_incluido:
         return v_raw
 
-    # CASO B: El modelo aporta palabras nuevas (Ej: GRAND NEW SUPERVAN)
-    # Concatenamos Modelo + Versión y limpiamos duplicados en orden.
+    # ----------------------------------------------------------------------
+    # PASO B: FUSIÓN DE DATOS (Caso GRAND NEW SUPERVAN)
+    # ----------------------------------------------------------------------
+    # Si faltan palabras (como "NEW"), juntamos todo y limpiamos repetidos.
     palabras_totales = palabras_m + palabras_v
     palabras_unicas = []
     vistos = set()
@@ -556,6 +550,7 @@ def fusionar_modelo_version(modelo, version):
             vistos.add(p)
             
     return " ".join(palabras_unicas)
+
 
 def obtener_token_comparacion(palabra):
     """ Normaliza tokens (1.5L == 1.5). """
@@ -609,7 +604,7 @@ def interactuar_y_buscar(page, texto_original, selector_input, selector_items_li
         page.locator(selector_input).press_sequentially(texto_escribir, delay=100)
     except: return False
 
-    tiempo = 3 if "ui-autocomplete" in selector_items_lista else 4
+    tiempo = 5 if "ui-autocomplete" in selector_items_lista else 4
     print(f"⏳ Esperando resultados ({tiempo}s)...")
     time.sleep(tiempo)
     
