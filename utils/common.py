@@ -504,25 +504,57 @@ def separar_sufijos_conocidos(texto):
     return t_separado
 
 def fusionar_modelo_version(modelo, version):
-    """ Une Modelo y Version, separa sufijos y elimina duplicados. """
-    m_raw = (modelo or "").strip().upper().replace("-", " ")
-    v_raw = (version or "").strip().upper().replace("-", " ")
+    """
+    Une Modelo y Versión con inteligencia de orden.
     
-    # Separamos sufijos pegados antes de nada
-    m = separar_sufijos_conocidos(m_raw)
-    v = separar_sufijos_conocidos(v_raw)
+    CASO 1 (SWIFT): 
+       Modelo: "SWIFT"
+       Versión: "NEW SWIFT GLX"
+       -> Como "SWIFT" ya está en la versión, retorna SOLO la versión: "NEW SWIFT GLX".
     
-    if v in ["SIN VERSION", "S/V", "", "NO APLICA"]: return m
+    CASO 2 (SUPERVAN):
+       Modelo: "GRAND NEW SUPERVAN"
+       Versión: "GRAND SUPERVAN PLUS"
+       -> Como falta "NEW" en la versión, concatena y limpia: "GRAND NEW SUPERVAN PLUS".
+    """
+    # 1. Limpieza y separación de sufijos (X70FL -> X70 FL)
+    m_raw = separar_sufijos_conocidos((modelo or "").strip().upper().replace("-", " "))
+    v_raw = separar_sufijos_conocidos((version or "").strip().upper().replace("-", " "))
+    
+    if v_raw in ["SIN VERSION", "S/V", "", "NO APLICA"]: return m_raw
 
-    palabras_brutas = m.split() + v.split()
+    # Convertimos a listas de palabras para analizar
+    palabras_m = m_raw.split()
+    palabras_v = v_raw.split()
+    
+    # ----------------------------------------------------------------------
+    # LÓGICA NUEVA: VERIFICACIÓN DE INCLUSIÓN (Para arreglar el caso SWIFT)
+    # ----------------------------------------------------------------------
+    # Verificamos si TODAS las palabras del modelo ya existen en la versión.
+    set_v = set(palabras_v) # Conjunto de palabras de la versión para búsqueda rápida
+    
+    modelo_incluido_en_version = True
+    for pm in palabras_m:
+        if pm not in set_v:
+            modelo_incluido_en_version = False
+            break
+            
+    # CASO A: El modelo es un subconjunto de la versión (Ej: SWIFT está en NEW SWIFT)
+    # Usamos la versión pura para mantener el orden correcto ("NEW SWIFT").
+    if modelo_incluido_en_version:
+        return v_raw
+
+    # CASO B: El modelo aporta palabras nuevas (Ej: GRAND NEW SUPERVAN)
+    # Concatenamos Modelo + Versión y limpiamos duplicados en orden.
+    palabras_totales = palabras_m + palabras_v
     palabras_unicas = []
     vistos = set()
     
-    for p in palabras_brutas:
-        p_limpia = p.strip()
-        if p_limpia not in vistos:
-            palabras_unicas.append(p_limpia)
-            vistos.add(p_limpia)       
+    for p in palabras_totales:
+        if p not in vistos:
+            palabras_unicas.append(p)
+            vistos.add(p)
+            
     return " ".join(palabras_unicas)
 
 def obtener_token_comparacion(palabra):
