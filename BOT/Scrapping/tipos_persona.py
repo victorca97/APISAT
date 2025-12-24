@@ -1097,7 +1097,6 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                     page.locator("#btnNuevaBusquedaRel").click()
 
                     page.locator("input[name='txtDocuRela']").fill(num_documento)
-
                     #page.select_option("#ddlTipoDocuRela",value=tipo_documento2)
                     #page.select_option("#ddlTipoDocuRela",value=tipo_documento2)
                     page.locator("input[name='cmdBuscaDocuRel']").click()

@@ -39,7 +39,6 @@ class SatScraper:
                 
                 return 1  # Retorna 1 para saltar a la siguiente placa
             # --------------------------------------------------
-
             lista_placas = self.page.evaluate('Array.from(document.querySelectorAll("#dgDeclaraciones > tbody > tr > td:nth-child(4)")).map(li => li.innerText)')
             print(f"Listado de placas : {lista_placas}")
             

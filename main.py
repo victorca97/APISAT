@@ -20,8 +20,6 @@ from BOT.Scrapping.tipos_persona import *
 from dotenv import load_dotenv
 load_dotenv()
 
-
-
 def SAT():
     usuario = os.getenv('USER_SAT')
     contra = os.getenv('PASSWORD_SAT')

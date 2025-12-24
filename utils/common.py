@@ -522,8 +522,7 @@ def fusionar_modelo_version(modelo, version):
         p_limpia = p.strip()
         if p_limpia not in vistos:
             palabras_unicas.append(p_limpia)
-            vistos.add(p_limpia)
-            
+            vistos.add(p_limpia)       
     return " ".join(palabras_unicas)
 
 def obtener_token_comparacion(palabra):
