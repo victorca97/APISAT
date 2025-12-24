@@ -812,8 +812,6 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             # Limpieza: Dejamos de escuchar alertas para no afectar otros procesos
             page.remove_listener("dialog", manejar_dialogo)
                 
-
-    
     except Exception as e:
         destinos = ["practicantes.sistemas@notariapaino.pe", "jmallqui@notariapaino.pe","jmallqui@autohub.pe","administracion@autohub.pe"]
         asunto=f"ERROR BOT SAT-AUTOHUB Inmatriculaciones N°{inmatriculaciones} con la referencia {referencia}"
