@@ -558,7 +558,6 @@ def obtener_token_comparacion(palabra):
     if re.match(r"^\d+(\.\d+)?L$", p): return p[:-1] 
     if p in ["DLX", "DELUXE"]: return "TOKEN_DELUXE"
     if p in ["LTD", "LIMITED"]: return "TOKEN_LIMITED"
-    if p in ["STD", "STANDARD"]: return "TOKEN_STANDARD"
     if p in ["AUT", "AUTOMATICO", "AT"]: return "TOKEN_AUTOMATICO"
     if p in ["MEC", "MECANICO", "MT"]: return "TOKEN_MECANICO"
     if p in ["4X2", "2WD", "SIMPLE", "S-AWD"]: return "TOKEN_TRACCION_SIMPLE"
@@ -585,7 +584,7 @@ def limpiar_texto_para_input(texto):
     """ Prepara texto para escribir (sin duplicados, respeta L). """
     if not texto: return ""
     texto_upper = texto.upper().replace("-", " ").strip()
-    palabras_prohibidas = ["DLX", "LTD", "STD", "AUT", "MEC", "GLP", "GNV"] 
+    palabras_prohibidas = ["DLX", "LTD", "AUT", "MEC", "GLP", "GNV"] 
     palabras_finales = []
     for p in texto_upper.split():
         if p not in palabras_prohibidas: palabras_finales.append(p)
@@ -597,11 +596,12 @@ def limpiar_texto_para_input(texto):
 
 def interactuar_y_buscar(page, texto_original, selector_input, selector_items_lista):
     texto_escribir = limpiar_texto_para_input(texto_original)
-    print(f"✍️  Buscando: '{texto_escribir}'")
     
+    # Delay 30ms para escritura veloz pero detectable
+    print(f"✍️  Buscando: '{texto_escribir}'")
     try:
         page.locator(selector_input).fill("")
-        page.locator(selector_input).press_sequentially(texto_escribir, delay=100)
+        page.locator(selector_input).press_sequentially(texto_escribir, delay=30)
     except: return False
 
     tiempo = 5 if "ui-autocomplete" in selector_items_lista else 4
@@ -612,26 +612,41 @@ def interactuar_y_buscar(page, texto_original, selector_input, selector_items_li
         if not page.is_visible(selector_items_lista): return False
     except: return False
 
+    # --- COMPARACIÓN INTELIGENTE (ORDENADA) ---
     try:
         opciones = page.query_selector_all(selector_items_lista)
+        
+        # 1. Obtenemos tu lista de tokens
         lista_buscada = normalizar_texto_lista(texto_original)
-        print(f"🧩 Patrón buscado: {lista_buscada}")
+        
+        # 2. LA MAGIA: Ordenamos tu lista alfabéticamente para comparar
+        # Así 'EIV FL' será igual a 'FL EIV'
+        lista_buscada_ordenada = sorted(lista_buscada)
+        
+        print(f"🧩 Patrón buscado (Ordenado): {lista_buscada_ordenada}")
 
         for op in opciones:
             texto_opcion = op.inner_text().strip()
             lista_opcion = normalizar_texto_lista(texto_opcion)
+            
+            # 3. Ordenamos también la opción de la lista
+            lista_opcion_ordenada = sorted(lista_opcion)
 
-            if lista_buscada == lista_opcion:
-                print(f"✅ Coincidencia EXACTA: '{texto_opcion}'")
+            # 4. Comparamos las versiones ordenadas
+            # Esto ignora el desorden de palabras, pero respeta cantidades (evita duplicados extra)
+            if lista_buscada_ordenada == lista_opcion_ordenada:
+                print(f"✅ Coincidencia EXACTA (Contenido): '{texto_opcion}'")
                 time.sleep(0.5)
                 op.click()
                 return True
                 
-        print(f"⚠️ Ninguna opción coincide exactamente.")
+        print(f"⚠️ Ninguna opción coincide en contenido exacto.")
         return False
+
     except Exception as e:
         print(f"⚠️ Error comparando: {e}")
         return False
+
 
 def detectar_tipo_otros_modelos(page):
     try:
@@ -642,7 +657,7 @@ def detectar_tipo_otros_modelos(page):
             try: txt = page.locator("#ddlTraccion option:checked").inner_text().upper()
             except: pass
             if any(k in txt for k in ["4X4", "AWD", "4WD", "QUATTRO", "DOBLE"]):
-                return "OTROS MODELOS TRACCIÓN DOBLE"
+                return "OTROS MODELOS TRACCION DOBLE"
             else:
                 return "OTROS MODELOS TRACCIÓN SIMPLE"
         return "OTROS MODELOS"
