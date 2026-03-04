@@ -164,7 +164,7 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             
             page.select_option("#ddlTipoRelacionado",value="0")
 
-            #input("Corrige la direccion u otro dato si es necesario y presiona Enter para continuar...")
+            input("Corrige la direccion u otro dato si es necesario y presiona Enter para continuar...")
             Registrador.info("Termine la primera hoja")
 
             with page.expect_navigation(wait_until='load'):
@@ -183,12 +183,13 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             raise
 
         try:
-            # input("Ingresar fecha de inscripcion...")
+
             fecha_formateada = datetime.strptime(fechaInscripcion, "%Y-%m-%d")
             fecha_formateada = fecha_formateada.strftime("%d-%m-%Y")
             fecha_formateada = fecha_formateada.replace("-", "/")
             print(fecha_formateada)
             page.locator("input[name='txtInscripcion']").fill(fecha_formateada)
+            # input("Ingresar fecha de inscripcion...")
 
             page.locator("input[name='txtAnoModelo']").fill(anoModelo)
             page.keyboard.press("Enter")                
@@ -254,11 +255,11 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             # Seleccionar modelo ULTIMO PASO
             v_modelos=f"{modelos}".strip()
             time.sleep(2)
-            page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=30)
+            page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=700)
             v_modeloCompleto = combinar_modelo_version(modelos, version)
             
             time.sleep(2)
-            resultado_seleccion = encontrar_modelo(page, modelos, version, formulaRodante=formulaRodante)
+            resultado_seleccion = encontrar_modelo(page, modelos, version)
             
 
 
@@ -300,7 +301,7 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
 
             page.locator("input[name='txtOtros']").fill("Recibos")
 
-            #input("Corrige el modelo...")
+            input("Corrige el modelo...")
             Registrador.info("Termine la Segunda Hoja")
             # Parte final
             page.locator("input[name='btnValidar']").click()
@@ -317,15 +318,14 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             raise ValueError("Marca no encontrada")
         time.sleep(2)
 
-        encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion, formulaRodante=formulaRodante)
-
-
+        encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion)      
+        input("Corrige el modelo...")
+        
         page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
         page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
         page.select_option("#ddlTipoMonedaV",value=valueM)
-        input("Corrige el modelo...")
+
         Registrador.info("Termine la parte final de la hoja")
-        time.sleep(2)
             
         with page.expect_navigation(wait_until='load'):
             page.locator("input[name='btnAceptarV']").click()
@@ -498,7 +498,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
                     page.locator("input[name='txtDireccion']").fill(direccion)
                 else:
                     print("El distrito no esta habilitado")
-                #input("Corrige la direccion si es necesario y presiona Enter para continuar...")
+                input("Corrige la direccion si es necesario y presiona Enter para continuar...")
                 
             else:
                 print("No es la misma razon social")            
@@ -534,7 +534,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
                 #     input.removeAttribute('disabled');
                 #     input.value = '';
                 #     """)
-                #input("Corrige la direccion si es necesario y presiona Enter para continuar...")
+                input("Corrige la direccion si es necesario y presiona Enter para continuar...")
             # Llenar el nuevo valor
             # page.locator("input[name='txtNroAsientos']").fill(nAsientos)
             #Datos del representate--------------------
@@ -565,7 +565,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
                 page.select_option("#ddlDistritoRela",value=distritoR)
                 page.locator("input[name='txtDireccionRela']").fill(direccionR)
                 
-                #input("Corrige la direccion si es necesario y presiona Enter para continuar...")
+                input("Corrige la direccion si es necesario y presiona Enter para continuar...")
                 
             else:
                 print("entre aca2")
@@ -587,7 +587,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
                 page.select_option("#ddlDistritoRela",value=distritoR)
                 page.locator("input[name='txtDireccionRela']").fill(direccion)
                 
-                #input("Corrige la direccion si es necesario y presiona Enter para continuar...")
+                input("Corrige la direccion si es necesario y presiona Enter para continuar...")
             page.locator("input[name='btnSiguiente']").click()
         except Exception as e:
             page.locator("#lnkRegresar").click()
@@ -597,14 +597,14 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             #fechaInscripcion1 = datetime.strptime(fechaInscripcion, "%Y-%m-%d")
         try:
             # Formatear el objeto datetime a la cadena deseada (día-mes-año)
-            #input("Presiona Enter para continuar...")
+            # input("Presiona Enter para continuar...")
             
             fecha_formateada = datetime.strptime(fechaInscripcion, "%Y-%m-%d")
             fecha_formateada = fecha_formateada.strftime("%d-%m-%Y")
             fecha_formateada = fecha_formateada.replace("-", "/")
             print(fecha_formateada)
             page.locator("input[name='txtInscripcion']").fill(fecha_formateada)
-            #input("Ingresar fecha de inscripcion...")
+            # input("Ingresar fecha de inscripcion...")
             page.locator("input[name='txtAnoModelo']").fill(anoModelo)
             page.keyboard.press("Enter")                
 
@@ -676,11 +676,11 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             # Seleccionar modelo ULTIMO PASO
             v_modelos=f"{modelos}".strip()
             time.sleep(2)
-            page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=30)
+            page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=700)
             v_modeloCompleto = combinar_modelo_version(modelos, version)
             
             time.sleep(2)
-            resultado_seleccion = encontrar_modelo(page, modelos, version, formulaRodante=formulaRodante)
+            resultado_seleccion = encontrar_modelo(page, modelos, version)
             
             #DATOS DE LA ADQUISICION------------------
             page.select_option("#ddlTipoTransferencia",value={tipodeadquisicion})
@@ -692,14 +692,14 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             print(fecha_formateada1)
             page.locator("input[name='txtFechaAdqui']").fill(fecha_formateada1)
 
-            # input("Corrige la fecha y monto")
+
             page.select_option("#ddlTipoPropiedad",value="5")
 
             valueM=value_moneda(moneda)
             page.select_option("#ddlTipoMoneda",value=valueM) 
 
             page.locator("input[name='txtValorTrasferencia']").fill(valorMonetario)
-            # input("Corrige la fecha y monto")
+
             
 
             #apartados de documentos adjuntos
@@ -711,7 +711,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
 
             page.locator("input[name='txtOtros']").fill("Recibos")
 
-            #input("Corrige el modelo...")
+            input("Corrige el modelo...")
             Registrador.info("Termine la Segunda Hoja")
             # Parte final
             page.locator("input[name='btnValidar']").click()
@@ -731,17 +731,14 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
         if not encontrar_marca1(page, marcas):
             raise ValueError("Marca no encontrada")
 
-        encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion, formulaRodante=formulaRodante)
-
+        encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion)
         
+        input("Corrige... el mdelo si es necesario y presiona Enter para continuar...") 
         page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
         page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
         page.select_option("#ddlTipoMonedaV", value=valueM)
-        input("Corrige... LA FECHA Y DINERO SI ES NECESARIO..") 
 
         Registrador.info("Termine la parte final de la hoja. Intentando guardar...")
-        time.sleep(2)
-
 
         # 2. PREPARACIÓN DE SEGURIDAD (ANTES DEL CLIC)
         # ---------------------------------------------------------
@@ -1041,12 +1038,12 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                     page.locator("input[name='txtApePateRela']").fill(apellido_paterno2)
                     
                     
-                    # if apellido_materno == "":
-                    #     page.locator("input[name='chkSinApeMatAdmi']").check()
-                    # else:
-                    #     page.locator("input[name='txtApeMateRela']").fill(apellido_materno2)
+                    if apellido_materno == "":
+                        page.locator("input[name='chkSinApeMatAdmi']").check()
+                    else:
+                        page.locator("input[name='txtApeMateRela']").fill(apellido_materno2)
                     
-                    # page.locator("input[name='txtNombRela']").fill(nombre2)
+                    page.locator("input[name='txtNombRela']").fill(nombre2)
                     
                     # AGREGAR ESTA VALIDACIÓN NUEVA
                     if apellido_materno2 == "":
@@ -1060,7 +1057,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                         page.select_option("#ddlDistritoRela",value=distrito2)
                         page.locator("input[name='txtDireccionRela']").fill(direccion2)
 
-                    #input("Corrige la direccion si es necesario y presiona Enter para continuar...")
+                    input("Corrige la direccion si es necesario y presiona Enter para continuar...")
                 else:
                     print("No Tengo los datos")
 
@@ -1122,7 +1119,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                         page.select_option("#ddlDistritoRela",value=distrito2)
                         page.locator("input[name='txtDireccionRela']").fill(direccion2)
                         
-                    #input("Corrige la direccion si es necesario y presiona Enter para continuar...")
+                    input("Corrige la direccion si es necesario y presiona Enter para continuar...")
 
                 with page.expect_navigation(wait_until='load'):
                     page.locator("input[name='btnSiguiente']").click()
@@ -1210,11 +1207,11 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 # Seleccionar modelo ULTIMO PASO
                 v_modelos=f"{modelos}".strip()
                 time.sleep(2)
-                page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=30)
+                page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=700)
                 v_modeloCompleto = combinar_modelo_version(modelos, version)
                 
                 time.sleep(2)
-                resultado_seleccion = encontrar_modelo(page, modelos, version, formulaRodante=formulaRodante)
+                resultado_seleccion = encontrar_modelo(page, modelos, version)
 
 
                 #DATOS DE LA ADQUISICION------------------  
@@ -1227,7 +1224,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 print(fecha_formateada1)
                 page.locator("input[name='txtFechaAdqui']").fill(fecha_formateada1)
 
-                #input("Ingresar fecha de adquisicion...")
+                # input("Ingresar fecha de adquisicion...")
 
                 page.select_option("#ddlTipoPropiedad",value="5")
 
@@ -1248,7 +1245,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
 
                 page.locator("input[name='txtOtros']").fill("Recibos")
 
-                #("Corrige el modelo...")
+                input("Corrige el modelo...")
                 Registrador.info("Termine la segunda hoja")
                 # Parte final
             
@@ -1267,15 +1264,14 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
             if not encontrar_marca1(page,marcas):
                 raise ValueError("Marca no encontrada")
 
-            encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion, formulaRodante=formulaRodante)
+            encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion)
 
             page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
             page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
             page.select_option("#ddlTipoMonedaV",value=valueM)
-            #input("Corrige el modelo...")
+            input("Corrige el modelo...")
             Registrador.info("Termine la parte final de la hoja")
-            time.sleep(2)
-
+            
             
             with page.expect_navigation(wait_until='load'):
                 page.locator("input[name='btnAceptarV']").click()
@@ -1473,7 +1469,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
                     page.select_option("#ddlDistrito",value=distrito)
                     page.locator("input[name='txtDireccion']").fill(direccion)
 
-            #input("Corrige y Presiona Enter para continuar...")
+            input("Corrige y Presiona Enter para continuar...")
             Registrador.info("Termine la primera hoja")
 
 
@@ -1484,13 +1480,6 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             #fechaInscripcion1 = datetime.strptime(fechaInscripcion, "%Y-%m-%d")
             time.sleep(3)
             # Formatear el objeto datetime a la cadena deseada (día-mes-año)
-            # input("Corregir fecha")
-            fecha_formateada = datetime.strptime(fechaInscripcion, "%Y-%m-%d")
-            fecha_formateada = fecha_formateada.strftime("%d-%m-%Y")
-            fecha_formateada = fecha_formateada.replace("-", "/")
-            print(fecha_formateada)
-            page.locator("input[name='txtInscripcion']").fill(fecha_formateada)
-            #nput("Corregir fecha")
             fecha_formateada = datetime.strptime(fechaInscripcion, "%Y-%m-%d")
             fecha_formateada = fecha_formateada.strftime("%d-%m-%Y")
             fecha_formateada = fecha_formateada.replace("-", "/")
@@ -1563,11 +1552,11 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             # Seleccionar modelo ULTIMO PASO
             v_modelos=f"{modelos}".strip()
             time.sleep(2)
-            page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=30)
+            page.locator("input[name='txtDesModelo']").press_sequentially(v_modelos ,delay=700)
             v_modeloCompleto = combinar_modelo_version(modelos, version)
             
             time.sleep(2)
-            resultado_seleccion = encontrar_modelo(page, modelos, version, formulaRodante=formulaRodante)
+            resultado_seleccion = encontrar_modelo(page, modelos, version)
             
             #DATOS DE LA ADQUISICION------------------
             # TIPO TRANSFERENCIA
@@ -1612,7 +1601,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             page.locator("input[name='txtOtros']").fill("Recibos")
 
 
-            #input("Corrige el modelo...")  # Pausa para revisión manual si es necesario
+            input("Corrige el modelo...")  # Pausa para revisión manual si es necesario
             Registrador.info("Termine la segunda hoja")
 
             # Parte final
@@ -1630,17 +1619,15 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
                 raise ValueError("Marca no encontrada")
             time.sleep(2)
 
-            encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion, formulaRodante=formulaRodante)
+            encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion)
             input("Corrige el modelo...")
 
             
             page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
             page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
             page.select_option("#ddlTipoMonedaV",value=valueM)
-            
-            Registrador.info("Termine la parte final de la hoja")
-            time.sleep(2)
 
+            Registrador.info("Termine la parte final de la hoja")
             
             
             with page.expect_navigation(wait_until='load'):
@@ -1749,7 +1736,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
                 page.select_option("#ddlDistrito",value=distrito)
                 page.locator("input[name='txtDireccion']").fill(direccion)
 
-            #input("Corrige la direccion si es necesario y presiona Enter para continuar...")
+            input("Corrige la direccion si es necesario y presiona Enter para continuar...")
             Registrador.info("Termine la primera hoja del coocomprador")
 
             
@@ -1815,3 +1802,9 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
         enviar_email_Api(destinos, asunto, error_message)
         print(e)
         print(traceback.format_exc())
+
+
+    
+
+
+
