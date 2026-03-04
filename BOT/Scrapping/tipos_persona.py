@@ -730,7 +730,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
         if not encontrar_marca1(page, marcas):
             raise ValueError("Marca no encontrada")
 
-        encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion, formulaRodante=formulaRodante)
+        encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion, traccion=formulaRodante)  
         
         page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
         page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
@@ -1265,7 +1265,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
             if not encontrar_marca1(page,marcas):
                 raise ValueError("Marca no encontrada")
 
-            encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion, formulaRodante=formulaRodante)
+            encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion, traccion=formulaRodante)  
 
             page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
             page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
@@ -1622,7 +1622,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
                 raise ValueError("Marca no encontrada")
             time.sleep(2)
 
-            encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion, formulaRodante=formulaRodante)
+            encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion, traccion=formulaRodante)
             input("Corrige el modelo...")
 
             
