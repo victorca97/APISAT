@@ -183,13 +183,12 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             raise
 
         try:
-
+            # input("Ingresar fecha de inscripcion...")
             fecha_formateada = datetime.strptime(fechaInscripcion, "%Y-%m-%d")
             fecha_formateada = fecha_formateada.strftime("%d-%m-%Y")
             fecha_formateada = fecha_formateada.replace("-", "/")
             print(fecha_formateada)
             page.locator("input[name='txtInscripcion']").fill(fecha_formateada)
-            #input("Ingresar fecha de inscripcion...")
 
             page.locator("input[name='txtAnoModelo']").fill(anoModelo)
             page.keyboard.press("Enter")                
@@ -259,7 +258,7 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             v_modeloCompleto = combinar_modelo_version(modelos, version)
             
             time.sleep(2)
-            resultado_seleccion = encontrar_modelo(page, modelos, version)
+            resultado_seleccion = encontrar_modelo(page, modelos, version, formulaRodante)
             
 
 
@@ -318,13 +317,12 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             raise ValueError("Marca no encontrada")
         time.sleep(2)
 
-        encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion)      
-        #input("Corrige el modelo...")
+        encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion, traccion=formulaRodante)    
         
         page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
         page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
         page.select_option("#ddlTipoMonedaV",value=valueM)
-
+        input("Corrige el modelo...")
         Registrador.info("Termine la parte final de la hoja")
         time.sleep(2)
             
@@ -681,7 +679,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             v_modeloCompleto = combinar_modelo_version(modelos, version)
             
             time.sleep(2)
-            resultado_seleccion = encontrar_modelo(page, modelos, version)
+            resultado_seleccion = encontrar_modelo(page, modelos, version, formulaRodante)
             
             #DATOS DE LA ADQUISICION------------------
             page.select_option("#ddlTipoTransferencia",value={tipodeadquisicion})
@@ -693,14 +691,14 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             print(fecha_formateada1)
             page.locator("input[name='txtFechaAdqui']").fill(fecha_formateada1)
 
-
+            # input("Corrige la fecha y monto")
             page.select_option("#ddlTipoPropiedad",value="5")
 
             valueM=value_moneda(moneda)
             page.select_option("#ddlTipoMoneda",value=valueM) 
 
             page.locator("input[name='txtValorTrasferencia']").fill(valorMonetario)
-
+            # input("Corrige la fecha y monto")
             
 
             #apartados de documentos adjuntos
@@ -732,12 +730,12 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
         if not encontrar_marca1(page, marcas):
             raise ValueError("Marca no encontrada")
 
-        encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion)
+        encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion, formulaRodante=formulaRodante)
         
-        #input("Corrige... el mdelo si es necesario y presiona Enter para continuar...") 
         page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
         page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
         page.select_option("#ddlTipoMonedaV", value=valueM)
+        input("Corrige... LA FECHA Y DINERO SI ES NECESARIO..") 
 
         Registrador.info("Termine la parte final de la hoja. Intentando guardar...")
         time.sleep(2)
@@ -1041,12 +1039,12 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                     page.locator("input[name='txtApePateRela']").fill(apellido_paterno2)
                     
                     
-                    if apellido_materno == "":
-                        page.locator("input[name='chkSinApeMatAdmi']").check()
-                    else:
-                        page.locator("input[name='txtApeMateRela']").fill(apellido_materno2)
+                    # if apellido_materno == "":
+                    #     page.locator("input[name='chkSinApeMatAdmi']").check()
+                    # else:
+                    #     page.locator("input[name='txtApeMateRela']").fill(apellido_materno2)
                     
-                    page.locator("input[name='txtNombRela']").fill(nombre2)
+                    # page.locator("input[name='txtNombRela']").fill(nombre2)
                     
                     # AGREGAR ESTA VALIDACIÓN NUEVA
                     if apellido_materno2 == "":
@@ -1214,7 +1212,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 v_modeloCompleto = combinar_modelo_version(modelos, version)
                 
                 time.sleep(2)
-                resultado_seleccion = encontrar_modelo(page, modelos, version)
+                resultado_seleccion = encontrar_modelo(page, modelos, version, formulaRodante)
 
 
                 #DATOS DE LA ADQUISICION------------------  
@@ -1267,7 +1265,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
             if not encontrar_marca1(page,marcas):
                 raise ValueError("Marca no encontrada")
 
-            encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion)
+            encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion, formulaRodante=formulaRodante)
 
             page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
             page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
@@ -1484,6 +1482,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             #fechaInscripcion1 = datetime.strptime(fechaInscripcion, "%Y-%m-%d")
             time.sleep(3)
             # Formatear el objeto datetime a la cadena deseada (día-mes-año)
+            #nput("Corregir fecha")
             fecha_formateada = datetime.strptime(fechaInscripcion, "%Y-%m-%d")
             fecha_formateada = fecha_formateada.strftime("%d-%m-%Y")
             fecha_formateada = fecha_formateada.replace("-", "/")
@@ -1560,7 +1559,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             v_modeloCompleto = combinar_modelo_version(modelos, version)
             
             time.sleep(2)
-            resultado_seleccion = encontrar_modelo(page, modelos, version)
+            resultado_seleccion = encontrar_modelo(page, modelos, version, formulaRodante)
             
             #DATOS DE LA ADQUISICION------------------
             # TIPO TRANSFERENCIA
@@ -1623,14 +1622,14 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
                 raise ValueError("Marca no encontrada")
             time.sleep(2)
 
-            encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion)
-            #input("Corrige el modelo...")
+            encontrar_modelo2(page, modelos, version, seleccion_previa=resultado_seleccion, formulaRodante=formulaRodante)
+            input("Corrige el modelo...")
 
             
             page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
             page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
             page.select_option("#ddlTipoMonedaV",value=valueM)
-
+            
             Registrador.info("Termine la parte final de la hoja")
             time.sleep(2)
 
@@ -1808,10 +1807,3 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
         enviar_email_Api(destinos, asunto, error_message)
         print(e)
         print(traceback.format_exc())
-
-
-    
-
-
-
-
