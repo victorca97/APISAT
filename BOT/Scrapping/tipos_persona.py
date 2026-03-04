@@ -1474,6 +1474,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
                     page.locator("input[name='txtDireccion']").fill(direccion)
 
             #input("Corrige y Presiona Enter para continuar...")
+            print("Datos bien regularizados")
             Registrador.info("Termine la primera hoja")
 
 

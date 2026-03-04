@@ -718,7 +718,7 @@ def flujo_seleccionar_otros(page, tipo_otros, texto_sin_dup, selectores):
             real_inp.fill("")
             # ESCRITURA MANUAL FINAL: Se escribe estrictamente la versión SIN duplicados
             real_inp.press_sequentially(texto_sin_dup, delay=0.10)
-            print(f"📝 Escrito manualmente (SIN duplicados y fiel): {texto_sin_dup}")
+            print(f" Escrito manualmente (SIN duplicados y fiel): {texto_sin_dup}")
         except: pass
         
     return tipo_otros
@@ -737,33 +737,33 @@ def aplicar_excepciones_especificas(modelo, version, formulaRodante=""):
     # REGLA 1: Ford F-150 LARIAT FHEV -> Inyectar 4x4
     if "F-150" in texto_completo and "LARIAT" in texto_completo and "FHEV" in texto_completo:
         if t in ["4X4", "AWD", "4WD", "DOBLE"]:
-            print("⚡ [EXCEPCIÓN ACTIVADA]: Inyectando '4X4' a la F-150 LARIAT FHEV")
+            print(" [EXCEPCIÓN ACTIVADA]: Inyectando '4X4' a la F-150 LARIAT FHEV")
             return "F-150", "LARIAT 4X4 FHEV"
             
     # REGLA 2: Honda CR-V EXL -> Transformar a EX-L
     if "CR-V" in texto_completo and "EXL" in texto_completo:
-        print("⚡ [EXCEPCIÓN ACTIVADA]: Transformando 'EXL' a 'EX-L' para CR-V")
+        print(" [EXCEPCIÓN ACTIVADA]: Transformando 'EXL' a 'EX-L' para CR-V")
         m_corregido = m.replace("EXL", "EX-L")
         v_corregida = v.replace("EXL", "EX-L")
         return m_corregido, v_corregida
 
     # REGLA 3: Subaru FORESTER -> Unir "SI DRIVE" a "SI-DRIVE"
     if "FORESTER" in texto_completo and "SI DRIVE" in texto_completo:
-        print("⚡ [EXCEPCIÓN ACTIVADA]: Uniendo 'SI DRIVE' a 'SI-DRIVE' para Forester")
+        print(" [EXCEPCIÓN ACTIVADA]: Uniendo 'SI DRIVE' a 'SI-DRIVE' para Forester")
         m_corregido = m.replace("SI DRIVE", "SI-DRIVE")
         v_corregida = v.replace("SI DRIVE", "SI-DRIVE")
         return m_corregido, v_corregida
 
     # REGLA 4: Mazda redundante -> Convertir "MAZDA3" a "MAZDA 3"
     if "MAZDA3" in texto_completo and "MAZDA 3" in texto_completo:
-        print("⚡ [EXCEPCIÓN ACTIVADA]: Corrigiendo redundancia 'MAZDA3 MAZDA 3'")
+        print(" [EXCEPCIÓN ACTIVADA]: Corrigiendo redundancia 'MAZDA3 MAZDA 3'")
         m_corregido = m.replace("MAZDA3", "MAZDA 3")
         v_corregida = v.replace("MAZDA3", "MAZDA 3")
         return m_corregido, v_corregida
 
     # REGLA 5: HONOR S -> Agregar la 'L' a la cilindrada 1.5
     if "HONOR S" in texto_completo and "1.5" in texto_completo:
-        print("⚡ [EXCEPCIÓN ACTIVADA]: Agregando 'L' a la cilindrada del HONOR S")
+        print(" [EXCEPCIÓN ACTIVADA]: Agregando 'L' a la cilindrada del HONOR S")
         m_corregido = m.replace("1.5", "1.5L")
         v_corregida = v.replace("1.5", "1.5L")
         return m_corregido, v_corregida
@@ -786,15 +786,15 @@ def encontrar_modelo(page, modelo, version, formulaRodante=""):
     if interactuar_y_buscar(page, texto_con_dup, texto_sin_dup, sel['input'], sel['lista_items']):
         return True 
     
-    print("⚠️ Pasando a manual...")
+    print(" Pasando a manual...")
     tipo_otros = detectar_tipo_otros_modelos(page)
     
     # =================================================================
-    # 🚨 EXCEPCIÓN DE FALLBACK (TERRAMAR)
+    #  EXCEPCIÓN DE FALLBACK (TERRAMAR)
     # =================================================================
     texto_unido = f"{modelo} {version}".upper()
     if "TERRAMAR" in texto_unido:
-        print("⚡ [EXCEPCIÓN ACTIVADA]: Forzando la categoría 'OTROS MODELOS' para Terramar.")
+        print(" [EXCEPCIÓN ACTIVADA]: Forzando la categoría 'OTROS MODELOS' para Terramar.")
         tipo_otros = "OTROS MODELOS"
     # =================================================================
     
@@ -820,23 +820,23 @@ def encontrar_modelo2(page, modelo, version, seleccion_previa=None, formulaRodan
 
     # 👇 CORRECCIÓN CLAVE PARA EVITAR EL ERROR CON TRUE/FALSE 👇
     if isinstance(seleccion_previa, str) and "OTROS MODELOS" in seleccion_previa.upper():
-        print(f"⏩ ATAJO ACTIVADO: La selección previa fue '{seleccion_previa}'.")
+        print(f" ATAJO ACTIVADO: La selección previa fue '{seleccion_previa}'.")
         print(f"   -> Escribiendo fielmente: {texto_sin_dup}")
         return flujo_seleccionar_otros(page, seleccion_previa, texto_sin_dup, sel)
 
-    print(f"🔎 [Popup] Iniciando búsqueda...")
+    print(f" [Popup] Iniciando búsqueda...")
     if interactuar_y_buscar(page, texto_con_dup, texto_sin_dup, sel['input'], sel['lista_items']):
         return True
     
-    print("⚠️ Pasando a manual en Popup...")
+    print(" Pasando a manual en Popup...")
     tipo_otros = detectar_tipo_otros_modelos(page) 
     
     # =================================================================
-    # 🚨 EXCEPCIÓN DE FALLBACK (TERRAMAR) PARA EL POPUP
+    #  EXCEPCIÓN DE FALLBACK (TERRAMAR) PARA EL POPUP
     # =================================================================
     texto_unido = f"{modelo} {version}".upper()
     if "TERRAMAR" in texto_unido:
-        print("⚡ [EXCEPCIÓN ACTIVADA]: Forzando la categoría 'OTROS MODELOS' para Terramar.")
+        print(" [EXCEPCIÓN ACTIVADA]: Forzando la categoría 'OTROS MODELOS' para Terramar.")
         tipo_otros = "OTROS MODELOS"
     # =================================================================
     
