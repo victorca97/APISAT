@@ -19,12 +19,12 @@ def obtener_datos_sat():
 
         data_python = response.json() 
 
-        print("Datos de la API:", data_python)
+        #print("Datos de la API:", data_python)
 
         for objetos in data_python:
-            print("Inmatriculaciones:", objetos.get('inmatriculaciones')) 
+            print("Inmatriculacion:", objetos.get('inmatriculaciones')) 
             print("Placa:", objetos.get('placa'))
-            print(f"Cantidad de inmatriculacion a procesar: {len(objetos)}")
+            #print(f"Cantidad de inmatriculacion a procesar: {len(objetos)}")
             
             compradores = objetos.get('compradores')
             if compradores and isinstance(compradores, list): 

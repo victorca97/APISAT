@@ -657,7 +657,7 @@ def detectar_tipo_otros_modelos(page):
             try: txt = page.locator("#ddlTraccion option:checked").inner_text().upper()
             except: pass
             if any(k in txt for k in ["4X4", "AWD", "4WD", "QUATTRO", "DOBLE"]):
-                return "OTROS MODELOS TRACCION DOBLE"
+                return "OTROS MODELOS TRACCIÓN DOBLE"
             else:
                 return "OTROS MODELOS TRACCIÓN SIMPLE"
         return "OTROS MODELOS"
@@ -884,7 +884,7 @@ def Guardar_Archivos(page, browser, inmatriculacion, dni):
             print("Procesando cambio de domicilio...")
             
             # Solo pide ver el botón si existe
-            input("ver boton - Presiona Enter para continuar con cambio de domicilio...")
+            #input("ver boton - Presiona Enter para continuar con cambio de domicilio...")
             
             with page.expect_navigation(wait_until='load'):
                 page.locator("input[id='btnImpDJCamDom']").click()
@@ -913,7 +913,7 @@ def Guardar_Archivos(page, browser, inmatriculacion, dni):
     # Procesar declaración jurada (siempre se ejecuta)
     try:
         print("Procesando declaración jurada...")
-        input("ver boton - Presiona Enter para continuar con declaración jurada...")
+        #input("ver boton - Presiona Enter para continuar con declaración jurada...")
         parte1 = page.inner_html("#DivImpresion > table > tbody > tr > td > table:nth-child(1)")
         parte2 = page.inner_html("#DivImpresion > table > tbody > tr > td > table:nth-child(2)")
         parte3 = page.inner_html("#DivImpresion > table > tbody > tr > td > table:nth-child(3)")
