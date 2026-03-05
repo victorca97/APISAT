@@ -164,7 +164,7 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             
             page.select_option("#ddlTipoRelacionado",value="0")
 
-            #input("Corrige la direccion u otro dato si es necesario y presiona Enter para continuar...")
+            input("Corrige la direccion u otro dato si es necesario y presiona Enter para continuar...")
             Registrador.info("Termine la primera hoja")
 
             with page.expect_navigation(wait_until='load'):
@@ -300,7 +300,7 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
 
             page.locator("input[name='txtOtros']").fill("Recibos")
 
-            #input("Corrige el modelo...")
+            input("Corrige el modelo...")
             Registrador.info("Termine la Segunda Hoja")
             # Parte final
             page.locator("input[name='btnValidar']").click()
@@ -498,7 +498,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
                     page.locator("input[name='txtDireccion']").fill(direccion)
                 else:
                     print("El distrito no esta habilitado")
-                #input("Corrige la direccion si es necesario y presiona Enter para continuar...")
+                input("Corrige la direccion si es necesario y presiona Enter para continuar...")
                 
             else:
                 print("No es la misma razon social")            
@@ -534,7 +534,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
                 #     input.removeAttribute('disabled');
                 #     input.value = '';
                 #     """)
-                #input("Corrige la direccion si es necesario y presiona Enter para continuar...")
+                input("Corrige la direccion si es necesario y presiona Enter para continuar...")
             # Llenar el nuevo valor
             # page.locator("input[name='txtNroAsientos']").fill(nAsientos)
             #Datos del representate--------------------
@@ -565,7 +565,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
                 page.select_option("#ddlDistritoRela",value=distritoR)
                 page.locator("input[name='txtDireccionRela']").fill(direccionR)
                 
-                #input("Corrige la direccion si es necesario y presiona Enter para continuar...")
+                input("Corrige la direccion si es necesario y presiona Enter para continuar...")
                 
             else:
                 print("entre aca2")
@@ -587,7 +587,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
                 page.select_option("#ddlDistritoRela",value=distritoR)
                 page.locator("input[name='txtDireccionRela']").fill(direccion)
                 
-                #input("Corrige la direccion si es necesario y presiona Enter para continuar...")
+                input("Corrige la direccion si es necesario y presiona Enter para continuar...")
             page.locator("input[name='btnSiguiente']").click()
         except Exception as e:
             page.locator("#lnkRegresar").click()
@@ -711,7 +711,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
 
             page.locator("input[name='txtOtros']").fill("Recibos")
 
-            #input("Corrige el modelo...")
+            input("Corrige el modelo...")
             Registrador.info("Termine la Segunda Hoja")
             # Parte final
             page.locator("input[name='btnValidar']").click()
@@ -737,7 +737,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
         page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
         page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
         page.select_option("#ddlTipoMonedaV", value=valueM)
-        input("Corrige... LA FECHA Y DINERO SI ES NECESARIO..") 
+        input("Corrige el modelo...") 
 
         Registrador.info("Termine la parte final de la hoja. Intentando guardar...")
         time.sleep(2)
@@ -1060,7 +1060,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                         page.select_option("#ddlDistritoRela",value=distrito2)
                         page.locator("input[name='txtDireccionRela']").fill(direccion2)
 
-                    #input("Corrige la direccion si es necesario y presiona Enter para continuar...")
+                    input("Corrige la direccion si es necesario y presiona Enter para continuar...")
                 else:
                     print("No Tengo los datos")
 
@@ -1122,7 +1122,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                         page.select_option("#ddlDistritoRela",value=distrito2)
                         page.locator("input[name='txtDireccionRela']").fill(direccion2)
                         
-                    #input("Corrige la direccion si es necesario y presiona Enter para continuar...")
+                    input("Corrige la direccion si es necesario y presiona Enter para continuar...")
 
                 with page.expect_navigation(wait_until='load'):
                     page.locator("input[name='btnSiguiente']").click()
@@ -1248,7 +1248,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
 
                 page.locator("input[name='txtOtros']").fill("Recibos")
 
-                #("Corrige el modelo...")
+                input("Corrige el modelo...")
                 Registrador.info("Termine la segunda hoja")
                 # Parte final
             
@@ -1272,7 +1272,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
             page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
             page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
             page.select_option("#ddlTipoMonedaV",value=valueM)
-            #input("Corrige el modelo...")
+            input("Corrige el modelo...")
             Registrador.info("Termine la parte final de la hoja")
             time.sleep(2)
 
@@ -1473,7 +1473,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
                     page.select_option("#ddlDistrito",value=distrito)
                     page.locator("input[name='txtDireccion']").fill(direccion)
 
-            #input("Corrige y Presiona Enter para continuar...")
+            input("Corrige y Presiona Enter para continuar...")
             print("Datos bien regularizados")
             Registrador.info("Termine la primera hoja")
 
@@ -1613,7 +1613,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             page.locator("input[name='txtOtros']").fill("Recibos")
 
 
-            #input("Corrige el modelo...")  # Pausa para revisión manual si es necesario
+            input("Corrige el modelo...") 
             Registrador.info("Termine la segunda hoja")
 
             # Parte final
@@ -1750,7 +1750,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
                 page.select_option("#ddlDistrito",value=distrito)
                 page.locator("input[name='txtDireccion']").fill(direccion)
 
-            #input("Corrige la direccion si es necesario y presiona Enter para continuar...")
+            input("Corrige la direccion si es necesario y presiona Enter para continuar...")
             Registrador.info("Termine la primera hoja del coocomprador")
 
             
