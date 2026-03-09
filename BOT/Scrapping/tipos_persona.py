@@ -647,7 +647,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
                 print("AVISAR A FER O JOHAN NRO MOTOR")
                 print("*" * 40)
                 print("*" * 40)
-                input("Escribe 'listo' y presiona ENTER para continuar... ")
+                #input("Escribe 'listo' y presiona ENTER para continuar... ")
 
             # 3. Limpiamos el dato y lo escribimos en la web
             nroMotor_limpio = str(nroMotor).replace(" ", "")
@@ -1198,7 +1198,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                     print("AVISAR A FER O JOHAN NRO MOTOR")
                     print("*" * 40)
                     print("*" * 40)
-                    input("Escribe 'listo' y presiona ENTER para continuar... ")
+                    #input("Escribe 'listo' y presiona ENTER para continuar... ")
 
                 # 3. Limpiamos el dato y lo escribimos en la web
                 nroMotor_limpio = str(nroMotor).replace(" ", "")
@@ -1564,7 +1564,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
                 print("AVISAR A FER O JOHAN NRO MOTOR")
                 print("*" * 40)
                 print("*" * 40)
-                input("Escribe 'listo' y presiona ENTER para continuar... ")
+                #input("Escribe 'listo' y presiona ENTER para continuar... ")
 
             # 3. Limpiamos el dato y lo escribimos en la web
             nroMotor_limpio = str(nroMotor).replace(" ", "")

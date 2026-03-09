@@ -767,6 +767,13 @@ def aplicar_excepciones_especificas(modelo, version, formulaRodante=""):
         m_corregido = m.replace("1.5", "1.5L")
         v_corregida = v.replace("1.5", "1.5L")
         return m_corregido, v_corregida
+    
+    # REGLA 6: Peugeot PARTNER -> Cambiar "DIESEL" a "DISEL" (Error tipográfico del SAT)
+    if "PARTNER 1.6 DIESEL CORTA 2AS" in texto_completo:
+        print(" [EXCEPCIÓN ACTIVADA]: Cambiando 'DIESEL' a 'DISEL' solo para Partner 1.6 Corta")
+        m_corregido = m.replace("DIESEL", "DISEL")
+        v_corregida = v.replace("DIESEL", "DISEL")
+        return m_corregido, v_corregida
                 
     return modelo, version
 
