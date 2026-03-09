@@ -209,7 +209,23 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
                 raise ValueError("Marca no encontrada")
 
             time.sleep(2)
-            page.locator("input[name='txtMotor']").fill(nroMotor)
+            # Validacion de nroMotor
+            if " " in str(nroMotor):
+                print("*" * 40)
+                print("*" * 40)
+                print("*" * 40)
+                print("*" * 40)
+                print("CAMBIO REALIZADO")
+                print("*" * 40)
+                print("*" * 40)
+                print("*" * 40)
+                print("*" * 40)
+
+            # 3. Limpiamos el dato y lo escribimos en la web
+            nroMotor_limpio = str(nroMotor).replace(" ", "")
+            page.locator("input[name='txtMotor']").fill(nroMotor_limpio)
+            
+            
             page.locator("input[name='txtNroAsientos']").fill(nAsientos)
 
             value_combustible=encontrar_combustible(combustible)
@@ -624,7 +640,18 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
 
             
             time.sleep(2)
-            page.locator("input[name='txtMotor']").fill(nroMotor)
+            # 2. Validacion de nroMotor
+            if " " in str(nroMotor):
+                print("*" * 40)
+                print("*" * 40)
+                print("AVISAR A FER O JOHAN NRO MOTOR")
+                print("*" * 40)
+                print("*" * 40)
+                input("Escribe 'listo' y presiona ENTER para continuar... ")
+
+            # 3. Limpiamos el dato y lo escribimos en la web
+            nroMotor_limpio = str(nroMotor).replace(" ", "")
+            page.locator("input[name='txtMotor']").fill(nroMotor_limpio)
             page.locator("input[name='txtNroAsientos']").fill(nAsientos)
 
             value_combustible=encontrar_combustible(combustible)
@@ -749,7 +776,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
 
         # Listener de Alertas: Lo ponemos ANTES para que esté "escuchando" cuando demos clic.
         def manejar_dialogo(dialog):
-            print(f"🔔 ALERTA SAT DETECTADA: {dialog.message}")
+            print(f" ALERTA SAT DETECTADA: {dialog.message}")
             dialog.accept()
 
         # Activamos el listener
@@ -771,18 +798,18 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             # C. EL CLIC ÚNICO (Sin expect_navigation)
             print("3. Dando Clic...")
             boton.click(timeout=5000)
-            print("✅ Clic enviado.")
+            print(" Clic enviado.")
 
             # 4. VERIFICACIÓN DEL RESULTADO
             # -----------------------------------------------------
-            print("⏳ Esperando respuesta del servidor...")
+            print(" Esperando respuesta del servidor...")
             
             # Esperamos a que el Popup (#txtDesModeloV) desaparezca.
             # Si desaparece -> Se guardó bien.
             # Si sigue ahí -> Hubo error.
             try:
                 page.locator("#txtDesModeloV").wait_for(state="detached", timeout=10000)
-                print("🎉 ÉXITO: El popup se cerró.")
+                print(" ÉXITO: El popup se cerró.")
                 
                 # Pausa de seguridad y guardado de archivos
                 time.sleep(2)
@@ -790,23 +817,23 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
 
             except:
                 # Si entra aquí, es que pasaron 10 segundos y el popup SIGUE ABIERTO
-                print("⚠️ ALERTA: El popup no se cerró. El SAT rechazó los datos.")
+                print(" ALERTA: El popup no se cerró. El SAT rechazó los datos.")
                 
                 # Tomamos la foto del error
                 page.screenshot(path="ERROR_DETECTADO.png")
-                print("📸 FOTO DEL ERROR GUARDADA: 'ERROR_DETECTADO.png'")
+                print(" FOTO DEL ERROR GUARDADA: 'ERROR_DETECTADO.png'")
                 
                 # Buscamos mensaje rojo en pantalla
                 try:
                     msg = page.locator("span[style*='Red'], .ErrorMessage, #lblError").first.inner_text()
-                    print(f"❌ MENSAJE EN PANTALLA: {msg}")
+                    print(f" MENSAJE EN PANTALLA: {msg}")
                 except:
-                    print("❌ No se encontró texto de error, pero el formulario sigue abierto.")
+                    print(" No se encontró texto de error, pero el formulario sigue abierto.")
 
         except Exception as e:
             # Captura errores técnicos (Botón no encontrado, crash, etc.)
             print("\n" + "█"*50)
-            print("🔴 ¡ERROR TÉCNICO CAPTURADO!")
+            print(" ¡ERROR TÉCNICO CAPTURADO!")
             print(f"MENSAJE: {e}")
             print("█"*50 + "\n")
             page.screenshot(path="ERROR_CRITICO.png")
@@ -1164,7 +1191,18 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
 
                 time.sleep(2)
                 
-                page.locator("input[name='txtMotor']").fill(nroMotor)
+                # VALIDACION NRO MOTOR
+                if " " in str(nroMotor):
+                    print("*" * 40)
+                    print("*" * 40)
+                    print("AVISAR A FER O JOHAN NRO MOTOR")
+                    print("*" * 40)
+                    print("*" * 40)
+                    input("Escribe 'listo' y presiona ENTER para continuar... ")
+
+                # 3. Limpiamos el dato y lo escribimos en la web
+                nroMotor_limpio = str(nroMotor).replace(" ", "")
+                page.locator("input[name='txtMotor']").fill(nroMotor_limpio)
                 page.locator("input[name='txtNroAsientos']").fill(nAsientos)
 
                 value_combustible=encontrar_combustible(combustible)
@@ -1519,9 +1557,18 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             v_modelos=f"{modelos}".strip()
             time.sleep(2)
             
-            
+            # VALIDACION NRO MOTOR
+            if " " in str(nroMotor):
+                print("*" * 40)
+                print("*" * 40)
+                print("AVISAR A FER O JOHAN NRO MOTOR")
+                print("*" * 40)
+                print("*" * 40)
+                input("Escribe 'listo' y presiona ENTER para continuar... ")
 
-            page.locator("input[name='txtMotor']").fill(nroMotor)
+            # 3. Limpiamos el dato y lo escribimos en la web
+            nroMotor_limpio = str(nroMotor).replace(" ", "")
+            page.locator("input[name='txtMotor']").fill(nroMotor_limpio)
             page.locator("input[name='txtNroAsientos']").fill(nAsientos)
 
             value_combustible=encontrar_combustible(combustible)
