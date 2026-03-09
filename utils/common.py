@@ -970,7 +970,7 @@ def Guardar_Archivos(page, browser, inmatriculacion, dni):
             print("Procesando cambio de domicilio...")
             
             # Solo pide ver el botón si existe
-            #input("ver boton - Presiona Enter para continuar con cambio de domicilio...")
+            input("ver boton - Presiona Enter para continuar con cambio de domicilio...")
             
             with page.expect_navigation(wait_until='load'):
                 page.locator("input[id='btnImpDJCamDom']").click()
