@@ -811,7 +811,7 @@ def aplicar_excepciones_especificas(modelo, version, formulaRodante=""):
         return m_corregido, v_corregida
     
     # REGLA 7: Volkswagen TAOS -> Limpiar comas, deduplicar TAOS, unir 250 TSI y quitar L
-    if "TAOS HIGHLINE" in texto_completo and "250 TSI" in texto_completo:
+    if "TAOS HIGHLINE" in texto_completo and "250 TSI" and "TIP" in texto_completo:
         print(" [EXCEPCIÓN ACTIVADA]: Limpiando formato rebelde para TAOS 250 TSI")
         # 1. Quitamos comas
         texto_limpio = texto_completo.replace(",", " ")
@@ -826,7 +826,31 @@ def aplicar_excepciones_especificas(modelo, version, formulaRodante=""):
         # y dejamos la 'versión' vacía. El motor de búsqueda lo procesará perfectamente.
         texto_limpio = " ".join(texto_limpio.split()) # Quita espacios dobles por si acaso
         return texto_limpio, ""
-                 
+    
+    # REGLA 8: Volkswagen JETTA -> Separar 250TSI a 250 TSI y quitar L de 1.4L
+    if "JETTA TRENDLINE" in texto_completo and "250TSI" and "TIP" in texto_completo:
+        print(" [EXCEPCIÓN ACTIVADA]: Ajustando formato para JETTA 250TSI")
+        # 1. Separamos el motor
+        texto_limpio = texto_completo.replace("250TSI", "250 TSI")
+        # 2. Quitamos la L de 1.4L
+        texto_limpio = texto_limpio.replace("1.4L", "1.4")
+        
+        # Unimos espacios sobrantes y retornamos
+        texto_limpio = " ".join(texto_limpio.split())
+        return texto_limpio, ""
+    
+    # REGLA 9: Volkswagen JETTA -> Separar 250TSI a 250 TSI y quitar L de 1.4L
+    if "JETTA HIGHLINE" in texto_completo and "250TSI" and "TIP" in texto_completo:
+        print(" [EXCEPCIÓN ACTIVADA]: Ajustando formato para JETTA 250TSI")
+        # 1. Separamos el motor
+        texto_limpio = texto_completo.replace("250TSI", "250 TSI")
+        # 2. Quitamos la L de 1.4L
+        texto_limpio = texto_limpio.replace("1.4L", "1.4")
+        
+        # Unimos espacios sobrantes y retornamos
+        texto_limpio = " ".join(texto_limpio.split())
+        return texto_limpio, ""
+                  
     return modelo, version
 
 
