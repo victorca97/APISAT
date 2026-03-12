@@ -850,6 +850,16 @@ def aplicar_excepciones_especificas(modelo, version, formulaRodante=""):
         # Unimos espacios sobrantes y retornamos
         texto_limpio = " ".join(texto_limpio.split())
         return texto_limpio, ""
+    
+    # REGLA 10: Audi Q8 -> Corregir error tipográfico del SAT (QUATTRO a QUATRRO)
+    if "Q8 BLACK S LINE 55 TFSI" in texto_completo and "QUATTRO" in texto_completo:
+        print(" [EXCEPCIÓN ACTIVADA]: Corrigiendo 'QUATTRO' a 'QUATRRO' para Q8")
+        # Reemplazamos la palabra con el error exacto del SAT
+        texto_limpio = texto_completo.replace("QUATTRO", "QUATRRO")
+        
+        # Unimos espacios sobrantes y retornamos
+        texto_limpio = " ".join(texto_limpio.split())
+        return texto_limpio, ""
                   
     return modelo, version
 
