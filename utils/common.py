@@ -634,6 +634,7 @@ def interactuar_y_buscar(page, texto_con_dup, texto_sin_dup, selector_input, sel
     for i, (texto_a_buscar, texto_original_comparacion) in enumerate(intentos):
         lista_buscada = normalizar_texto_lista(texto_original_comparacion)
         lista_buscada_ordenada = sorted(lista_buscada)
+        set_buscado = set(lista_buscada) # Agregamos esto para la pasada 2 (Subset)
 
         tipo = "CON DUPLICADOS" if texto_original_comparacion == texto_con_dup else "SIN DUPLICADOS"
         print(f" Intento #{i+1} [{tipo}]: Escribiendo '{texto_a_buscar}'...")
@@ -656,22 +657,56 @@ def interactuar_y_buscar(page, texto_con_dup, texto_sin_dup, selector_input, sel
 
         try:
             opciones = page.query_selector_all(selector_items_lista)
-            encontrado = False
+            
+            # ==============================================================
+            # PASADA 1: BÚSQUEDA EXACTA (Evita el problema de la Tiggo 2 Pro)
+            # ==============================================================
             for op in opciones:
                 texto_opcion = op.inner_text().strip()
                 lista_opcion = normalizar_texto_lista(texto_opcion)
                 lista_opcion_ordenada = sorted(lista_opcion)
 
                 if lista_buscada_ordenada == lista_opcion_ordenada:
-                    print(f"  ¡MATCH PERFECTO!: '{texto_opcion}'")
-                    elemento_fresco = page.locator(selector_items_lista).filter(has_text=texto_opcion).first
+                    print(f"  ✅ ¡MATCH PERFECTO!: '{texto_opcion}'")
+                    
+                    # NUEVO CLIC EXACTO (Evita clics a opciones que solo "contienen" el texto)
+                    import re
+                    patron_exacto = re.compile(f"^{re.escape(texto_opcion)}$")
+                    elemento_fresco = page.locator(selector_items_lista).filter(has_text=patron_exacto).first
+                    
                     time.sleep(0.5)
                     elemento_fresco.click(force=True)
                     return True
 
-            if not encontrado:
-                print(f" Lista visible, pero sin MATCH perfecto.")
+            # ==============================================================
+            # PASADA 2: BÚSQUEDA HOMÓLOGO / SUBSET (F-150 4x4, CS55 4x2)
+            # ==============================================================
+            for op in opciones:
+                texto_opcion = op.inner_text().strip()
+                texto_opcion_upper = texto_opcion.upper()
+                
+                # REGLA ANTI-TRAMPA 1: Ignorar "OTROS MODELOS"
+                if "OTROS MODELOS" in texto_opcion_upper:
+                    continue
 
+                lista_opcion = normalizar_texto_lista(texto_opcion)
+                set_opcion = set(lista_opcion)
+
+                # REGLA ESTRICTA: Los conjuntos de palabras deben ser EXACTAMENTE IGUALES.
+                # No se permite que el SAT agregue "NUEVA", "4X2", "4X4" ni nada.
+                # Si se requería un 4x4, debió inyectarse antes en 'aplicar_excepciones_especificas'.
+                if set_buscado == set_opcion:
+                    print(f"  ✅ ¡MATCH EXACTO POR SETS (Sin intrusos)!: '{texto_opcion}'")
+                    
+                    # CLIC DE FRANCOTIRADOR (Regex exacto)
+                    import re
+                    patron_exacto = re.compile(f"^{re.escape(texto_opcion)}$")
+                    elemento_fresco = page.locator(selector_items_lista).filter(has_text=patron_exacto).first
+                    
+                    time.sleep(0.5)
+                    elemento_fresco.click(force=True)
+                    return True
+            print(f" ❌ Lista visible, pero sin MATCH perfecto ni homólogo.")
         except Exception as e:
             print(f" Error comparando: {e}")
 
@@ -767,7 +802,65 @@ def aplicar_excepciones_especificas(modelo, version, formulaRodante=""):
         m_corregido = m.replace("1.5", "1.5L")
         v_corregida = v.replace("1.5", "1.5L")
         return m_corregido, v_corregida
-                
+    
+    # REGLA 6: Peugeot PARTNER -> Cambiar "DIESEL" a "DISEL" (Error tipográfico del SAT)
+    if "PARTNER 1.6 DIESEL CORTA 2AS" in texto_completo:
+        print(" [EXCEPCIÓN ACTIVADA]: Cambiando 'DIESEL' a 'DISEL' solo para Partner 1.6 Corta")
+        m_corregido = m.replace("DIESEL", "DISEL")
+        v_corregida = v.replace("DIESEL", "DISEL")
+        return m_corregido, v_corregida
+    
+    # REGLA 7: Volkswagen TAOS -> Limpiar comas, deduplicar TAOS, unir 250 TSI y quitar L
+    if "TAOS HIGHLINE" in texto_completo and "250 TSI" and "TIP" in texto_completo:
+        print(" [EXCEPCIÓN ACTIVADA]: Limpiando formato rebelde para TAOS 250 TSI")
+        # 1. Quitamos comas
+        texto_limpio = texto_completo.replace(",", " ")
+        # 2. Quitamos el TAOS duplicado
+        texto_limpio = texto_limpio.replace("TAOS TAOS", "TAOS")
+        # 3. Unimos el 250 TSI
+        texto_limpio = texto_limpio.replace("250 TSI", "250TSI")
+        # 4. Quitamos la L de 1.4L
+        texto_limpio = texto_limpio.replace("1.4L", "1.4")
+        
+        # Como ya unimos todo el texto y lo limpiamos, lo pasamos todo en el 'modelo' 
+        # y dejamos la 'versión' vacía. El motor de búsqueda lo procesará perfectamente.
+        texto_limpio = " ".join(texto_limpio.split()) # Quita espacios dobles por si acaso
+        return texto_limpio, ""
+    
+    # REGLA 8: Volkswagen JETTA -> Separar 250TSI a 250 TSI y quitar L de 1.4L
+    if "JETTA TRENDLINE" in texto_completo and "250TSI" and "TIP" in texto_completo:
+        print(" [EXCEPCIÓN ACTIVADA]: Ajustando formato para JETTA 250TSI")
+        # 1. Separamos el motor
+        texto_limpio = texto_completo.replace("250TSI", "250 TSI")
+        # 2. Quitamos la L de 1.4L
+        texto_limpio = texto_limpio.replace("1.4L", "1.4")
+        
+        # Unimos espacios sobrantes y retornamos
+        texto_limpio = " ".join(texto_limpio.split())
+        return texto_limpio, ""
+    
+    # REGLA 9: Volkswagen JETTA -> Separar 250TSI a 250 TSI y quitar L de 1.4L
+    if "JETTA HIGHLINE" in texto_completo and "250TSI" and "TIP" in texto_completo:
+        print(" [EXCEPCIÓN ACTIVADA]: Ajustando formato para JETTA 250TSI")
+        # 1. Separamos el motor
+        texto_limpio = texto_completo.replace("250TSI", "250 TSI")
+        # 2. Quitamos la L de 1.4L
+        texto_limpio = texto_limpio.replace("1.4L", "1.4")
+        
+        # Unimos espacios sobrantes y retornamos
+        texto_limpio = " ".join(texto_limpio.split())
+        return texto_limpio, ""
+    
+    # REGLA 10: Audi Q8 -> Corregir error tipográfico del SAT (QUATTRO a QUATRRO)
+    if "Q8 BLACK S LINE 55 TFSI" in texto_completo and "QUATTRO" in texto_completo:
+        print(" [EXCEPCIÓN ACTIVADA]: Corrigiendo 'QUATTRO' a 'QUATRRO' para Q8")
+        # Reemplazamos la palabra con el error exacto del SAT
+        texto_limpio = texto_completo.replace("QUATTRO", "QUATRRO")
+        
+        # Unimos espacios sobrantes y retornamos
+        texto_limpio = " ".join(texto_limpio.split())
+        return texto_limpio, ""
+                  
     return modelo, version
 
 
