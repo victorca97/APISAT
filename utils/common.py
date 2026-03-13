@@ -658,6 +658,33 @@ def interactuar_y_buscar(page, texto_con_dup, texto_sin_dup, selector_input, sel
         try:
             opciones = page.query_selector_all(selector_items_lista)
             
+            # Limpiamos el texto buscado para la Pasada 0 (solo quitamos espacios dobles)
+            texto_buscado_literal = " ".join(texto_original_comparacion.upper().split())
+
+            # ==============================================================
+            # PASADA 0: BÚSQUEDA LITERAL (FOTOGRÁFICA) - PRIORIDAD MÁXIMA
+            # Soluciona casos como la Tiguan donde los tokens son iguales 
+            # pero el orden o los guiones hacen la diferencia.
+            # ==============================================================
+            for op in opciones:
+                texto_opcion_raw = op.inner_text().strip()
+                texto_opcion_literal = " ".join(texto_opcion_raw.upper().split())
+                
+                # REGLA ANTI-TRAMPA 1: Ignorar "OTROS MODELOS"
+                if "OTROS MODELOS" in texto_opcion_literal:
+                    continue
+
+                if texto_buscado_literal == texto_opcion_literal:
+                    print(f"  MATCH LITERAL EXACTO: '{texto_opcion_raw}'")
+                    
+                    import re
+                    patron_exacto = re.compile(f"^{re.escape(texto_opcion_raw)}$")
+                    elemento_fresco = page.locator(selector_items_lista).filter(has_text=patron_exacto).first
+                    
+                    time.sleep(0.5)
+                    elemento_fresco.click(force=True)
+                    return True
+            
             # ==============================================================
             # PASADA 1: BÚSQUEDA EXACTA (Evita el problema de la Tiggo 2 Pro)
             # ==============================================================
@@ -667,7 +694,7 @@ def interactuar_y_buscar(page, texto_con_dup, texto_sin_dup, selector_input, sel
                 lista_opcion_ordenada = sorted(lista_opcion)
 
                 if lista_buscada_ordenada == lista_opcion_ordenada:
-                    print(f"  ✅ ¡MATCH PERFECTO!: '{texto_opcion}'")
+                    print(f" MATCH PERFECTO: '{texto_opcion}'")
                     
                     # NUEVO CLIC EXACTO (Evita clics a opciones que solo "contienen" el texto)
                     import re
@@ -696,7 +723,7 @@ def interactuar_y_buscar(page, texto_con_dup, texto_sin_dup, selector_input, sel
                 # No se permite que el SAT agregue "NUEVA", "4X2", "4X4" ni nada.
                 # Si se requería un 4x4, debió inyectarse antes en 'aplicar_excepciones_especificas'.
                 if set_buscado == set_opcion:
-                    print(f"  ✅ ¡MATCH EXACTO POR SETS (Sin intrusos)!: '{texto_opcion}'")
+                    print(f"  MATCH EXACTO POR SETS (Sin duplicados): '{texto_opcion}'")
                     
                     # CLIC DE FRANCOTIRADOR (Regex exacto)
                     import re
@@ -706,7 +733,7 @@ def interactuar_y_buscar(page, texto_con_dup, texto_sin_dup, selector_input, sel
                     time.sleep(0.5)
                     elemento_fresco.click(force=True)
                     return True
-            print(f" ❌ Lista visible, pero sin MATCH perfecto ni homólogo.")
+            print(f"  Lista visible, pero sin MATCH perfecto ni homólogo.")
         except Exception as e:
             print(f" Error comparando: {e}")
 
@@ -729,7 +756,7 @@ def detectar_tipo_otros_modelos(page):
     except: return "OTROS MODELOS"
 
 def flujo_seleccionar_otros(page, tipo_otros, texto_sin_dup, selectores):
-    print(f"🔄 Usando '{tipo_otros}' para llenado manual...")
+    print(f" Usando '{tipo_otros}' para llenado manual...")
     # Para encontrar la opción "OTROS MODELOS", usamos el mismo texto en ambos parámetros (no aplica duplicados aquí)
     if not interactuar_y_buscar(page, tipo_otros, tipo_otros, selectores['input'], selectores['lista_items']):
         return None
