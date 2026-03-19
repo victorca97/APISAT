@@ -802,12 +802,15 @@ def aplicar_excepciones_especificas(modelo, version, formulaRodante=""):
             print(" [EXCEPCIÓN ACTIVADA]: Inyectando '4X4' a la F-150 LARIAT FHEV")
             return "F-150", "LARIAT 4X4 FHEV"
             
-    # REGLA 2: Honda CR-V EXL -> Transformar a EX-L
+    # REGLA 2: Honda CR-V EXL -> Transformar a EX-L (Excepto en la versión híbrida FHEV)
     if "CR-V" in texto_completo and "EXL" in texto_completo:
-        print(" [EXCEPCIÓN ACTIVADA]: Transformando 'EXL' a 'EX-L' para CR-V")
-        m_corregido = m.replace("EXL", "EX-L")
-        v_corregida = v.replace("EXL", "EX-L")
-        return m_corregido, v_corregida
+        # Aquí está el candado: Si NO tiene la palabra "FHEV", aplicamos el cambio.
+        # Si sí la tiene, lo ignora y lo deja intacto (CR-V EXL FHEV) para que haga match directo.
+        if "FHEV" not in texto_completo:
+            print(" [EXCEPCIÓN ACTIVADA]: Transformando 'EXL' a 'EX-L' para CR-V (Versión regular)")
+            m_corregido = m.replace("EXL", "EX-L")
+            v_corregida = v.replace("EXL", "EX-L")
+            return m_corregido, v_corregida
 
     # REGLA 3: Subaru FORESTER -> Unir "SI DRIVE" a "SI-DRIVE"
     if "FORESTER" in texto_completo and "SI DRIVE" in texto_completo:
@@ -1062,7 +1065,7 @@ def Guardar_Archivos(page, browser, inmatriculacion, dni):
     os.makedirs(carpeta_inmatriculacion, exist_ok=True)
 
     # Define las rutas de los archivos
-    archivo_delcaracion = os.path.join(carpeta_inmatriculacion, f"ArchivoDeclaracion_{inmatriculacion}_{dni}.pdf")
+    archivo_declaracion = os.path.join(carpeta_inmatriculacion, f"ArchivoDeclaracion_{inmatriculacion}_{dni}.pdf")
     archivo_cambioDomicilio = os.path.join(carpeta_inmatriculacion, f"ArchivoCambioDomicilio_{inmatriculacion}_{dni}.pdf")
     
     # Variable para controlar si existe el botón de cambio de domicilio
@@ -1095,24 +1098,23 @@ def Guardar_Archivos(page, browser, inmatriculacion, dni):
             with page.expect_navigation(wait_until='load'):
                 page.locator("input[id='btnImpDJCamDom']").click()
 
-            # Obtener HTML y generar PDF de cambio de domicilio
             html_cambioDomicilio = page.inner_html("#form1 > div:nth-child(4)")
 
             with open(archivo_cambioDomicilio, "wb") as pdf:
                 pisa_status = pisa.CreatePDF(html_cambioDomicilio, dest=pdf)
                 if pisa_status.err:
-                    print("Error al generar el PDF CAMBIODOMICILIO")
+                    raise Exception("La librería pisa falló al crear el PDF del Cambio de Domicilio")
 
             print(f"PDF del cambio domicilio guardado en: {archivo_cambioDomicilio}")
             Registrador.info(f"PDF del cambio domicilio guardado en: {archivo_cambioDomicilio}")
 
-            # Regresar a la página anterior
             with page.expect_navigation(wait_until='load'):
                 page.locator("#btnRegresar").click()
                 
         except Exception as e:
-            print(f" Error al procesar cambio de domicilio: {e}")
-            existe_boton_cambio_domicilio = False  # Marcar como fallido
+            # ESTO ES VITAL: Si falló, lanzamos el error para que envíe el correo.
+            # Ya no usamos "existe_boton_cambio_domicilio = False" aquí.
+            raise Exception(f"Fallo crítico al generar PDF Cambio Domicilio: {e}")
     else:
         print(" Saltando proceso de cambio de domicilio - botón no encontrado")
 
@@ -1202,29 +1204,28 @@ def Guardar_Archivos(page, browser, inmatriculacion, dni):
         # Crear nueva página y generar PDF
         nueva_pagina = browser.new_page()
         nueva_pagina.set_content(html_minimal)
-        nueva_pagina.pdf(path=archivo_delcaracion, format="A4", print_background=False)
+        nueva_pagina.pdf(path=archivo_declaracion, format="A4", print_background=False)
         nueva_pagina.close()
         
-        print(f" PDF de declaración guardado en: {archivo_delcaracion}")
-        Registrador.info(f"PDF de declaración guardado en: {archivo_delcaracion}")
+        print(f" PDF de declaración guardado en: {archivo_declaracion}")
+        Registrador.info(f"PDF de declaración guardado en: {archivo_declaracion}")
         
     except Exception as e:
         print(f" Error al procesar declaración jurada: {e}")
         raise  # Si falla la declaración jurada, sí detenemos el proceso
 
     # Leer archivos y codificar en base64
-    archivo_delcaracion_base64 = ""
+    archivo_declaracion_base64 = ""
     archivo_cambioDomicilio_base64 = ""
 
     # Leer archivo de declaración (siempre debe existir)
     try:
-        with open(archivo_delcaracion, 'rb') as archivo_delcaracion_file:
-            archivo_delcaracion_bytes = archivo_delcaracion_file.read()
-            archivo_delcaracion_base64 = base64.b64encode(archivo_delcaracion_bytes).decode('utf-8')
-    except FileNotFoundError:
-        print(f" Error: No se encontró el archivo de declaración en: {archivo_delcaracion}")
+        with open(archivo_declaracion, 'rb') as archivo_declaracion_file:
+            archivo_declaracion_bytes = archivo_declaracion_file.read()
+            archivo_declaracion_base64 = base64.b64encode(archivo_declaracion_bytes).decode('utf-8')
     except Exception as e:
-        print(f" Error al leer el archivo de declaración: {e}")
+        # Si no puede leer el archivo, dispara el error
+        raise Exception(f"No se pudo leer el PDF de Declaración para Base64: {e}")
 
     # Leer archivo de cambio de domicilio solo si se procesó correctamente
     if existe_boton_cambio_domicilio:
@@ -1232,10 +1233,9 @@ def Guardar_Archivos(page, browser, inmatriculacion, dni):
             with open(archivo_cambioDomicilio, 'rb') as archivo_cambioDomicilio_file:
                 archivo_cambioDomicilio_bytes = archivo_cambioDomicilio_file.read()
                 archivo_cambioDomicilio_base64 = base64.b64encode(archivo_cambioDomicilio_bytes).decode('utf-8')
-        except FileNotFoundError:
-            print(f" Error: No se encontró el archivo de cambio de domicilio en: {archivo_cambioDomicilio}")
         except Exception as e:
-            print(f" Error al leer el archivo de cambio de domicilio: {e}")
+            # Si no puede leer el archivo, dispara el error
+            raise Exception(f"No se pudo leer el PDF de Cambio Domicilio para Base64: {e}")
 
     # Preparar datos según si existe o no el botón
     if existe_boton_cambio_domicilio:
@@ -1243,7 +1243,7 @@ def Guardar_Archivos(page, browser, inmatriculacion, dni):
             "inmatriculacion": inmatriculacion,
             "cliente": dni,
             "file_cambio_domicilio": archivo_cambioDomicilio_base64,
-            "file_declaracion_jurada": archivo_delcaracion_base64
+            "file_declaracion_jurada": archivo_declaracion_base64
         }
         print("Preparando datos con ambos archivos (cambio domicilio y declaración)")
     else:
@@ -1251,7 +1251,7 @@ def Guardar_Archivos(page, browser, inmatriculacion, dni):
             "inmatriculacion": inmatriculacion,
             "cliente": dni,
             "file_cambio_domicilio": "",  # vacío
-            "file_declaracion_jurada": archivo_delcaracion_base64
+            "file_declaracion_jurada": archivo_declaracion_base64
         }
         print("Preparando datos solo con declaración jurada (sin cambio de domicilio)")
 
@@ -1266,7 +1266,11 @@ def Guardar_Archivos(page, browser, inmatriculacion, dni):
     print(f"JSON guardado en: {ruta_archivo_json}")
 
     # Enviar inmatriculación
-    enviar_inmatriculacion(inmatriculacion, dni, archivo_cambioDomicilio_base64, archivo_delcaracion_base64)
+    try:
+        enviar_inmatriculacion(inmatriculacion, dni, archivo_cambioDomicilio_base64, archivo_declaracion_base64)
+    except Exception as e:
+        # Si la API se cae o no responde, dispara el error
+        raise Exception(f"Fallo la comunicación con la API (enviar_inmatriculacion): {e}")
     
     time.sleep(5)
 
