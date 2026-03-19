@@ -340,47 +340,43 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
         page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
         page.select_option("#ddlTipoMonedaV",value=valueM)
         input("Corrige el modelo...")
+        
         Registrador.info("Termine la parte final de la hoja")
         time.sleep(2)
-            
-        with page.expect_navigation(wait_until='load'):
-            page.locator("input[name='btnAceptarV']").click()
-            time.sleep(2)
+        
+        # 1. EL VIGÍA (page.once): Se coloca ANTES de hacer el clic.
+        page.once("dialog", lambda dialog: dialog.accept())
+        
         try:
-            page.on("dialog", lambda dialog: dialog.accept())
-        except:
-            pass
+            with page.expect_navigation(wait_until='load', timeout=30000):
+                page.locator("input[name='btnAceptarV']").click()
+        except Exception as e:
+            Registrador.warning(f"Aviso de navegación lenta o trabada: {e}")
+            
         time.sleep(2) 
 
-        Guardar_Archivos(page,browser,inmatriculaciones,num_documento)
+        # 2. Llamada a la función. Si algo falla aquí adentro, saltará directo al except de abajo.
+        Guardar_Archivos(page, browser, inmatriculaciones, num_documento)
 
 
+    # 3. EL ATRAPADOR MAESTRO: Un solo except que envía el correo sí o sí.
     except Exception as e:
+        import traceback
         destinos = ["practicantes.sistemas@notariapaino.pe", "jmallqui@notariapaino.pe","jmallqui@autohub.pe","administracion@autohub.pe"]
-        asunto=f"ERROR BOT SAT-AUTOHUB Inmatriculaciones N°{inmatriculaciones} con la referencia {referencia}"
-        error_message = f"""
-        <p>Hubo un error al momento de procesar los datos del cliente(persona natural). </p>
-        <p>Error: {e} </p>
-        <p>Datos JSON:</p>
-        <pre>{json_formateado}</pre>
-        """
-        print(traceback.format_exc())
-        enviar_email_Api(destinos, asunto, error_message)
-
-    except Exception as ve:
-        destinos = ["practicantes.sistemas@notariapaino.pe", "jmallqui@notariapaino.pe","jmallqui@autohub.pe","administracion@autohub.pe"]
-        asunto=f"ERROR BOT SAT-AUTOHUB Inmatriculaciones N°{inmatriculaciones} con la referencia {referencia}"
+        asunto = f"ERROR BOT SAT-AUTOHUB Inmatriculaciones N°{inmatriculaciones} con la referencia {referencia}"
+        
+        traza_error = traceback.format_exc()
         error_message = f"""
         <html>
         <body>
-            <h3>Hubo un error en la validación:</h3>
-            <p><strong>Error:</strong> {ve}</p>
-            <p><strong>Traceback:</strong></p>
-            <pre>{traceback.format_exc()}</pre>
+            <h3>Hubo un error crítico procesando los datos del cliente.</h3>
+            <p><strong>Error detectado:</strong> {e}</p>
+            <p><strong>Detalle Técnico (Traceback):</strong></p>
+            <pre>{traza_error}</pre>
         </body>
         </html>
         """
-        print(traceback.format_exc())
+        print(traza_error)
         enviar_email_Api(destinos, asunto, error_message)
         
         
@@ -644,10 +640,9 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             if " " in str(nroMotor):
                 print("*" * 40)
                 print("*" * 40)
-                print("AVISAR A FER O JOHAN NRO MOTOR")
+                print("CAMBIO REALIZADO")
                 print("*" * 40)
                 print("*" * 40)
-                input("Escribe 'listo' y presiona ENTER para continuar... ")
 
             # 3. Limpiamos el dato y lo escribimos en la web
             nroMotor_limpio = str(nroMotor).replace(" ", "")
@@ -764,109 +759,47 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
         page.locator("input[name='txtFechaAdquiV']").fill(str(fecha_formateada1))
         page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
         page.select_option("#ddlTipoMonedaV", value=valueM)
-        input("Corrige el modelo...") 
-
-        Registrador.info("Termine la parte final de la hoja. Intentando guardar...")
+        input("Corrige el modelo...")
+        
+        Registrador.info("Termine la parte final de la hoja")
         time.sleep(2)
-
-
-        # 2. PREPARACIÓN DE SEGURIDAD (ANTES DEL CLIC)
-        # ---------------------------------------------------------
-        print("---- INICIANDO INTENTO DE CLIC FINAL ----")
-
-        # Listener de Alertas: Lo ponemos ANTES para que esté "escuchando" cuando demos clic.
-        def manejar_dialogo(dialog):
-            print(f" ALERTA SAT DETECTADA: {dialog.message}")
-            dialog.accept()
-
-        # Activamos el listener
-        page.on("dialog", manejar_dialogo)
-
-        # 3. INTENTO DE GUARDADO (TRY-CATCH DIAGNÓSTICO)
-        # ---------------------------------------------------------
+        
+        # 1. EL VIGÍA (page.once): Se coloca ANTES de hacer el clic.
+        page.once("dialog", lambda dialog: dialog.accept())
+        
         try:
-            # A. Definimos el botón
-            boton = page.locator("input[name='btnAceptarV']")
-
-            # B. Verificación: ¿Existe y está habilitado?
-            print("1. Buscando botón...")
-            boton.wait_for(state="visible", timeout=5000)
-            
-            print("2. Verificando si está habilitado...")
-            expect(boton).to_be_enabled(timeout=5000)
-
-            # C. EL CLIC ÚNICO (Sin expect_navigation)
-            print("3. Dando Clic...")
-            boton.click(timeout=5000)
-            print(" Clic enviado.")
-
-            # 4. VERIFICACIÓN DEL RESULTADO
-            # -----------------------------------------------------
-            print(" Esperando respuesta del servidor...")
-            
-            # Esperamos a que el Popup (#txtDesModeloV) desaparezca.
-            # Si desaparece -> Se guardó bien.
-            # Si sigue ahí -> Hubo error.
-            try:
-                page.locator("#txtDesModeloV").wait_for(state="detached", timeout=10000)
-                print(" ÉXITO: El popup se cerró.")
-                
-                # Pausa de seguridad y guardado de archivos
-                time.sleep(2)
-                Guardar_Archivos(page, browser, inmatriculaciones, num_documento)
-
-            except:
-                # Si entra aquí, es que pasaron 10 segundos y el popup SIGUE ABIERTO
-                print(" ALERTA: El popup no se cerró. El SAT rechazó los datos.")
-                
-                # Tomamos la foto del error
-                page.screenshot(path="ERROR_DETECTADO.png")
-                print(" FOTO DEL ERROR GUARDADA: 'ERROR_DETECTADO.png'")
-                
-                # Buscamos mensaje rojo en pantalla
-                try:
-                    msg = page.locator("span[style*='Red'], .ErrorMessage, #lblError").first.inner_text()
-                    print(f" MENSAJE EN PANTALLA: {msg}")
-                except:
-                    print(" No se encontró texto de error, pero el formulario sigue abierto.")
-
+            with page.expect_navigation(wait_until='load', timeout=30000):
+                page.locator("input[name='btnAceptarV']").click()
         except Exception as e:
-            # Captura errores técnicos (Botón no encontrado, crash, etc.)
-            print("\n" + "█"*50)
-            print(" ¡ERROR TÉCNICO CAPTURADO!")
-            print(f"MENSAJE: {e}")
-            print("█"*50 + "\n")
-            page.screenshot(path="ERROR_CRITICO.png")
+            Registrador.warning(f"Aviso de navegación lenta o trabada: {e}")
+            
+        time.sleep(2) 
 
-        finally:
-            # Limpieza: Dejamos de escuchar alertas para no afectar otros procesos
-            page.remove_listener("dialog", manejar_dialogo)
-                
+        # 2. Llamada a la función. Si algo falla aquí adentro, saltará directo al except de abajo.
+        Guardar_Archivos(page, browser, inmatriculaciones, num_documento)
+
+
+    # 3. EL ATRAPADOR MAESTRO: Un solo except que envía el correo sí o sí.
     except Exception as e:
+        import traceback
         destinos = ["practicantes.sistemas@notariapaino.pe", "jmallqui@notariapaino.pe","jmallqui@autohub.pe","administracion@autohub.pe"]
-        asunto=f"ERROR BOT SAT-AUTOHUB Inmatriculaciones N°{inmatriculaciones} con la referencia {referencia}"
-        error_message = f"""
-        <p>Hubo un error al momento de procesar los datos del cliente(Juridica). </p>
-        <p>Error: {e} </p>
-        """
-        enviar_email_Api(destinos, asunto, error_message)
-
-    except ValueError as ve:
-        destinos = ["practicantes.sistemas@notariapaino.pe", "jmallqui@notariapaino.pe","jmallqui@autohub.pe","administracion@autohub.pe"]
-        asunto=f"ERROR BOT SAT-AUTOHUB Inmatriculaciones N°{inmatriculaciones} con la referencia {referencia}"
+        asunto = f"ERROR BOT SAT-AUTOHUB Inmatriculaciones N°{inmatriculaciones} con la referencia {referencia}"
+        
+        traza_error = traceback.format_exc()
         error_message = f"""
         <html>
         <body>
-            <h3>Hubo un error en la validación:</h3>
-            <p><strong>Error:</strong> {ve}</p>
-            <p><strong>Traceback:</strong></p>
-            <pre>{traceback.format_exc()}</pre>
+            <h3>Hubo un error crítico procesando los datos del cliente.</h3>
+            <p><strong>Error detectado:</strong> {e}</p>
+            <p><strong>Detalle Técnico (Traceback):</strong></p>
+            <pre>{traza_error}</pre>
         </body>
         </html>
         """
+        print(traza_error)
         enviar_email_Api(destinos, asunto, error_message)
         
-        
+
         
 #-----------------------------------------------PERSONA SOCIEDAD CONYUGAL-------------------------------------------------
 
@@ -1195,10 +1128,9 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 if " " in str(nroMotor):
                     print("*" * 40)
                     print("*" * 40)
-                    print("AVISAR A FER O JOHAN NRO MOTOR")
+                    print("CAMBIO REALIZADO")
                     print("*" * 40)
                     print("*" * 40)
-                    input("Escribe 'listo' y presiona ENTER para continuar... ")
 
                 # 3. Limpiamos el dato y lo escribimos en la web
                 nroMotor_limpio = str(nroMotor).replace(" ", "")
@@ -1311,48 +1243,40 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
             page.locator("input[name='txtValorTrasferenciaV']").fill(valorMonetario)
             page.select_option("#ddlTipoMonedaV",value=valueM)
             input("Corrige el modelo...")
+            
             Registrador.info("Termine la parte final de la hoja")
             time.sleep(2)
-
-            
-            with page.expect_navigation(wait_until='load'):
+        
+        page.once("dialog", lambda dialog: dialog.accept())
+        
+        try:
+            with page.expect_navigation(wait_until='load', timeout=30000):
                 page.locator("input[name='btnAceptarV']").click()
-            time.sleep(2)
+        except Exception as e:
+            Registrador.warning(f"Aviso de navegación lenta o trabada: {e}")
+            
+        time.sleep(2) 
 
-            try:
-                page.on("dialog", lambda dialog: dialog.accept())
-            except:
-                pass
-            time.sleep(2)
-            Guardar_Archivos(page,browser,inmatriculaciones,num_documento)
-
+        Guardar_Archivos(page, browser, inmatriculaciones, num_documento)
 
     except Exception as e:
+        import traceback
         destinos = ["practicantes.sistemas@notariapaino.pe", "jmallqui@notariapaino.pe","jmallqui@autohub.pe","administracion@autohub.pe"]
-        asunto=f"ERROR BOT SAT-AUTOHUB Inmatriculaciones N°{inmatriculaciones} con la referencia {referencia}"
-        error_message = f"""
-        <p>Hubo un error al momento de procesar los datos del cliente(sociedad conyugal). </p>
-        <p>Error: {e} </p>
-        """
-        enviar_email_Api(destinos, asunto, error_message)
-        print(traceback.format_exc())
-
-    except ValueError as ve:
-        destinos = ["practicantes.sistemas@notariapaino.pe", "jmallqui@notariapaino.pe","jmallqui@autohub.pe","administracion@autohub.pe"]
-        asunto=f"TEST ERROR BOT SAT-AUTOHUB Inmatriculaciones N°{inmatriculaciones} con la referencia {referencia}"
+        asunto = f"ERROR BOT SAT-AUTOHUB Inmatriculaciones N°{inmatriculaciones} con la referencia {referencia}"
+        
+        traza_error = traceback.format_exc()
         error_message = f"""
         <html>
         <body>
-            <h3>Hubo un error en la validación:</h3>
-            <p><strong>Error:</strong> {ve}</p>
-            <p><strong>Traceback:</strong></p>
-            <pre>{traceback.format_exc()}</pre>
+            <h3>Hubo un error crítico procesando los datos del cliente.</h3>
+            <p><strong>Error detectado:</strong> {e}</p>
+            <p><strong>Detalle Técnico (Traceback):</strong></p>
+            <pre>{traza_error}</pre>
         </body>
         </html>
         """
+        print(traza_error)
         enviar_email_Api(destinos, asunto, error_message)
-        print(e)
-        print(traceback.format_exc())
 
     return inmatriculaciones
 
@@ -1561,10 +1485,9 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             if " " in str(nroMotor):
                 print("*" * 40)
                 print("*" * 40)
-                print("AVISAR A FER O JOHAN NRO MOTOR")
+                print("CAMBIO REALIZADO")
                 print("*" * 40)
                 print("*" * 40)
-                input("Escribe 'listo' y presiona ENTER para continuar... ")
 
             # 3. Limpiamos el dato y lo escribimos en la web
             nroMotor_limpio = str(nroMotor).replace(" ", "")
@@ -1842,23 +1765,6 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
         <p>Hubo un error al momento de procesar los datos del cliente(Natural Coo-comprador). </p>
         <p>Error: {e} </p>
         <pre>{traceback.format_exc()}</pre>
-        """
-        enviar_email_Api(destinos, asunto, error_message)
-        print(e)
-        print(traceback.format_exc())
-
-    except ValueError as ve:
-        destinos = ["practicantes.sistemas@notariapaino.pe", "jmallqui@notariapaino.pe","jmallqui@autohub.pe","administracion@autohub.pe"]
-        asunto=f"ERROR BOT SAT-AUTOHUB Inmatriculaciones N°{inmatriculaciones} con la referencia {referencia}"
-        error_message = f"""
-        <html>
-        <body>
-            <h3>Hubo un error en la validación:</h3>
-            <p><strong>Error:</strong> {ve}</p>
-            <p><strong>Traceback:</strong></p>
-            <pre>{traceback.format_exc()}</pre>
-        </body>
-        </html>
         """
         enviar_email_Api(destinos, asunto, error_message)
         print(e)
