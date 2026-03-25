@@ -58,9 +58,12 @@ def SAT():
                 referencias_a_saltar = {100006404,100006419,100006434,100006434,100006519,100006522,100006553,100006554,100006562,
                                         100006586,100006587,100006623,100006654,100006654,100006662,100006768,100006768,100006772,100006790,100006800,
                                         100006817,100006820,100006886,100006958,100006958,100006998,100007008,100007019,100007185,100007324, 
-                                        100007336,100007336,100007349,100007437,100007444, 100007035 ,10000659,
+                                        100007336,100007336,100007349,100007437,100007444,10000659,
                                         #Procesado por el cliente
                                        100006767,
+                                       
+                                       
+                                       #Caso subsanado 100007035
 
                                         #Error en conyugal - ITEM 1
                                         100006466, 100006609,
@@ -75,13 +78,173 @@ def SAT():
 
                                         #AUTOLAND, RECIBOS ANTES DE DICIEMBRE DEL 2025 - ITEM 4
                                         100006947,100006951,100006972,100006972,100006958,100006982,100006986,100006991,100007001,
-                                        100007008, 100007010,100007032,100007035,
+                                        100007008, 100007010,100007032,
 
                                         #AUTOLAND, RECIBOS ANTES DE DICIEMBRE DEL 2025 ITEM 6
                                         100007191,100007210,100007225,100007247,100007272,100007295,100007309,100007322,100007418,
-                                        100007428,100007438,100007440,100007480
+                                        100007428,100007438,100007440,100007480,
                                         
-
+                                        #AUTOLAND COCOMPRADOR Y CASOS DE REVISAR RECIBOS JOSE REPORTARA MNN MELI
+                                        100006797, 100006798, 100006800, 100006807, 100006810, 100006811,
+                                        100006815, 100006816, 100006817, 100006818, 100006820,
+                                        100006825, 100006832, 100006835, 100006846, 100006847, 100006851,
+                                        100006852, 100006858, 100006861, 100006862, 100006873, 100006883,
+                                        100006886, 100006892, 100006895, 100006897, 100006906, 100006913,
+                                        100006926, 100006930, 100006865, 100006870, 100006877, 100006878, 100006879,
+                                        100006880, 100006881, 100006888, 100006899, 100006905, 100006902,
+                                        100006910, 100006912, 100006914, 100006919, 100007534, 100007538, 100007559,
+                                        
+                                        
+                                        # AUTOLAND MES FEBRERO ITEM 1 cocomprador - casos con jose 100007532 como este que uno sea gran contribuyente y el otro no en conyugal
+                                        100007500, 100007505, 100007517, 100007519, 100007521, 100007538, 100007559, 100007532,
+                                        100007542, 100007558, 100007564, 100007577, 100007578, 100007625, 100007644,
+                                        
+                                        # Caso prueba TIGGO 2 PRO 1.5 CVT FULL FL 100007587
+                                        # RECIBO ANTIGUO
+                                        100007596, 100007611,
+                                        
+                                        
+                                        # REVOSHOP ITEM 2/3 MALOS RECIBOS
+                                        100003421, 100003423, 100003425, 100003426, 100003429, 100003430,
+                                        100003434, 100003437, 100003438, 100003443, 100003444, 100003459,
+                                        100003467, 100003470, 100003474, 100003477, 100003479, 100003480,
+                                        100003484, 100003486, 100003487, 100003490, 100003491, 100003493,
+                                        100003500, 
+                                        
+                                        # RECIBO ANTIGUO
+                                        100003462, 100003463, 100003481,
+                                        
+                                        # CASOS REVISAR JOSE
+                                        100003460, 100003472, 100003476,
+                                        
+                                        # MELI CONSULTA NOMBRE LARGO
+                                        100003450,
+                                
+                                        # GRAN CONTRIBUYENTE - COBRANZA COACTIVA PERO SI COINCIDE CON EL RECIBO
+                                        100003433, 100003448, 100003452, 100003454,
+                                        
+                                        # Correo invalido
+                                        100003489,
+                                        
+                                        
+                                        
+                                        # NUEVO ITEM CASOS MAPEADOS
+                                        # REVOSHOP ITEM 2/5 MALOS RECIBOS
+                                        100003604, 100003611, 100003613, 100003621, 100003631, 100003634,
+                                        100003646, 100003647, 100003648, 100003659, 100003632,                           
+                                                         
+                                                                                
+                                        # RECIBO ANTIGUO
+                                        100003605, 100003606, 100003618, 100003627, 100003630, 100003651,
+                                        100003663, 100003665,                                   
+                                                           
+                                                                                
+                                        # REVOSHOP COCOMPRADORS
+                                        100003628,                           
+                                                                                
+                                        # CASOS REVISAR JOSE
+                                       
+                                        
+                                        # GRAN CONTRIBUYENTE - COBRANZA COACTIVA PERO SI COINCIDE CON EL RECIBO
+                                        
+                                        
+                                        
+                                        # NUEVO ITEM CASOS MAPEADOS
+                                        # EUROSHOP ITEM 1/3 MALOS RECIBOS
+                                          100003806, 100003807,  100003808, 100003809, 100003811, 100003812, 100003814, 100003815,
+                                          100003823, 100003824, 100003835,  100003838, 100003841, 100003843, 100003820, 100003836,
+                                          100003842,    
+                                                         
+                                                                                
+                                        # RECIBO ANTIGUO
+                                        
+                                                                                
+                                        # REVOSHOP COCOMPRADORS
+                                                                 
+                                                                                
+                                        # CASOS REVISAR JOSE
+                                       
+                                        
+                                        # GRAN CONTRIBUYENTE - COBRANZA COACTIVA PERO SI COINCIDE CON EL RECIBO
+                                        100003844,
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        # NUEVO ITEM CASOS MAPEADOS
+                                        # EUROSHOP ITEM 2/1 MALOS RECIBOS
+                                        100004017, 100004024, 100004025, 100004029, 100004031, 100004032, 100004037,    
+                                                         
+                                                                                
+                                        # RECIBO ANTIGUO
+                                        
+                                                                                
+                                        # REVOSHOP COCOMPRADORS
+                                                                 
+                                                                                
+                                        # CASOS REVISAR JOSE
+                                       
+                                        
+                                        # GRAN CONTRIBUYENTE - COBRANZA COACTIVA PERO SI COINCIDE CON EL RECIBO
+                                        100004020, 100004028,
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        # NUEVO ITEM CASOS MAPEADOS
+                                        # EUROSHOP ITEM 2/2 MALOS RECIBOS
+                                        100004045, 100004049, 100004053, 100004057, 100004058,   
+                                                         
+                                                                                
+                                        # RECIBO ANTIGUO
+                                        100004041, 100004042, 100004043, 100004044, 100004055,
+                                                                                
+                                        # EUROSHOP COCOMPRADORS
+                                                                 
+                                                                                
+                                        # CASOS REVISAR JOSE
+                                       
+                                        
+                                        # GRAN CONTRIBUYENTE - COBRANZA COACTIVA PERO SI COINCIDE CON EL RECIBO
+                                        100004052,
+                                        
+                                        
+                                        
+                                        
+                                        
+                                         # NUEVO ITEM CASOS MAPEADOS
+                                        # EUROSHOP ITEM 2/5 MALOS RECIBOS
+                                        100004158, 100004162, 100004165, 100004167, 100004168, 100004169, 100004173, 100004174,
+                                        100004181, 100004183, 100004184, 100004186, 100004194, 100004196, 100004201,
+                                        100004206, 100004212, 100004213, 100004214, 100004221, 100004211, 
+                                                 
+                                        # PRUEBA - 100004187     - 100004200        
+                                                                                
+                                        # RECIBO ANTIGUO
+                                        100004161, 100004188, 100004189, 100004198, 100004202, 100004208, 100004215,
+                                                                                
+                                        # EUROSHOP COCOMPRADORS
+                                        100004192,                         
+                                                                                
+                                        # CASOS REVISAR JOSE
+                                        
+                                        # PRUEBA LUNES 100017644 Q3 Dynamic TFSI 110 kW S tronic SI SE PUEDE HACER DICHO MODELO
+                                        100004193,
+                
+                                        
+                                        # GRAN CONTRIBUYENTE - COBRANZA COACTIVA PERO SI COINCIDE CON EL RECIBO
+                                        100004176, 100004195, 100004207
+                                        
+                                        
+                                        
+                                        
+                                        # MAQALFA
+                                        
                                          }
 
                 for item in data_list:
