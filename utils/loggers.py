@@ -54,13 +54,13 @@ class Logger:
             "INFO": Fore.GREEN,
             "OBS": Fore.YELLOW,
             "ERROR": Fore.RED,
-            "WAR": Fore.YELLOW
+            "WARNING": Fore.YELLOW
         }
 
         @staticmethod
         def format(level, message):
             nivel_max_len = 5
-            display_level = "OBSERVACION" if level.upper() == "WAR" else level.upper()
+            display_level = "OBSERVACION" if level.upper() == "WARNING" else level.upper()
             nivel_formateado = display_level.ljust(nivel_max_len)
             
             # Fecha y hora completa con milisegundos (igual que en archivo)
@@ -72,7 +72,7 @@ class Logger:
             lineas_extra = "\n".join(f"{espacios}{linea}" for linea in lineas[1:])
             mensaje_alineado = primera_linea + ("\n" + lineas_extra if lineas_extra else "")
 
-            color = Logger.ColoredFormatter.COLORS.get(display_level, Fore.WHITE)
+            color = Logger.ColoredFormatter.COLORS.get(level.upper(), Fore.WHITE)
             return f"{color}{mensaje_alineado}{Style.RESET_ALL}"
 
     def _log(self, level, message, condicion=False):
@@ -91,7 +91,7 @@ class Logger:
         self._log("INFO", mensaje, condicion)
 
     def warning(self, mensaje, condicion=False):
-        self._log("WAR", mensaje, condicion)
+        self._log("WARNING", mensaje, condicion)
 
     def error(self, mensaje, condicion=False):
         self._log("ERROR", mensaje, condicion)

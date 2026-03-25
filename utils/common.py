@@ -148,23 +148,37 @@ def encontrar_marca(page, marca_usuario):
     # Mapeo personalizado de marcas
     MAPEO_MARCAS = {
         "MG": "MG",
-        "LINXYS": "LINXYS"
+        "LINXYS": "LINXYS",
+        "SOUEAST": "SOUESAST",
+        "DONG FENG": "DONGFENG",
+        "TIANJIN FAW": " FAW",
+        "BEIJING AUTO WORKS": "BAW",
+        "BEIJING AUTOMOBILE WORKS": "BAW",
+        "ZXAUTO": "ZX",
+        "MARCOPOLO": "MARCOPOLO VOLARE",
+        "AGRALE": "AGRALE-MODASA"
     }
 
     try:
         # Aplicar mapeo si la marca está en el diccionario
         marca_a_buscar = MAPEO_MARCAS.get(marca_usuario.upper(), marca_usuario)
         print(f"Buscando marca: {marca_a_buscar}")
+        
+        # 1. Limpiamos la caja de texto por completo
+        page.locator("input[name='txtDesMarca']").clear()
+        page.locator("input[name='txtDesMarca']").press_sequentially(marca_a_buscar,delay=120)
 
         time.sleep(2)
 
         # Verificar si existe la lista de marcas
         try:
-            page.wait_for_selector("#ui-id-1 > li", timeout=6000)
+            page.wait_for_selector("#txtDesMarca", timeout=6000)
             time.sleep(2)
+            
+            
             hay_lista = True
         except:
-            print("❌ No se encontró la lista de marcas. Procediendo con 'OTRAS MARCAS'...")
+            print(" No se encontró la lista de marcas. Procediendo con 'OTRAS MARCAS'...")
             hay_lista = False
 
         # Si hay lista, hacer la búsqueda normal
@@ -189,16 +203,16 @@ def encontrar_marca(page, marca_usuario):
 
             if best_match_value:
                 if best_match_ratio >= 0.99:
-                    print(f"✅ Coincidencia alta encontrada: '{best_match_value}' con ratio {best_match_ratio:.2f}")
+                    print(f" Coincidencia alta encontrada: '{best_match_value}' con ratio {best_match_ratio:.2f}")
                     indice_css = best_match_index + 1
                     page.click(f"#ui-id-1 > li:nth-child({indice_css})")
                     return best_match_value
                 else:
-                    print("⚠️ Baja coincidencia. Buscando 'OTRAS MARCAS'...")
+                    print(" Baja coincidencia. Buscando 'OTRAS MARCAS'...")
             else:
-                print("❌ Sin coincidencias. Forzando 'OTRAS MARCAS'...")
+                print(" Sin coincidencias. Forzando 'OTRAS MARCAS'...")
         else:
-            print("⚠️ Lista no disponible. Forzando 'OTRAS MARCAS'...")
+            print(" Lista no disponible. Forzando 'OTRAS MARCAS'...")
 
         # Bloque común para cuando hay que usar "OTRAS MARCAS"
         max_reintentos = 3
@@ -207,7 +221,7 @@ def encontrar_marca(page, marca_usuario):
 
         while not encontrado and intento < max_reintentos:
             intento += 1
-            print(f"🔄 Reintento {intento} para encontrar 'OTRAS MARCAS'")
+            print(f" Reintento {intento} para encontrar 'OTRAS MARCAS'")
             variable_otras = "OTRAS MARCAS"
 
             # Limpiar y escribir en el campo de marca
@@ -225,46 +239,46 @@ def encontrar_marca(page, marca_usuario):
                 for i, opcion in enumerate(opciones2):
                     texto = opcion.inner_text().strip()
                     if texto.upper() == "OTRAS MARCAS":
-                        print("✅ Opción encontrada: OTRAS MARCAS")
+                        print(" Opción encontrada: OTRAS MARCAS")
                         indice_css = i + 1
                         page.click(f"#ui-id-1 > li:nth-child({indice_css})")
                         encontrado = True
                         break
             except Exception as e:
-                print(f"⚠️ Error al buscar opciones: {e}")
+                print(f" Error al buscar opciones: {e}")
 
             if not encontrado:
                 print("No encontrado aún. Reintentando...")
                 time.sleep(2)
 
         if encontrado:
-            print("✅ 'OTRAS MARCAS' seleccionado correctamente.")
+            print(" 'OTRAS MARCAS' seleccionado correctamente.")
             
             # Marcar el checkbox #chkNueMarca si existe
             try:
                 if page.locator("#chkNueMarca").is_visible():
                     page.locator("#chkNueMarca").check()
-                    print("✅ Checkbox #chkNueMarca marcado")
+                    print(" Checkbox #chkNueMarca marcado")
                     time.sleep(1)
             except Exception as e:
-                print(f"⚠️ No se pudo marcar #chkNueMarca: {e}")
+                print(f" No se pudo marcar #chkNueMarca: {e}")
             
             # Llenar el campo de marca real si existe
             try:
                 if page.locator("#txtDesMarcaReal").is_visible():
                     page.locator("#txtDesMarcaReal").fill("")
                     page.locator("#txtDesMarcaReal").press_sequentially(marca_a_buscar, delay=0.10)
-                    print(f"✅ Campo #txtDesMarcaReal llenado con: {marca_a_buscar}")
+                    print(f" Campo #txtDesMarcaReal llenado con: {marca_a_buscar}")
             except Exception as e:
-                print(f"⚠️ No se pudo llenar #txtDesMarcaReal: {e}")
+                print(f" No se pudo llenar #txtDesMarcaReal: {e}")
             
             return variable_otras
         else:
-            print("❌ No se pudo seleccionar 'OTRAS MARCAS' después de varios intentos.")
+            print(" No se pudo seleccionar 'OTRAS MARCAS' después de varios intentos.")
             return None
 
     except Exception as e:
-        print(f"⚠️ Error al buscar marcas: {e}")
+        print(f" Error al buscar marcas: {e}")
         return None
     
 
@@ -272,13 +286,25 @@ def encontrar_marca1(page, marca_usuario):
     # Mapeo personalizado de marcas
     MAPEO_MARCAS = {
         "MG": "MG",
-        "LINXYS": "LINXYS"
+        "LINXYS": "LINXYS",
+        "SOUEAST": "SOUESAST",
+        "DONG FENG": "DONGFENG",
+        "TIANJIN FAW": " FAW",
+        "BEIJING AUTO WORKS": "BAW",
+        "BEIJING AUTOMOBILE WORKS": "BAW",
+        "ZXAUTO": "ZX",
+        "MARCOPOLO": "MARCOPOLO VOLARE",
+        "AGRALE": "AGRALE-MODASA"
     }
 
     try:
         # Aplicar mapeo si la marca está en el diccionario
         marca_a_buscar = MAPEO_MARCAS.get(marca_usuario.upper(), marca_usuario)
         print(f"Buscando marca: {marca_a_buscar}")
+        
+        # 1. Limpiamos la caja de texto por completo
+        page.locator("input[name='txtDesMarcaV']").clear()
+        page.locator("input[name='txtDesMarcaV']").press_sequentially(marca_a_buscar,delay=120)
 
         time.sleep(2)
 
@@ -288,7 +314,7 @@ def encontrar_marca1(page, marca_usuario):
             time.sleep(2)
             hay_lista = True
         except:
-            print("❌ No se encontró la lista '#ui-id-5 > li'. Procediendo con 'OTRAS MARCAS'...")
+            print(" No se encontró la lista '#ui-id-5 > li'. Procediendo con 'OTRAS MARCAS'...")
             hay_lista = False
 
         # Si hay lista, hacer búsqueda normal
@@ -313,17 +339,17 @@ def encontrar_marca1(page, marca_usuario):
 
             if best_match_value:
                 if best_match_ratio >= 0.99:
-                    print(f"✅ Coincidencia alta encontrada: '{best_match_value}' con ratio {best_match_ratio:.2f}")
+                    print(f" Coincidencia alta encontrada: '{best_match_value}' con ratio {best_match_ratio:.2f}")
                     indice_css = best_match_index + 1
                     page.click(f"#ui-id-5 > li:nth-child({indice_css})")
                     return best_match_value
                 else:
-                    print("⚠️ Baja coincidencia. Forzando 'OTRAS MARCAS'...")
+                    print(" Baja coincidencia. Forzando 'OTRAS MARCAS'...")
             else:
-                print("❌ Sin coincidencias. Forzando 'OTRAS MARCAS'...")
+                print(" Sin coincidencias. Forzando 'OTRAS MARCAS'...")
 
         else:
-            print("⚠️ Lista no disponible. Forzando 'OTRAS MARCAS'.")
+            print(" Lista no disponible. Forzando 'OTRAS MARCAS'.")
 
         # Bloque común para cuando hay que usar "OTRAS MARCAS"
         max_reintentos = 5
@@ -332,7 +358,7 @@ def encontrar_marca1(page, marca_usuario):
 
         while not encontrado and intento < max_reintentos:
             intento += 1
-            print(f"🔄 Reintento {intento} para encontrar 'OTRAS MARCAS'")
+            print(f" Reintento {intento} para encontrar 'OTRAS MARCAS'")
             variable_otras = "OTRAS MARCAS"
 
             page.locator("#txtDesMarcaV").fill("")
@@ -348,25 +374,25 @@ def encontrar_marca1(page, marca_usuario):
             for i, opcion in enumerate(opciones2):
                 texto = opcion.inner_text().strip()
                 if texto.upper() == "OTRAS MARCAS":
-                    print("✅ Opción encontrada: OTRAS MARCAS")
+                    print(" Opción encontrada: OTRAS MARCAS")
                     indice_css = i + 1
                     page.click(f"#ui-id-5 > li:nth-child({indice_css})")
                     encontrado = True
                     break
 
             if not encontrado:
-                print("⏳ No encontrado aún. Reintentando...")
+                print(" No encontrado aún. Reintentando...")
                 time.sleep(3)
 
         if encontrado:
-            print("✅ 'OTRAS MARCAS' seleccionado correctamente.")
+            print(" 'OTRAS MARCAS' seleccionado correctamente.")
             return variable_otras
         else:
-            print("❌ No se pudo seleccionar 'OTRAS MARCAS' después de varios intentos.")
+            print(" No se pudo seleccionar 'OTRAS MARCAS' después de varios intentos.")
             return None
 
     except Exception as e:
-        print(f"⚠️ Error al buscar marcas: {e}")
+        print(f" Error al buscar marcas: {e}")
         return None
     
 
@@ -491,9 +517,10 @@ def encontrar_carroceria(page,carroceria_buscada):
         print(f"No se encontró una coincidencia cercana para '{carroceria_buscada}'.")
         return None
 
-# ==============================================================================
-# 1. HERRAMIENTAS DE PROCESAMIENTO DE TEXTO (CEREBRO)
-# ==============================================================================
+
+# =============================
+# CASOS MODELOS VEHICULOS
+# =============================
 
 def separar_sufijos_conocidos(texto):
     """ Separa 'X70FL' -> 'X70 FL' """
@@ -589,7 +616,7 @@ def generar_intentos_busqueda_avanzado(texto_con_dup, texto_sin_dup):
     
     def agregar_variantes(base_text, texto_original_para_comparar):
         if not base_text: return
-        palabras_prohibidas = ["DLX", "LTD", "GNV"] 
+        palabras_prohibidas = ["LTD", "GNV"] 
         base = " ".join([p for p in base_text.split() if p not in palabras_prohibidas])
         
         # 1. Original (con símbolos)
@@ -626,276 +653,285 @@ def generar_intentos_busqueda_avanzado(texto_con_dup, texto_sin_dup):
         
     return intentos
 
+import re
+import time
+
 def interactuar_y_buscar(page, texto_con_dup, texto_sin_dup, selector_input, selector_items_lista):
     intentos = generar_intentos_busqueda_avanzado(texto_con_dup, texto_sin_dup)
-
-    print(f" Iniciando búsqueda en SAT...")
+    print(f"\n INICIANDO BÚSQUEDA EN SAT: '{texto_sin_dup}'")
 
     for i, (texto_a_buscar, texto_original_comparacion) in enumerate(intentos):
         lista_buscada = normalizar_texto_lista(texto_original_comparacion)
         lista_buscada_ordenada = sorted(lista_buscada)
-        set_buscado = set(lista_buscada) # Agregamos esto para la pasada 2 (Subset)
+        set_buscado = set(lista_buscada) 
 
         tipo = "CON DUPLICADOS" if texto_original_comparacion == texto_con_dup else "SIN DUPLICADOS"
-        print(f" Intento #{i+1} [{tipo}]: Escribiendo '{texto_a_buscar}'...")
-        print(f" Validando contra Tokens: {lista_buscada_ordenada}")
+        print(f"  Intento #{i+1} [{tipo}]: Escribiendo '{texto_a_buscar}'...")
         
+        # 1. ESCRITURA
         try:
-            page.locator(selector_input).fill("")
+            page.locator(selector_input).clear()
             page.locator(selector_input).press_sequentially(texto_a_buscar, delay=0.10)
-        except: return False
+        except Exception as e: 
+            print(f"   Error al escribir en el input: {e}")
+            return False
 
+        # 2. ESPERA DE LA LISTA
         tiempo_espera = 3
-        print(f"   Esperando lista ({tiempo_espera}s)...")
         time.sleep(tiempo_espera) 
 
-        try:
-            if not page.is_visible(selector_items_lista):
-                print(f"    La lista no apareció visualmente.")
-                continue 
-        except: continue
+        if not page.locator(selector_items_lista).first.is_visible():
+            print("   La lista autocompletable no apareció.")
+            continue 
 
-        try:
-            opciones = page.query_selector_all(selector_items_lista)
+        # 3. CAPTURA DE OPCIONES
+        opciones = page.locator(selector_items_lista).all()
+        texto_buscado_literal = " ".join(texto_original_comparacion.upper().split())
+
+        # ==============================================================
+        # PASADA 0: BÚSQUEDA LITERAL (FOTOGRÁFICA)
+        # ==============================================================
+        for op in opciones:
+            texto_opcion_raw = op.inner_text().strip()
+            texto_opcion_literal = " ".join(texto_opcion_raw.upper().split())
             
-            # Limpiamos el texto buscado para la Pasada 0 (solo quitamos espacios dobles)
-            texto_buscado_literal = " ".join(texto_original_comparacion.upper().split())
+            if "OTROS MODELOS" in texto_opcion_literal: continue
 
-            # ==============================================================
-            # PASADA 0: BÚSQUEDA LITERAL (FOTOGRÁFICA) - PRIORIDAD MÁXIMA
-            # Soluciona casos como la Tiguan donde los tokens son iguales 
-            # pero el orden o los guiones hacen la diferencia.
-            # ==============================================================
-            for op in opciones:
-                texto_opcion_raw = op.inner_text().strip()
-                texto_opcion_literal = " ".join(texto_opcion_raw.upper().split())
+            if texto_buscado_literal == texto_opcion_literal:
+                print(f"   MATCH LITERAL EXACTO: '{texto_opcion_raw}'")
+                patron_exacto = re.compile(f"^{re.escape(texto_opcion_raw)}$")
+                page.locator(selector_items_lista).filter(has_text=patron_exacto).first.click(force=True)
+                return True
+        
+        # ==============================================================
+        # PASADA 1: BÚSQUEDA EXACTA (Mismas palabras, distinto orden)
+        # ==============================================================
+        for op in opciones:
+            texto_opcion = op.inner_text().strip()
+            lista_opcion_ordenada = sorted(normalizar_texto_lista(texto_opcion))
+
+            if lista_buscada_ordenada == lista_opcion_ordenada:
+                print(f"   MATCH PERFECTO: '{texto_opcion}'")
+                patron_exacto = re.compile(f"^{re.escape(texto_opcion)}$")
+                page.locator(selector_items_lista).filter(has_text=patron_exacto).first.click(force=True)
+                return True
+
+        # ==============================================================
+        # PASADA 2: BÚSQUEDA HOMÓLOGO / SUBSET (Mismos sets)
+        # ==============================================================
+        for op in opciones:
+            texto_opcion = op.inner_text().strip()
+            if "OTROS MODELOS" in texto_opcion.upper(): continue
+
+            set_opcion = set(normalizar_texto_lista(texto_opcion))
+
+            if set_buscado == set_opcion:
+                print(f"   MATCH EXACTO POR SETS: '{texto_opcion}'")
+                patron_exacto = re.compile(f"^{re.escape(texto_opcion)}$")
+                page.locator(selector_items_lista).filter(has_text=patron_exacto).first.click(force=True)
+                return True
                 
-                # REGLA ANTI-TRAMPA 1: Ignorar "OTROS MODELOS"
-                if "OTROS MODELOS" in texto_opcion_literal:
-                    continue
+        print("   Opciones visibles, pero ninguna hizo MATCH.")
 
-                if texto_buscado_literal == texto_opcion_literal:
-                    print(f"  MATCH LITERAL EXACTO: '{texto_opcion_raw}'")
-                    
-                    import re
-                    patron_exacto = re.compile(f"^{re.escape(texto_opcion_raw)}$")
-                    elemento_fresco = page.locator(selector_items_lista).filter(has_text=patron_exacto).first
-                    
-                    time.sleep(0.5)
-                    elemento_fresco.click(force=True)
-                    return True
-            
-            # ==============================================================
-            # PASADA 1: BÚSQUEDA EXACTA (Evita el problema de la Tiggo 2 Pro)
-            # ==============================================================
-            for op in opciones:
-                texto_opcion = op.inner_text().strip()
-                lista_opcion = normalizar_texto_lista(texto_opcion)
-                lista_opcion_ordenada = sorted(lista_opcion)
-
-                if lista_buscada_ordenada == lista_opcion_ordenada:
-                    print(f" MATCH PERFECTO: '{texto_opcion}'")
-                    
-                    # NUEVO CLIC EXACTO (Evita clics a opciones que solo "contienen" el texto)
-                    import re
-                    patron_exacto = re.compile(f"^{re.escape(texto_opcion)}$")
-                    elemento_fresco = page.locator(selector_items_lista).filter(has_text=patron_exacto).first
-                    
-                    time.sleep(0.5)
-                    elemento_fresco.click(force=True)
-                    return True
-
-            # ==============================================================
-            # PASADA 2: BÚSQUEDA HOMÓLOGO / SUBSET (F-150 4x4, CS55 4x2)
-            # ==============================================================
-            for op in opciones:
-                texto_opcion = op.inner_text().strip()
-                texto_opcion_upper = texto_opcion.upper()
-                
-                # REGLA ANTI-TRAMPA 1: Ignorar "OTROS MODELOS"
-                if "OTROS MODELOS" in texto_opcion_upper:
-                    continue
-
-                lista_opcion = normalizar_texto_lista(texto_opcion)
-                set_opcion = set(lista_opcion)
-
-                # REGLA ESTRICTA: Los conjuntos de palabras deben ser EXACTAMENTE IGUALES.
-                # No se permite que el SAT agregue "NUEVA", "4X2", "4X4" ni nada.
-                # Si se requería un 4x4, debió inyectarse antes en 'aplicar_excepciones_especificas'.
-                if set_buscado == set_opcion:
-                    print(f"  MATCH EXACTO POR SETS (Sin duplicados): '{texto_opcion}'")
-                    
-                    # CLIC DE FRANCOTIRADOR (Regex exacto)
-                    import re
-                    patron_exacto = re.compile(f"^{re.escape(texto_opcion)}$")
-                    elemento_fresco = page.locator(selector_items_lista).filter(has_text=patron_exacto).first
-                    
-                    time.sleep(0.5)
-                    elemento_fresco.click(force=True)
-                    return True
-            print(f"  Lista visible, pero sin MATCH perfecto ni homólogo.")
-        except Exception as e:
-            print(f" Error comparando: {e}")
-
-    print(" Agotados todos los intentos. Se pasará a llenado manual.")
+    print(" Agotados todos los intentos. Pasando a Plan B (Llenado manual).")
     return False
 
-def detectar_tipo_otros_modelos(page):
+
+def detectar_tipo_otros_modelos(page, peso_bruto=None):
+    """Calcula el fallback correcto ('OTROS MODELOS...') según la clase y peso."""
     try:
-        val_clase = page.locator("#ddlClase").input_value()
-        if val_clase == "1": return "OTROS MODELOS"
+        val_clase = page.locator("#ddlClase").input_value().strip()
+        
+        # ---------------------------------------------------------
+        # Automóvil (1), Ómnibus (7), Remolcador/Tracto (12)
+        # ---------------------------------------------------------
+        if val_clase in ["1", "7", "12"]: 
+            return "OTROS MODELOS"
+            
+        # ---------------------------------------------------------
+        # Camioneta (11) - Validación de Tracción
+        # ---------------------------------------------------------
         elif val_clase == "11": 
-            txt = ""
-            try: txt = page.locator("#ddlTraccion option:checked").inner_text().upper()
-            except: pass
-            if any(k in txt for k in ["4X4", "AWD", "4WD", "QUATTRO", "DOBLE"]):
-                return "OTROS MODELOS TRACCIÓN DOBLE"
-            else:
-                return "OTROS MODELOS TRACCIÓN SIMPLE"
+            try:
+                txt = page.locator("#ddlTraccion option:checked").inner_text().upper()
+                if any(k in txt for k in ["4X4", "AWD", "4WD", "QUATTRO", "DOBLE"]):
+                    return "OTROS MODELOS TRACCIÓN DOBLE"
+            except: 
+                pass # Si falla al leer la tracción, asume tracción simple
+            
+            return "OTROS MODELOS TRACCIÓN SIMPLE"
+                
+        # ---------------------------------------------------------
+        # Camión (8) - Validación de Peso Bruto Vehicular
+        # ---------------------------------------------------------
+        elif val_clase == "8":
+            if not peso_bruto: return "OTROS MODELOS"
+            try:
+                peso = float(peso_bruto)
+                if peso <= 7000: return "OTROS MODELOS PVB HASTA 7 000 KG."
+                elif peso <= 20000: return "OTROS MODELOS DE PVB MAS DE 7 000 KG A 20 000 KG."
+                else: return "OTROS MODELOS PVB MAYOR A 20 000 KG."
+            except ValueError:
+                return "OTROS MODELOS"
+                
+        # Fallback genérico si el value es otra cosa
         return "OTROS MODELOS"
-    except: return "OTROS MODELOS"
+        
+    except Exception as e: 
+        print(f" Error en detectar_tipo_otros_modelos: {e}")
+        return "OTROS MODELOS"
+
 
 def flujo_seleccionar_otros(page, tipo_otros, texto_sin_dup, selectores):
-    print(f" Usando '{tipo_otros}' para llenado manual...")
-    # Para encontrar la opción "OTROS MODELOS", usamos el mismo texto en ambos parámetros (no aplica duplicados aquí)
-    if not interactuar_y_buscar(page, tipo_otros, tipo_otros, selectores['input'], selectores['lista_items']):
-        return None
-    time.sleep(1)
+    print(f"\n INICIANDO FLUJO MANUAL: Usando '{tipo_otros}' como puente...")
     
+    # =================================================================
+    # PASO 1: Seleccionar "OTROS MODELOS" en el input principal
+    # =================================================================
+    if not interactuar_y_buscar(page, tipo_otros, tipo_otros, selectores['input'], selectores['lista_items']):
+        print("Falló la selección de la opción genérica.")
+        return None
+        
+    time.sleep(1)
+    texto_limpio_final = texto_sin_dup.replace(",", "").strip()
+    
+    # =================================================================
+    # PASO 2: Intentar buscar en el input secundario (Si existe)
+    # =================================================================
     if selectores.get('input_real'):
         lista_secundaria = "ul.ui-autocomplete:visible > li"
-        # Búsqueda en el input secundario (solo con texto SIN duplicados)
-        if interactuar_y_buscar(page, texto_sin_dup, texto_sin_dup, selectores['input_real'], lista_secundaria):
+        print(f"  Buscando modelo limpio '{texto_limpio_final}' en input secundario...")
+        
+        if interactuar_y_buscar(page, texto_limpio_final, texto_limpio_final, selectores['input_real'], lista_secundaria):
             return tipo_otros 
             
+    # =================================================================
+    # PASO 3: Activar Checkbox de "Nuevo Modelo" (Si es necesario)
+    # =================================================================
     if selectores.get('check'):
         try:
             chk = page.locator(selectores['check'])
-            if chk.is_visible() and not chk.is_checked(): chk.check()
-        except: pass
+            if chk.is_visible() and not chk.is_checked(): 
+                print("   Activando Checkbox para ingresar modelo manual...")
+                chk.check()
+        except Exception as e: 
+            print(f"   No se pudo marcar el checkbox: {e}")
         
+    # =================================================================
+    # PASO 4: Escribir a la fuerza el modelo final en la caja de texto
+    # =================================================================
     if selectores.get('input_real'):
         try:
             real_inp = page.locator(selectores['input_real'])
-            real_inp.fill("")
-            # ESCRITURA MANUAL FINAL: Se escribe estrictamente la versión SIN duplicados
-            real_inp.press_sequentially(texto_sin_dup, delay=0.10)
-            print(f" Escrito manualmente (SIN duplicados y fiel): {texto_sin_dup}")
-        except: pass
-        
+            real_inp.clear() # .clear() es más seguro que .fill("")
+            real_inp.press_sequentially(texto_limpio_final, delay=0.10)
+            print(f"   ✅ Modelo '{texto_limpio_final}' escrito manualmente en el SAT con éxito.")
+        except Exception as e: 
+            print(f"   ❌ Error crítico al escribir manualmente: {e}")
+            
     return tipo_otros
 
-def aplicar_excepciones_especificas(modelo, version, formulaRodante=""):
-    """ 
-    Filtro para inyectar datos o corregir formatos en modelos muy específicos 
-    antes de que pasen al motor de búsqueda.
+
+     
+# ==============================================================================
+# Casos mapeados de modelos mal escritos en SAT
+# ==============================================================================
+reglas_sat = [
+    {
+        "modelo": "F-150",
+        "version": "LARIAT FHEV",
+        "f_rodante": "4X4",
+        "modelo_sat": "F-150 LARIAT 4X4 FHEV"
+    },
+    {
+        "modelo": "CR-V",
+        "version": "EXL FHEV",
+        "f_rodante": "", 
+        "modelo_sat": "CR-V EXL FHEV"
+    },
+    {
+        "modelo": "CR-V",
+        "version": "EXL",
+        "f_rodante": "", 
+        "modelo_sat": "CR-V EX-L"
+    },
+    {
+        "modelo": "FORESTER",
+        "version": "2.0I AWD CVT XS SI DRIVE",
+        "f_rodante": "",
+        "modelo_sat": "FORESTER XS SI-DRIVE AWD 2.0I CVT"
+    },
+    {
+        "modelo": "PARTNER", 
+        "version": "1.6 DIESEL CORTA 2AS", 
+        "f_rodante": "",
+        "modelo_sat": "PARTNER 1.6 DISEL CORTA 2AS"
+    },
+    {
+        "modelo": "TAOS", 
+        "version": "TAOS HIGHLINE 250 TSI, 1.4L, 2WD, TIP", 
+        "f_rodante": "",
+        "modelo_sat": "TAOS HIGHLINE 2WD 1.4 250TSI TIP"
+    },
+    {
+        "modelo": "JETTA", 
+        "version": "TRENDLINE 250TSI 1.4L TIP", 
+        "f_rodante": "",
+        "modelo_sat": "JETTA TRENDLINE 250 TSI 1.4 TIP"
+    },
+    {
+        "modelo": "JETTA", 
+        "version": "HIGHLINE 250TSI 1.4L TIP", 
+        "f_rodante": "",
+        "modelo_sat": "JETTA HIGHLINE 250 TSI 1.4 TIP"
+    },
+    {
+        "modelo": "Q8", 
+        "version": "BLACK S LINE 55 TFSI QUATTRO TIPTRONIC", 
+        "f_rodante": "",
+        "modelo_sat": "Q8 BLACK S LINE 55 TFSI QUATRRO TIPTRONIC"
+    }
+]
+
+# ==============================================================================
+# Paso 2: Correccion casos mapeados
+# ==============================================================================
+def aplicar_reglas_sat(modelo_api, version_api, traccion_api):
     """
-    m = (modelo or "").strip().upper()
-    v = (version or "").strip().upper()
-    t = (formulaRodante or "").strip().upper()
-    
-    texto_completo = f"{m} {v}"
-    
-    # REGLA 1: Ford F-150 LARIAT FHEV -> Inyectar 4x4
-    if "F-150" in texto_completo and "LARIAT" in texto_completo and "FHEV" in texto_completo:
-        if t in ["4X4", "AWD", "4WD", "DOBLE"]:
-            print(" [EXCEPCIÓN ACTIVADA]: Inyectando '4X4' a la F-150 LARIAT FHEV")
-            return "F-150", "LARIAT 4X4 FHEV"
-            
-    # REGLA 2: Honda CR-V EXL -> Transformar a EX-L (Excepto en la versión híbrida FHEV)
-    if "CR-V" in texto_completo and "EXL" in texto_completo:
-        # Aquí está el candado: Si NO tiene la palabra "FHEV", aplicamos el cambio.
-        # Si sí la tiene, lo ignora y lo deja intacto (CR-V EXL FHEV) para que haga match directo.
-        if "FHEV" not in texto_completo:
-            print(" [EXCEPCIÓN ACTIVADA]: Transformando 'EXL' a 'EX-L' para CR-V (Versión regular)")
-            m_corregido = m.replace("EXL", "EX-L")
-            v_corregida = v.replace("EXL", "EX-L")
-            return m_corregido, v_corregida
+    Recibe los datos crudos. Busca en 'reglas_sat'.
+    Si hay coincidencia, devuelve (Texto_Corregido, "").
+    Si no hay coincidencia, devuelve los datos crudos intactos.
+    """
+    mod_filtro = (modelo_api or "").strip().upper()
+    ver_filtro = (version_api or "").strip().upper()
+    trac_filtro = (traccion_api or "").strip().upper()
 
-    # REGLA 3: Subaru FORESTER -> Unir "SI DRIVE" a "SI-DRIVE"
-    if "FORESTER" in texto_completo and "SI DRIVE" in texto_completo:
-        print(" [EXCEPCIÓN ACTIVADA]: Uniendo 'SI DRIVE' a 'SI-DRIVE' para Forester")
-        m_corregido = m.replace("SI DRIVE", "SI-DRIVE")
-        v_corregida = v.replace("SI DRIVE", "SI-DRIVE")
-        return m_corregido, v_corregida
+    # Usamos next() como el .find() de JavaScript leyendo la variable global reglas_sat
+    regla_encontrada = next(
+        (item for item in reglas_sat 
+         if (item.get("modelo", "").upper() in mod_filtro)
+         and (item.get("version", "").upper() in ver_filtro)
+         and (not item.get("f_rodante") or item.get("f_rodante", "").upper() in trac_filtro)
+        ), 
+        None 
+    )
 
-    # REGLA 4: Mazda redundante -> Convertir "MAZDA3" a "MAZDA 3"
-    if "MAZDA3" in texto_completo and "MAZDA 3" in texto_completo:
-        print(" [EXCEPCIÓN ACTIVADA]: Corrigiendo redundancia 'MAZDA3 MAZDA 3'")
-        m_corregido = m.replace("MAZDA3", "MAZDA 3")
-        v_corregida = v.replace("MAZDA3", "MAZDA 3")
-        return m_corregido, v_corregida
-
-    # REGLA 5: HONOR S -> Agregar la 'L' a la cilindrada 1.5
-    if "HONOR S" in texto_completo and "1.5" in texto_completo:
-        print(" [EXCEPCIÓN ACTIVADA]: Agregando 'L' a la cilindrada del HONOR S")
-        m_corregido = m.replace("1.5", "1.5L")
-        v_corregida = v.replace("1.5", "1.5L")
-        return m_corregido, v_corregida
+    if regla_encontrada:
+        print(f" [CASO MAPEADO]: MODELO ENCONTRADO EN LA LISTA. CAMBIANDO A: '{regla_encontrada['modelo_sat']}'")
+        # El truco: Mandamos el texto perfecto en la variable modelo, y vaciamos la versión
+        return regla_encontrada["modelo_sat"], ""
     
-    # REGLA 6: Peugeot PARTNER -> Cambiar "DIESEL" a "DISEL" (Error tipográfico del SAT)
-    if "PARTNER 1.6 DIESEL CORTA 2AS" in texto_completo:
-        print(" [EXCEPCIÓN ACTIVADA]: Cambiando 'DIESEL' a 'DISEL' solo para Partner 1.6 Corta")
-        m_corregido = m.replace("DIESEL", "DISEL")
-        v_corregida = v.replace("DIESEL", "DISEL")
-        return m_corregido, v_corregida
-    
-    # REGLA 7: Volkswagen TAOS -> Limpiar comas, deduplicar TAOS, unir 250 TSI y quitar L
-    if "TAOS HIGHLINE" in texto_completo and "250 TSI" and "TIP" in texto_completo:
-        print(" [EXCEPCIÓN ACTIVADA]: Limpiando formato rebelde para TAOS 250 TSI")
-        # 1. Quitamos comas
-        texto_limpio = texto_completo.replace(",", " ")
-        # 2. Quitamos el TAOS duplicado
-        texto_limpio = texto_limpio.replace("TAOS TAOS", "TAOS")
-        # 3. Unimos el 250 TSI
-        texto_limpio = texto_limpio.replace("250 TSI", "250TSI")
-        # 4. Quitamos la L de 1.4L
-        texto_limpio = texto_limpio.replace("1.4L", "1.4")
-        
-        # Como ya unimos todo el texto y lo limpiamos, lo pasamos todo en el 'modelo' 
-        # y dejamos la 'versión' vacía. El motor de búsqueda lo procesará perfectamente.
-        texto_limpio = " ".join(texto_limpio.split()) # Quita espacios dobles por si acaso
-        return texto_limpio, ""
-    
-    # REGLA 8: Volkswagen JETTA -> Separar 250TSI a 250 TSI y quitar L de 1.4L
-    if "JETTA TRENDLINE" in texto_completo and "250TSI" and "TIP" in texto_completo:
-        print(" [EXCEPCIÓN ACTIVADA]: Ajustando formato para JETTA 250TSI")
-        # 1. Separamos el motor
-        texto_limpio = texto_completo.replace("250TSI", "250 TSI")
-        # 2. Quitamos la L de 1.4L
-        texto_limpio = texto_limpio.replace("1.4L", "1.4")
-        
-        # Unimos espacios sobrantes y retornamos
-        texto_limpio = " ".join(texto_limpio.split())
-        return texto_limpio, ""
-    
-    # REGLA 9: Volkswagen JETTA -> Separar 250TSI a 250 TSI y quitar L de 1.4L
-    if "JETTA HIGHLINE" in texto_completo and "250TSI" and "TIP" in texto_completo:
-        print(" [EXCEPCIÓN ACTIVADA]: Ajustando formato para JETTA 250TSI")
-        # 1. Separamos el motor
-        texto_limpio = texto_completo.replace("250TSI", "250 TSI")
-        # 2. Quitamos la L de 1.4L
-        texto_limpio = texto_limpio.replace("1.4L", "1.4")
-        
-        # Unimos espacios sobrantes y retornamos
-        texto_limpio = " ".join(texto_limpio.split())
-        return texto_limpio, ""
-    
-    # REGLA 10: Audi Q8 -> Corregir error tipográfico del SAT (QUATTRO a QUATRRO)
-    if "Q8 BLACK S LINE 55 TFSI" in texto_completo and "QUATTRO" in texto_completo:
-        print(" [EXCEPCIÓN ACTIVADA]: Corrigiendo 'QUATTRO' a 'QUATRRO' para Q8")
-        # Reemplazamos la palabra con el error exacto del SAT
-        texto_limpio = texto_completo.replace("QUATTRO", "QUATRRO")
-        
-        # Unimos espacios sobrantes y retornamos
-        texto_limpio = " ".join(texto_limpio.split())
-        return texto_limpio, ""
-                  
-    return modelo, version
+    # Si es un carro normal sin problemas, lo dejamos pasar igual
+    return mod_filtro, ver_filtro
 
 
-def encontrar_modelo(page, modelo, version, formulaRodante=""):
-    modelo, version = aplicar_excepciones_especificas(modelo, version, formulaRodante)
+# ==============================================================================
+# Paso 3: Selectores modelo 
+# ==============================================================================
+
+def encontrar_modelo(page, modelo, version, formulaRodante="", peso_bruto=None):
+    # 1er PASO: Pasar por la aduana ANTES de hacer cualquier cosa en la web
+    modelo, version = aplicar_reglas_sat(modelo, version, formulaRodante)
     
     sel = {
         'input': "#txtDesModelo", 
@@ -904,33 +940,31 @@ def encontrar_modelo(page, modelo, version, formulaRodante=""):
         'input_real': "#txtDesModeloReal" 
     }
     
+    # 2do PASO: Generar variantes con lo que sea que haya salido de la aduana
     texto_con_dup, texto_sin_dup = obtener_variantes_texto(modelo, version)
     
+    # 3er PASO: Intentar teclear en el SAT
     if interactuar_y_buscar(page, texto_con_dup, texto_sin_dup, sel['input'], sel['lista_items']):
         return True 
     
+    # 4to PASO: Si el SAT no lo encuentra, activar el salvavidas manual
     print(" Pasando a manual...")
-    tipo_otros = detectar_tipo_otros_modelos(page)
+    # AQUÍ PASAMOS EL PESO AL CEREBRO
+    tipo_otros = detectar_tipo_otros_modelos(page, peso_bruto)
     
-    # =================================================================
-    #  EXCEPCIÓN DE FALLBACK (TERRAMAR)
-    # =================================================================
+    # EXCEPCIÓN DE FALLBACK FINAL (TERRAMAR)
     texto_unido = f"{modelo} {version}".upper()
     if "TERRAMAR" in texto_unido:
         print(" [EXCEPCIÓN ACTIVADA]: Forzando la categoría 'OTROS MODELOS' para Terramar.")
         tipo_otros = "OTROS MODELOS"
-    # =================================================================
     
     return flujo_seleccionar_otros(page, tipo_otros, texto_sin_dup, sel)
 
-def agregarcompradores(page):
-    page.go_back()
-    page.locator("#btnRegresar").click()
-    page.locator("#btnRegresar").click()
-    page.locator("#dgDeclaraciones_lnkPorcentaje_0 > img").click()
 
-def encontrar_modelo2(page, modelo, version, seleccion_previa=None, formulaRodante=""):
-    modelo, version = aplicar_excepciones_especificas(modelo, version, formulaRodante)
+def encontrar_modelo2(page, modelo, version, seleccion_previa=None, formulaRodante="", peso_bruto=None):
+    print(f" [Popup] Validando datos en aduana...")
+    # 1er PASO: Pasar por la aduana
+    modelo, version = aplicar_reglas_sat(modelo, version, formulaRodante)
     
     sel = {
         'input': "#txtDesModeloV", 
@@ -941,7 +975,7 @@ def encontrar_modelo2(page, modelo, version, seleccion_previa=None, formulaRodan
     
     texto_con_dup, texto_sin_dup = obtener_variantes_texto(modelo, version)
 
-    # 👇 CORRECCIÓN CLAVE PARA EVITAR EL ERROR CON TRUE/FALSE 👇
+    # ATAJO DE "OTROS MODELOS" (Se mantiene intacto)
     if isinstance(seleccion_previa, str) and "OTROS MODELOS" in seleccion_previa.upper():
         print(f" ATAJO ACTIVADO: La selección previa fue '{seleccion_previa}'.")
         print(f"   -> Escribiendo fielmente: {texto_sin_dup}")
@@ -952,19 +986,24 @@ def encontrar_modelo2(page, modelo, version, seleccion_previa=None, formulaRodan
         return True
     
     print(" Pasando a manual en Popup...")
-    tipo_otros = detectar_tipo_otros_modelos(page) 
+    # AQUÍ PASAMOS EL PESO AL CEREBRO
+    tipo_otros = detectar_tipo_otros_modelos(page, peso_bruto) 
     
-    # =================================================================
-    #  EXCEPCIÓN DE FALLBACK (TERRAMAR) PARA EL POPUP
-    # =================================================================
+    # EXCEPCIÓN DE FALLBACK FINAL (TERRAMAR) PARA EL POPUP
     texto_unido = f"{modelo} {version}".upper()
     if "TERRAMAR" in texto_unido:
         print(" [EXCEPCIÓN ACTIVADA]: Forzando la categoría 'OTROS MODELOS' para Terramar.")
         tipo_otros = "OTROS MODELOS"
-    # =================================================================
     
     return flujo_seleccionar_otros(page, tipo_otros, texto_sin_dup, sel)
-    
+
+
+
+def agregarcompradores(page):
+    page.go_back()
+    page.locator("#btnRegresar").click()
+    page.locator("#btnRegresar").click()
+    page.locator("#dgDeclaraciones_lnkPorcentaje_0 > img").click()
     
 def enviar_inmatriculacion(inmatriculacion, dni, archivo_domicilio, archivo_declaracionJurada):
     url_evniarDocumentos = os.getenv('URL_ENVIA_DOCUMENTOS')
@@ -1068,8 +1107,10 @@ def Guardar_Archivos(page, browser, inmatriculacion, dni):
     archivo_declaracion = os.path.join(carpeta_inmatriculacion, f"ArchivoDeclaracion_{inmatriculacion}_{dni}.pdf")
     archivo_cambioDomicilio = os.path.join(carpeta_inmatriculacion, f"ArchivoCambioDomicilio_{inmatriculacion}_{dni}.pdf")
     
-    # Variable para controlar si existe el botón de cambio de domicilio
+    # 1. INICIALIZAR VARIABLES
     existe_boton_cambio_domicilio = False
+    archivo_declaracion_base64 = ""
+    archivo_cambioDomicilio_base64 = "" 
     
     # Validar si existe el botón btnImpDJCamDom
     try:
@@ -1112,9 +1153,11 @@ def Guardar_Archivos(page, browser, inmatriculacion, dni):
                 page.locator("#btnRegresar").click()
                 
         except Exception as e:
-            # ESTO ES VITAL: Si falló, lanzamos el error para que envíe el correo.
-            # Ya no usamos "existe_boton_cambio_domicilio = False" aquí.
-            raise Exception(f"Fallo crítico al generar PDF Cambio Domicilio: {e}")
+                #  FRENO DE EMERGENCIA 1: Muere si falla el Domicilio
+                mensaje_error = f" ERROR CRÍTICO: Falló la descarga de documentos (Cambio de Domicilio). Finalizando bot. Volver a procesar la inmatriculación: {inmatriculacion}. Detalle: {e}"
+                print(mensaje_error)
+                Registrador.error(mensaje_error)
+                raise Exception(mensaje_error)
     else:
         print(" Saltando proceso de cambio de domicilio - botón no encontrado")
 
@@ -1131,7 +1174,6 @@ def Guardar_Archivos(page, browser, inmatriculacion, dni):
         # Crear HTML minimalista
         html_minimal = f"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
         <html>
-        
         <head>
             <style type="text/css">
                 body {{
@@ -1211,66 +1253,81 @@ def Guardar_Archivos(page, browser, inmatriculacion, dni):
         Registrador.info(f"PDF de declaración guardado en: {archivo_declaracion}")
         
     except Exception as e:
-        print(f" Error al procesar declaración jurada: {e}")
-        raise  # Si falla la declaración jurada, sí detenemos el proceso
+            #  FRENO DE EMERGENCIA 2: Lanza error y salta al finally
+            mensaje_error = f" ERROR CRÍTICO: Falló la descarga de documentos (Declaración Jurada). Volver a procesar la inmatriculación: {inmatriculacion}. Detalle: {e}"
+            print(mensaje_error)
+            Registrador.error(mensaje_error)
+            raise Exception(mensaje_error)
 
-    # Leer archivos y codificar en base64
-    archivo_declaracion_base64 = ""
-    archivo_cambioDomicilio_base64 = ""
-
-    # Leer archivo de declaración (siempre debe existir)
+        # --- Leer archivos y codificar en base64 ---
     try:
-        with open(archivo_declaracion, 'rb') as archivo_declaracion_file:
-            archivo_declaracion_bytes = archivo_declaracion_file.read()
-            archivo_declaracion_base64 = base64.b64encode(archivo_declaracion_bytes).decode('utf-8')
+            with open(archivo_declaracion, 'rb') as archivo_declaracion_file:
+                archivo_declaracion_bytes = archivo_declaracion_file.read()
+                archivo_declaracion_base64 = base64.b64encode(archivo_declaracion_bytes).decode('utf-8')
     except Exception as e:
-        # Si no puede leer el archivo, dispara el error
-        raise Exception(f"No se pudo leer el PDF de Declaración para Base64: {e}")
+                mensaje_error = f" ERROR CRÍTICO: No se pudo leer el PDF de Declaración para Base64. Volver a procesar: {inmatriculacion}. Detalle: {e}"
+                print(mensaje_error)
+                Registrador.error(mensaje_error)
+                raise Exception(mensaje_error)
 
-    # Leer archivo de cambio de domicilio solo si se procesó correctamente
     if existe_boton_cambio_domicilio:
-        try:
-            with open(archivo_cambioDomicilio, 'rb') as archivo_cambioDomicilio_file:
-                archivo_cambioDomicilio_bytes = archivo_cambioDomicilio_file.read()
-                archivo_cambioDomicilio_base64 = base64.b64encode(archivo_cambioDomicilio_bytes).decode('utf-8')
-        except Exception as e:
-            # Si no puede leer el archivo, dispara el error
-            raise Exception(f"No se pudo leer el PDF de Cambio Domicilio para Base64: {e}")
+            try:
+                with open(archivo_cambioDomicilio, 'rb') as archivo_cambioDomicilio_file:
+                    archivo_cambioDomicilio_bytes = archivo_cambioDomicilio_file.read()
+                    archivo_cambioDomicilio_base64 = base64.b64encode(archivo_cambioDomicilio_bytes).decode('utf-8')
+            except Exception as e:
+                mensaje_error = f" ERROR CRÍTICO: No se pudo leer el PDF de Cambio Domicilio para Base64. Volver a procesar: {inmatriculacion}. Detalle: {e}"
+                print(mensaje_error)
+                Registrador.error(mensaje_error)
+                raise Exception(mensaje_error)
 
-    # Preparar datos según si existe o no el botón
-    if existe_boton_cambio_domicilio:
-        data = {
-            "inmatriculacion": inmatriculacion,
-            "cliente": dni,
-            "file_cambio_domicilio": archivo_cambioDomicilio_base64,
-            "file_declaracion_jurada": archivo_declaracion_base64
-        }
-        print("Preparando datos con ambos archivos (cambio domicilio y declaración)")
-    else:
-        data = {
-            "inmatriculacion": inmatriculacion,
-            "cliente": dni,
-            "file_cambio_domicilio": "",  # vacío
-            "file_declaracion_jurada": archivo_declaracion_base64
-        }
-        print("Preparando datos solo con declaración jurada (sin cambio de domicilio)")
+        # =================================================================
+        # FIN DEL BLOQUE PROTEGIDO -> INICIO DEL SALVAVIDAS
+        # =================================================================
+            finally:
+                print("\n Salvaguardando JSON del vehículo...")
+            
+            # Preparar datos según si existe o no el botón
+            if existe_boton_cambio_domicilio:
+                data = {
+                    "inmatriculacion": inmatriculacion,
+                    "cliente": dni,
+                    "file_cambio_domicilio": archivo_cambioDomicilio_base64,
+                    "file_declaracion_jurada": archivo_declaracion_base64
+                }
+                print("Preparando datos con ambos archivos (cambio domicilio y declaración)")
+            else:
+                data = {
+                    "inmatriculacion": inmatriculacion,
+                    "cliente": dni,
+                    "file_cambio_domicilio": "",  # vacío
+                    "file_declaracion_jurada": archivo_declaracion_base64
+                }
+                print("Preparando datos solo con declaración jurada (sin cambio de domicilio)")
 
-    # Guardar JSON
-    json_output = json.dumps(data, indent=4)
-    Namejson = f"DATOS_DEL_VEHICULO{inmatriculacion}_{dni}.json"
-    ruta_archivo_json = os.path.join(carpeta_inmatriculacion, Namejson)
-    
-    with open(ruta_archivo_json, "w") as Namejson:
-        Namejson.write(json_output)
+            # Guardar JSON localmente
+            json_output = json.dumps(data, indent=4)
+            Namejson = f"DATOS_DEL_VEHICULO{inmatriculacion}_{dni}.json"
+            ruta_archivo_json = os.path.join(carpeta_inmatriculacion, Namejson)
+            
+            try:
+                with open(ruta_archivo_json, "w") as f_json:
+                    f_json.write(json_output)
+                print(f" JSON guardado localmente en: {ruta_archivo_json}\n")
+            except Exception as e_json:
+                print(f" Error al guardar el JSON de respaldo: {e_json}\n")
 
-    print(f"JSON guardado en: {ruta_archivo_json}")
-
-    # Enviar inmatriculación
-    try:
-        enviar_inmatriculacion(inmatriculacion, dni, archivo_cambioDomicilio_base64, archivo_declaracion_base64)
-    except Exception as e:
-        # Si la API se cae o no responde, dispara el error
-        raise Exception(f"Fallo la comunicación con la API (enviar_inmatriculacion): {e}")
+        # =================================================================
+        # ENVÍO A LA API 
+        # (El código solo llega aquí si NO hubo 'raise Exception' arriba)
+        # =================================================================
+            try:
+                enviar_inmatriculacion(inmatriculacion, dni, archivo_cambioDomicilio_base64, archivo_declaracion_base64)
+            except Exception as e:
+                mensaje_error = f" ERROR CRÍTICO: Falló la comunicación con la API (enviar_inmatriculacion) para la placa {inmatriculacion}. Detalle: {e}"
+                print(mensaje_error)
+                Registrador.error(mensaje_error)
+                raise Exception(mensaje_error)
     
     time.sleep(5)
 
@@ -1284,6 +1341,7 @@ def Guardar_Archivos(page, browser, inmatriculacion, dni):
 #     except Exception as e:
 #         Registrador.error(f"Error al intentar regresar al menú de inscripción: {e}")
 #         print(f"Error al intentar regresar al menú de inscripción: {e}")
+
 
 def volver_a_inscripcion(page):
     """Función para volver al menú de inscripción de placa."""
