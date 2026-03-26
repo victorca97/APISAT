@@ -1010,6 +1010,24 @@ reglas_sat = [
         "version": "BLACK S LINE 55 TFSI QUATTRO TIPTRONIC",
         "f_rodante": "",
         "modelo_sat": "Q8 BLACK S LINE 55 TFSI QUATRRO TIPTRONIC"
+    },
+    {
+        "modelo": "Q8",
+        "version": "BLACK S LINE 55 TFSI QUATTRO TIPTRONIC",
+        "f_rodante": "",
+        "modelo_sat": "Q8 BLACK S LINE 55 TFSI QUATRRO TIPTRONIC"
+    },
+    {
+        "modelo": "C37",
+        "version": "MINIBUS 1.5 L V2",
+        "f_rodante": "",
+        "modelo_sat": "C37 MINIBUS 1.5L V2"
+    },
+    {
+        "modelo": "REFINE",
+        "version": "NEW REFINE 2.0 VVT GASOLINA",
+        "f_rodante": "",
+        "modelo_sat": "NEW REFINE 2.0 VVT GASOLINA"
     }
 ]
 

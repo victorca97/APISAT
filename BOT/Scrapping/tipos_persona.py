@@ -1062,27 +1062,25 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 sat_nomb_admi = page.locator("#txtNombAdmi").input_value().strip()
 
                 usar_api_admi = False
-                
-                # Validamos contra nuestras variables dinámicas 'admin'
-                if estado_sat == "NORMAL": 
-                    if sat_pate_admi != admin["paterno"] or sat_mate_admi != admin["materno"] or sat_nomb_admi != admin["nombre"]:
-                        if not sat_pate_admi and not sat_nomb_admi:
-                            usar_api_admi = True
-                        else:
-                            page.once("dialog", lambda d: d.accept()) 
-                            page.locator("input[name='cmdBuscaDocuAdmi']").click()
-                            page.wait_for_timeout(3000)
-                            
-                            # 🚨 NUEVO: Volvemos a leer después de la segunda búsqueda
-                            sat_pate_admi2 = page.locator("#txtApePateAdmi").input_value().strip()
-                            sat_mate_admi2 = page.locator("#txtApeMateAdmi").input_value().strip()
-                            sat_nomb_admi2 = page.locator("#txtNombAdmi").input_value().strip()
-                            
-                            # Si sigue sin coincidir, obligamos a usar la API
-                            if sat_pate_admi2 != admin["paterno"] or sat_mate_admi2 != admin["materno"] or sat_nomb_admi2 != admin["nombre"]:
-                                Registrador.warning("SAT terco en Fase 1. ¡Forzando nombres de la API!")
-                                usar_api_admi = True
 
+                # ¡VALIDAMOS SIEMPRE! Sin importar si el SAT lo precargó o no
+                if sat_pate_admi != admin["paterno"] or sat_mate_admi != admin["materno"] or sat_nomb_admi != admin["nombre"]:
+                    
+                    if estado_sat == "NORMAL": 
+                        page.once("dialog", lambda d: d.accept()) 
+                        page.locator("input[name='cmdBuscaDocuAdmi']").click()
+                        page.wait_for_timeout(3000)
+                        
+                        sat_pate_admi = page.locator("#txtApePateAdmi").input_value().strip()
+                        sat_mate_admi = page.locator("#txtApeMateAdmi").input_value().strip()
+                        sat_nomb_admi = page.locator("#txtNombAdmi").input_value().strip()
+                        
+                    # Si no hace match perfecto, forzamos la API
+                    if sat_pate_admi != admin["paterno"] or sat_mate_admi != admin["materno"] or sat_nomb_admi != admin["nombre"]:
+                        Registrador.warning("¡Forzando nombres de la API en Fase 1!")
+                        usar_api_admi = True
+                
+            
                 # Llenado de nombres arriba
                 if usar_api_admi:
                     page.locator("input[name='txtApePateAdmi']").fill(admin["paterno"])
@@ -1116,10 +1114,10 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 # ==============================================================================
                 # FASE 2: DATOS DEL CONYUGUE
                 # ==============================================================================
-                print("\n--- FASE 2: DATOS DEL CONYUGUE")
+                print("\n--- FASE 2: DATOS DEL CONYUGUE ---")
 
+                # 1. Si el flujo es NORMAL, necesitamos hacer la primera búsqueda manual
                 if estado_sat == "NORMAL":
-                    # EL SAT NO HIZO NADA: Buscamos manualmente a la persona de abajo
                     page.locator("#btnNuevaBusquedaRel").click()
                     page.select_option("#ddlTipoDocuRela", value=rela["tipo_doc"])
                     page.locator("input[name='txtDocuRela']").fill(rela["num_doc"])
@@ -1128,51 +1126,47 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                     page.locator("input[name='cmdBuscaDocuRel']").click()
                     page.wait_for_timeout(2000)
 
-                    sat_pate_r1 = page.locator("#txtApePateRela").input_value().strip()
-                    sat_mate_r1 = page.locator("#txtApeMateRela").input_value().strip()
-                    sat_nomb_r1 = page.locator("#txtNombRela").input_value().strip()
+                # 2. Leemos lo que el SAT tiene en pantalla (ya sea por búsqueda manual o precargado)
+                sat_pate_r1 = page.locator("#txtApePateRela").input_value().strip()
+                sat_mate_r1 = page.locator("#txtApeMateRela").input_value().strip()
+                sat_nomb_r1 = page.locator("#txtNombRela").input_value().strip()
 
-                    usar_api_r1 = False
+                usar_api_r1 = False
+                
+                # 3. COMPARACIÓN ESTRICTA CON LA API (Como en el Natural)
+                if sat_pate_r1 != rela["paterno"] or sat_mate_r1 != rela["materno"] or sat_nomb_r1 != rela["nombre"]:
                     
-                    # Validamos contra 'rela'
+                    # Si es NORMAL, le damos una segunda oportunidad al botón buscar
+                    if estado_sat == "NORMAL":
+                        page.once("dialog", lambda d: d.accept())
+                        page.locator("input[name='cmdBuscaDocuRel']").click()
+                        page.wait_for_timeout(3000)
+                        
+                        # Volvemos a leer
+                        sat_pate_r1 = page.locator("#txtApePateRela").input_value().strip()
+                        sat_mate_r1 = page.locator("#txtApeMateRela").input_value().strip()
+                        sat_nomb_r1 = page.locator("#txtNombRela").input_value().strip()
+                        
+                    # Si a pesar de todo (búsqueda doble o precargado erróneo) sigue diferente, obligamos a la API
                     if sat_pate_r1 != rela["paterno"] or sat_mate_r1 != rela["materno"] or sat_nomb_r1 != rela["nombre"]:
-                        if not sat_pate_r1 and not sat_nomb_r1:
-                            usar_api_r1 = True
-                        else:
-                            page.once("dialog", lambda d: d.accept())
-                            page.locator("input[name='cmdBuscaDocuRel']").click()
-                            page.wait_for_timeout(3000)
-                            
-                            # 🚨 NUEVO: Volvemos a leer después de la segunda búsqueda
-                            sat_pate_r2 = page.locator("#txtApePateRela").input_value().strip()
-                            sat_mate_r2 = page.locator("#txtApeMateRela").input_value().strip()
-                            sat_nomb_r2 = page.locator("#txtNombRela").input_value().strip()
-                            
-                            # Si sigue sin coincidir, obligamos a usar la API
-                            if sat_pate_r2 != rela["paterno"] or sat_mate_r2 != rela["materno"] or sat_nomb_r2 != rela["nombre"]:
-                                Registrador.warning("SAT terco en Fase 2. ¡Forzando nombres de la API!")
-                                usar_api_r1 = True
-                    
-                    if usar_api_r1:
-                        page.locator("input[name='txtApePateRela']").fill(rela["paterno"])
-                        if not rela["materno"]:
-                            page.locator("input[name='chkSinApeMatRela']").check()
-                        else:
-                            page.locator("input[name='txtApeMateRela']").fill(rela["materno"])
-                        page.locator("input[name='txtNombRela']").fill(rela["nombre"])
+                        Registrador.warning(f"Discrepancia detectada en Cónyuge | API: {rela['nombre']} {rela['paterno']} vs SAT: {sat_nomb_r1} {sat_pate_r1}. ¡Forzando API!")
+                        usar_api_r1 = True
+
+                # 4. LLENADO O FORZADO DE NOMBRES
+                if usar_api_r1:
+                    page.locator("input[name='txtApePateRela']").fill(rela["paterno"])
+                    if not rela["materno"]:
+                        page.locator("input[name='chkSinApeMatRela']").check()
                     else:
-                        if not page.locator("#txtApeMateRela").input_value().strip():
-                            page.locator("input[name='chkSinApeMatRela']").check()
-
+                        page.locator("input[name='txtApeMateRela']").fill(rela["materno"])
+                    page.locator("input[name='txtNombRela']").fill(rela["nombre"])
                 else:
-                    # EL SAT PRECARGÓ O INVIRTIÓ: Validamos con WARNINGS lo que el SAT puso abajo
-                    sat_pate_r1 = page.locator("#txtApePateRela").input_value().strip()
-                    sat_nomb_r1 = page.locator("#txtNombRela").input_value().strip()
-                    
-                    if sat_pate_r1 != rela["paterno"] or sat_nomb_r1 != rela["nombre"]:
-                        Registrador.warning(f"DISCREPANCIA NOMBRES | API: {rela['nombre']} {rela['paterno']} vs SAT: {sat_nomb_r1} {sat_pate_r1}")
+                    if not page.locator("#txtApeMateRela").input_value().strip():
+                        page.locator("input[name='chkSinApeMatRela']").check()
 
-                # FORZAMOS CONTACTO Y DIRECCIÓN 
+                # ==============================================================================
+                # FORZAMOS CONTACTO, DIRECCIÓN Y FECHA (Siempre se ejecuta)
+                # ==============================================================================
                 page.locator("input[name='txtTelefono2Rela']").fill(rela["celular"])
                 page.locator("input[name='txtCorreoElectronicoRela']").fill(rela["correo"])
 
@@ -1180,24 +1174,18 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                     page.select_option("#ddlDistritoRela", value=rela["distrito"])
                     page.locator("input[name='txtDireccionRela']").fill(rela["direccion"])
 
-                # FORZAMOS LA FECHA DE NACIMIENTO 
                 if rela["fecha"]:
                     try:
                         f_nac_abajo = datetime.strptime(rela["fecha"], "%Y-%m-%d").strftime("%d/%m/%Y")
-                        
-                        # Intentamos llenar el selector principal de abajo
                         selector_fecha_abajo = "input[name='txtFecNacRelacionado']" 
                         
                         if page.locator(selector_fecha_abajo).is_visible():
                             page.locator(selector_fecha_abajo).fill(f_nac_abajo)
-                        # else:
-                        #     # Alternativa si usan el mismo selector 'txtFecNacPersona' dos veces
-                        #     page.locator("input[name='txtFecNacPersona']").nth(1).fill(f_nac_abajo)
                             
                     except ValueError as e:
-                        Registrador.error(f"Error al procesar la fecha de nacimiento ({fecha_nacimiento}): {e}")
+                        Registrador.error(f"Error al procesar la fecha de nacimiento ({fecha_nacimiento2}): {e}")
                 else:
-                    Registrador.warning("No llegó fecha de nacimiento en la API. Campo omitido.")
+                    Registrador.warning("No llegó fecha de nacimiento de cónyuge en la API. Campo omitido.")
 
                 # ==============================================================================
                 # FINALIZACIÓN
