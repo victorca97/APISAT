@@ -55,6 +55,8 @@ def SAT():
                 Registrador.info(f"Iniciando intento global {intento_global + 1} de {max_reintentos}")
                 errores_globales = []  
                 inmatriculaciones_fallidas = []
+
+                prioritarios_maquinarias = {100017827, 100018092}  # Set de inmatriculaciones prioritarias
                 referencias_a_saltar = {100006404,100006419,100006434,100006434,100006519,100006522,100006553,100006554,100006562,
                                         100006586,100006587,100006623,100006654,100006654,100006662,100006768,100006768,100006772,100006790,100006800,
                                         100006817,100006820,100006886,100006958,100006958,100006998,100007008,100007019,100007185,100007324, 
@@ -64,11 +66,8 @@ def SAT():
                                        
                                        
                                        #Caso subsanado 100007035
-
                                         #Error en conyugal - ITEM 1
                                         100006466, 100006609,
-
-
                                         100006650,
                                         100007198,
                                         100007488,
@@ -171,9 +170,6 @@ def SAT():
                                         
                                         
                                         
-                                        
-                                        
-                                        
                                         # NUEVO ITEM CASOS MAPEADOS
                                         # EUROSHOP ITEM 2/1 MALOS RECIBOS
                                         100004017, 100004024, 100004025, 100004029, 100004031, 100004032, 100004037,    
@@ -194,8 +190,6 @@ def SAT():
                                         
                                         
                                         
-                                        
-                                        
                                         # NUEVO ITEM CASOS MAPEADOS
                                         # EUROSHOP ITEM 2/2 MALOS RECIBOS
                                         100004045, 100004049, 100004053, 100004057, 100004058,   
@@ -212,7 +206,6 @@ def SAT():
                                         
                                         # GRAN CONTRIBUYENTE - COBRANZA COACTIVA PERO SI COINCIDE CON EL RECIBO
                                         100004052,
-                                        
                                         
                                         
                                         
@@ -249,16 +242,23 @@ def SAT():
 
                 for item in data_list:
                     inmatriculaciones = item.get('inmatriculaciones', 'N/A')
-                    referencia=item.get('referencia','')
-                    placa = item.get('placa', 'N/A')  # Asumiendo que también hay 'placa' en cada item
-
+                    referencia = item.get('referencia', '')
+                    placa = item.get('placa', 'N/A')
+                    
+                    # A. Filtro de exclusión (Eliminamos los que no sirven)
                     if referencia in referencias_a_saltar:
                         Registrador.info(f"🔁 Referencia {referencia} está en la lista de exclusión. Saltando...")
                         continue
-
-                    print(f"Se va a procesar la inmatriculacion: {inmatriculaciones} con la placa: {placa}")
-                    Registrador.info(f"Se está procesando la inmatriculacion {inmatriculaciones}, placa {placa}")
-
+                    
+                    # B. Filtro de prioridad (Solo procesamos los prioritarios)
+                    if inmatriculaciones not in prioritarios_maquinarias:
+                        print(f"Ignorando {inmatriculaciones} porque no es prioridad.")
+                        continue
+                    
+                    # C. Procesamiento de prioridades
+                    print(f"Procesando prioridad: {inmatriculaciones} con placa: {placa}")
+                    Registrador.info(f"Se está procesando la inmatriculacion prioritaria {inmatriculaciones}, placa {placa}")
+                    
                     VerificarPlaca = satScrapper.iniciar_inscripcion(placa, inmatriculaciones)
                     if VerificarPlaca == 1:
                         Registrador.info(f"La placa: {placa} ya ha sido registrada anteriormente, pasaremos a la siguiente inmatriculacion")
