@@ -57,8 +57,8 @@ def SAT():
                 inmatriculaciones_fallidas = []
 
                 prioritarios_maquinarias = {100017827, 100018092}  # Set de inmatriculaciones prioritarias
-                referencias_a_saltar = {100006404,100006419,100006434,100006434,100006519,100006522,100006553,100006554,100006562,
-                                        100006586,100006587,100006623,100006654,100006654,100006662,100006768,100006768,100006772,100006790,100006800,
+                referencias_a_saltar = {100006404,100006554,
+                                        100006623,100006654,100006654,100006662,100006768,100006768,100006772,100006790,100006800,
                                         100006817,100006820,100006886,100006958,100006958,100006998,100007008,100007019,100007185,100007324, 
                                         100007336,100007336,100007349,100007437,100007444,10000659,
                                         #Procesado por el cliente
@@ -67,7 +67,7 @@ def SAT():
                                        
                                        #Caso subsanado 100007035
                                         #Error en conyugal - ITEM 1
-                                        100006466, 100006609,
+                                        100006609,
                                         100006650,
                                         100007198,
                                         100007488,
@@ -240,6 +240,16 @@ def SAT():
                                         
                                          }
 
+                # Verificar si hay inmatriculaciones prioritarias en el dataset
+                hay_prioritarios = any(item.get('inmatriculaciones') in prioritarios_maquinarias for item in data_list)
+                
+                if hay_prioritarios:
+                    Registrador.info("Se encontraron inmatriculaciones prioritarias. Procesando solo prioritarios...")
+                    print("Se encontraron prioritarios. Procesando solo esos...")
+                else:
+                    Registrador.info("No hay inmatriculaciones prioritarias. Procesando todas las disponibles...")
+                    print("No hay prioritarios. Procesando todas las inmatriculaciones disponibles...")
+
                 for item in data_list:
                     inmatriculaciones = item.get('inmatriculaciones', 'N/A')
                     referencia = item.get('referencia', '')
@@ -250,14 +260,18 @@ def SAT():
                         Registrador.info(f"🔁 Referencia {referencia} está en la lista de exclusión. Saltando...")
                         continue
                     
-                    # B. Filtro de prioridad (Solo procesamos los prioritarios)
-                    if inmatriculaciones not in prioritarios_maquinarias:
-                        print(f"Ignorando {inmatriculaciones} porque no es prioridad.")
+                    # B. Filtro de prioridad (Si hay prioritarios, solo procesar esos; si no, procesar todos)
+                    if hay_prioritarios and inmatriculaciones not in prioritarios_maquinarias:
+                        print(f"Ignorando {inmatriculaciones} porque no es prioridad (hay prioritarios disponibles).")
                         continue
                     
-                    # C. Procesamiento de prioridades
-                    print(f"Procesando prioridad: {inmatriculaciones} con placa: {placa}")
-                    Registrador.info(f"Se está procesando la inmatriculacion prioritaria {inmatriculaciones}, placa {placa}")
+                    # C. Procesamiento
+                    if hay_prioritarios:
+                        print(f"Procesando prioridad: {inmatriculaciones} con placa: {placa}")
+                        Registrador.info(f"Se está procesando la inmatriculacion prioritaria {inmatriculaciones}, placa {placa}")
+                    else:
+                        print(f"Procesando: {inmatriculaciones} con placa: {placa}")
+                        Registrador.info(f"Se está procesando la inmatriculacion {inmatriculaciones}, placa {placa}")
                     
                     VerificarPlaca = satScrapper.iniciar_inscripcion(placa, inmatriculaciones)
                     if VerificarPlaca == 1:
