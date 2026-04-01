@@ -165,9 +165,8 @@ def encontrar_marca(page, marca_usuario):
         print(f"Buscando marca: {marca_a_buscar}")
 
         # 1. Limpiamos la caja de texto por completo
-        page.locator("input[name='txtDesMarca']").clear()
         page.locator("input[name='txtDesMarca']").press_sequentially(
-            marca_a_buscar, delay=100)
+            marca_a_buscar, delay=80)
 
         time.sleep(2)
 
@@ -310,7 +309,7 @@ def encontrar_marca1(page, marca_usuario):
         print(f"Buscando marca: {marca_a_buscar}")
 
         # 1. Limpiamos la caja de texto por completo
-        page.locator("input[name='txtDesMarcaV']").clear()
+        # page.locator("input[name='txtDesMarcaV']").clear()
         page.locator("input[name='txtDesMarcaV']").press_sequentially(
             marca_a_buscar, delay=120)
 
@@ -617,7 +616,7 @@ def normalizar_texto_lista(texto):
     if not texto:
         return []
     texto_pre = separar_sufijos_conocidos(texto)
-    texto_limpio = texto_pre.upper().strip().replace(",", "").replace("/", " ")
+    texto_limpio = texto_pre.upper().strip().replace(",", "").replace("/", "")
     lista_tokens = []
     for palabra in texto_limpio.split():
         palabra_sin_guion = palabra.replace("-", "")
@@ -663,7 +662,7 @@ def generar_intentos_busqueda_avanzado(texto_con_dup, texto_sin_dup):
             vistos.add(base_sin_l)
 
         # 3. Sin símbolos
-        base_sin_simbolos = base.replace("-", "").replace("/", " ")
+        base_sin_simbolos = base.replace("-", "").replace("/", "")
         base_sin_simbolos = " ".join(base_sin_simbolos.split())
         if base_sin_simbolos not in vistos:
             intentos.append((base_sin_simbolos, texto_original_para_comparar))
@@ -688,23 +687,27 @@ def generar_intentos_busqueda_avanzado(texto_con_dup, texto_sin_dup):
     return intentos
 
 
+import time
 
 def interactuar_y_buscar(page, texto_con_dup, texto_sin_dup, selector_input, selector_items_lista):
     intentos = generar_intentos_busqueda_avanzado(texto_con_dup, texto_sin_dup)
     print(f"\nINICIANDO BUSQUEDA EN SAT: '{texto_sin_dup}'")
 
     for i, (texto_a_buscar, texto_original_comparacion) in enumerate(intentos):
+        
+        texto_a_buscar_limpio = " ".join(texto_a_buscar.replace("-", " ").split())
+        
         lista_buscada = normalizar_texto_lista(texto_original_comparacion)
         lista_buscada_ordenada = sorted(lista_buscada)
         set_buscado = set(lista_buscada) 
 
         tipo = "CON DUPLICADOS" if texto_original_comparacion == texto_con_dup else "SIN DUPLICADOS"
-        print(f"Intento #{i+1} [{tipo}]: Escribiendo '{texto_a_buscar}'...")
+        print(f"Intento #{i+1} [{tipo}]: Escribiendo '{texto_a_buscar_limpio}'...")
         
         # 1. ESCRITURA
         try:
             page.locator(selector_input).clear()
-            page.locator(selector_input).press_sequentially(texto_a_buscar, delay=0.10)
+            page.locator(selector_input).press_sequentially(texto_a_buscar_limpio, delay=0.10)
         except Exception as e: 
             print(f"Error al escribir en el input: {e}")
             return False
@@ -716,67 +719,83 @@ def interactuar_y_buscar(page, texto_con_dup, texto_sin_dup, selector_input, sel
             print("La lista autocompletable no aparecio.")
             continue 
 
-        # 3. CAPTURA DE OPCIONES Y PURIFICACION DE API
-        opciones = page.locator(selector_items_lista).all()
-        
-        # MAGIA AQUI: Limpiamos la basura de la API (Convierte "AWD  E6B" en "AWD E6B")
+        # 3. PURIFICACION DE API Y CONTEO
         texto_api_limpio_case = " ".join(texto_original_comparacion.split())
         texto_api_limpio_upper = texto_api_limpio_case.upper()
+        
+        # Contamos cuántas opciones hay para probarlas una por una
+        cantidad_opciones = page.locator(selector_items_lista).count()
 
         # ==============================================================
         # PASADA 0.1: PRIORIDAD ABSOLUTA (Mayusculas y espacios perfectos)
         # ==============================================================
-        for op in opciones:
+        for idx in range(cantidad_opciones):
+            op = page.locator(selector_items_lista).nth(idx)
+            if not op.is_visible(): continue
+                
             texto_opcion_original = op.inner_text().replace('\xa0', ' ').strip()
             texto_opcion_upper = texto_opcion_original.upper()
             
             if "OTROS MODELOS" in texto_opcion_upper and "OTROS MODELOS" not in texto_api_limpio_upper: continue
 
-            # Compara EXACTAMENTE igual (Atrapara el E6B mayuscula)
             if texto_api_limpio_case == texto_opcion_original:
                 print(f"MATCH PERFECTO (Case Sensitive): '{texto_opcion_original}'")
                 try:
                     op.click(timeout=3000, force=True)
                     page.wait_for_timeout(500)
-                    if "  " in page.locator(selector_input).input_value():
-                        print("Trampa del SAT detectada. Rechazando...")
+                    valor_en_caja = page.locator(selector_input).input_value()
+                    
+                    if "  " in valor_en_caja and "SOLUTO" not in valor_en_caja.upper():
+                        print(f"Trampa detectada en la opción {idx+1}. Descartando y probando la siguiente...")
                         page.locator(selector_input).clear() 
-                        return False 
+                        # Volvemos a teclear para que reaparezca la lista y seguir con el siguiente
+                        page.locator(selector_input).press_sequentially(texto_a_buscar_limpio, delay=0.10)
+                        page.wait_for_timeout(1500)
+                        continue # SALTA AL SIGUIENTE ÍNDICE
+                        
                     return True
                 except Exception as e: return False
 
         # ==============================================================
         # PASADA 0.2: BUSQUEDA LITERAL (Ignorando mayusculas/minusculas)
         # ==============================================================
-        for op in opciones:
+        for idx in range(cantidad_opciones):
+            op = page.locator(selector_items_lista).nth(idx)
+            if not op.is_visible(): continue
+                
             texto_opcion_original = op.inner_text().replace('\xa0', ' ').strip()
             texto_opcion_upper = texto_opcion_original.upper()
             
             if "OTROS MODELOS" in texto_opcion_upper and "OTROS MODELOS" not in texto_api_limpio_upper: continue
 
-            # Si no encontro el E6B, se conforma con el E6b
             if texto_api_limpio_upper == texto_opcion_upper:
                 print(f"MATCH LITERAL EXACTO: '{texto_opcion_original}'")
                 try:
                     op.click(timeout=3000, force=True)
                     page.wait_for_timeout(500)
-                    if "  " in page.locator(selector_input).input_value():
-                        print("Trampa del SAT detectada. Rechazando...")
+                    valor_en_caja = page.locator(selector_input).input_value()
+                    
+                    if "  " in valor_en_caja and "SOLUTO" not in valor_en_caja.upper():
+                        print(f"Trampa detectada en la opción {idx+1}. Descartando y probando la siguiente...")
                         page.locator(selector_input).clear() 
-                        return False 
+                        page.locator(selector_input).press_sequentially(texto_a_buscar_limpio, delay=0.10)
+                        page.wait_for_timeout(1500)
+                        continue
+                        
                     return True
                 except Exception as e: return False
 
         # ==============================================================
         # PASADA 1: BUSQUEDA EXACTA (Mismas palabras, distinto orden)
         # ==============================================================
-        for op in opciones:
+        for idx in range(cantidad_opciones):
+            op = page.locator(selector_items_lista).nth(idx)
+            if not op.is_visible(): continue
+                
             texto_opcion_original = op.inner_text().replace('\xa0', ' ').strip()
             texto_opcion_upper = texto_opcion_original.upper()
             
             if "OTROS MODELOS" in texto_opcion_upper and "OTROS MODELOS" not in texto_api_limpio_upper: continue
-            
-            # Como la API ahora esta limpia, esto rechazara siempre los dobles espacios del SAT
             if "  " in texto_opcion_upper and "  " not in texto_api_limpio_upper: continue
 
             lista_opcion_ordenada = sorted(normalizar_texto_lista(texto_opcion_upper))
@@ -786,16 +805,25 @@ def interactuar_y_buscar(page, texto_con_dup, texto_sin_dup, selector_input, sel
                 try:
                     op.click(timeout=3000, force=True)
                     page.wait_for_timeout(500)
-                    if "  " in page.locator(selector_input).input_value():
+                    valor_en_caja = page.locator(selector_input).input_value()
+                    
+                    if "  " in valor_en_caja and "SOLUTO" not in valor_en_caja.upper():
+                        print(f"Trampa detectada en la opción {idx+1}. Descartando y probando la siguiente...")
                         page.locator(selector_input).clear()
-                        return False
+                        page.locator(selector_input).press_sequentially(texto_a_buscar_limpio, delay=0.10)
+                        page.wait_for_timeout(1500)
+                        continue
+                        
                     return True
                 except: return False
 
         # ==============================================================
         # PASADA 2: BUSQUEDA HOMOLOGO / SUBSET
         # ==============================================================
-        for op in opciones:
+        for idx in range(cantidad_opciones):
+            op = page.locator(selector_items_lista).nth(idx)
+            if not op.is_visible(): continue
+                
             texto_opcion_original = op.inner_text().replace('\xa0', ' ').strip()
             texto_opcion_upper = texto_opcion_original.upper()
             
@@ -809,18 +837,22 @@ def interactuar_y_buscar(page, texto_con_dup, texto_sin_dup, selector_input, sel
                 try:
                     op.click(timeout=3000, force=True)
                     page.wait_for_timeout(500)
-                    if "  " in page.locator(selector_input).input_value():
+                    valor_en_caja = page.locator(selector_input).input_value()
+                    
+                    if "  " in valor_en_caja and "SOLUTO" not in valor_en_caja.upper():
+                        print(f"Trampa detectada en la opción {idx+1}. Descartando y probando la siguiente...")
                         page.locator(selector_input).clear()
-                        return False
+                        page.locator(selector_input).press_sequentially(texto_a_buscar_limpio, delay=0.10)
+                        page.wait_for_timeout(1500)
+                        continue
+                        
                     return True
                 except: return False
                 
-        print("Opciones visibles, pero ninguna hizo MATCH estricto.")
+        print("Opciones visibles, pero ninguna hizo MATCH estricto o todas eran trampas.")
 
     print("Agotados todos los intentos. Pasando a Plan B (Llenado manual mediante Checkbox).")
     return False
-
-
 
 
 def detectar_tipo_otros_modelos(page, peso_bruto=None):
@@ -907,7 +939,7 @@ def flujo_seleccionar_otros(page, tipo_otros, texto_sin_dup, selectores):
         print("No hubo match valido en la lista. Activando Checkbox...")
 
     # =================================================================
-    # PASO 3: ACTIVAR CHECKBOX CON JS
+    # PASO 3: ACTIVAR CHECKBOX 
     # =================================================================
     if selectores.get('check'):
         try:
@@ -1028,6 +1060,42 @@ reglas_sat = [
         "version": "NEW REFINE 2.0 VVT GASOLINA",
         "f_rodante": "",
         "modelo_sat": "NEW REFINE 2.0 VVT GASOLINA"
+    },
+    {
+        "modelo": "BRONCO SPORT",
+        "version": "BID BEND 4X4 AT",
+        "f_rodante": "",
+        "modelo_sat": "BRONCO SPORT BIG BEND 4X4 AT"
+    },
+    {
+        "modelo": "MAZDA3",
+        "version": "MAZDA 3 SPORT CORE 2.0 AT 2WD IPM IV E6B",
+        "f_rodante": "",
+        "modelo_sat": "MAZDA3 SPORT CORE 2.0 AT 2WD IPM IV E6B"
+    },
+    {
+        "modelo": "MAZDA3",
+        "version": "MAZDA 3 SPORT CORE 2.0 AT 2WD IPM IV E6B3",
+        "f_rodante": "",
+        "modelo_sat": "MAZDA3 SPORT CORE 2.0 AT 2WD IPM IV E6B3"
+    },
+    {
+        "modelo": "SOLUTO",
+        "version": "1.4 AT - LX PLUS",
+        "f_rodante": "",
+        "modelo_sat": "SOLUTO 1.4 AT  LX PLUS"
+    },
+    {
+        "modelo": "CROSSTREK",
+        "version": "2.0I AWD CVT",
+        "f_rodante": "",
+        "modelo_sat": "CROSSTREK 2.0 AWD CVT"
+    },
+    {
+        "modelo": "T1",
+        "version": "2.0T AWD 8AT B/O",
+        "f_rodante": "",
+        "modelo_sat": "T1 2.0T AWD 8AT BO"
     }
 ]
 

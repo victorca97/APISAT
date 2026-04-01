@@ -141,10 +141,10 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
                 
                 if not apellido_materno:
                     page.locator("input[name='chkSinApeMatAdmi']").check()
-                    page.locator("input[name='txtApeMateAdmi']").fill("")
+                    
                 else:
                     page.locator("input[name='txtApeMateAdmi']").fill(apellido_materno)
-                
+                    
                 nombre_a_validar = nombre
                 page.locator("input[name='txtNombAdmi']").fill(nombre)
             
@@ -156,7 +156,10 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
                     page.locator("input[name='chkSinApeMatAdmi']").check()
                 
                 # Guardamos el nombre final del SAT para contar sus letras
-                nombre_a_validar = page.locator("#txtNombAdmi").input_value().strip()
+                nombre_a_validar = page.locator("#txtNombAdmi").fill(nombre)
+                
+                # 2. Extraemos el texto real que está dentro de la caja
+                nombre_a_validar = page.locator("#txtNombAdmi").input_value()
 
             # Validación del límite de 30 caracteres
             if len(nombre_a_validar) > 30:
@@ -234,7 +237,7 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             #page.locator("input[name='txtAnoFabrica']").fill(anoFabricacion)
 
             time.sleep(2)
-            page.locator("input[name='txtDesMarca']").press_sequentially(marcas,delay=700)
+            # page.locator("input[name='txtDesMarca']").press_sequentially(marcas,delay=100)
             time.sleep(2)
 
             if not encontrar_marca(page,marcas):
@@ -359,7 +362,7 @@ def natural_sin_representante(referencia,comprador_info:dict,data,page:Page,brow
             page.locator("#btnCancelar").click()
             raise
         
-        page.locator("input[name='txtDesMarcaV']").press_sequentially(marcas,delay=200)
+        # page.locator("input[name='txtDesMarcaV']").press_sequentially(marcas,delay=200)
         time.sleep(2)
         if not encontrar_marca1(page,marcas):
             raise ValueError("Marca no encontrada")
@@ -695,7 +698,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
             #page.locator("input[name='txtAnoFabrica']").fill(anoFabricacion)
 
             time.sleep(2)
-            page.locator("input[name='txtDesMarca']").press_sequentially(marcas,delay=100)
+            # page.locator("input[name='txtDesMarca']").press_sequentially(marcas,delay=100)
             time.sleep(2)
             if not encontrar_marca(page,marcas):
                 raise ValueError("Marca no encontrada")
@@ -813,7 +816,7 @@ def  juridica_con_representante(referencia,comprador_info:dict,data,page:Page,br
 
         # 1. LLENADO DE DATOS
         # ---------------------------------------------------------
-        page.locator("input[name='txtDesMarcaV']").press_sequentially(marcas, delay=200)
+        # page.locator("input[name='txtDesMarcaV']").press_sequentially(marcas, delay=200)
         time.sleep(2)
 
         if not encontrar_marca1(page, marcas):
@@ -1232,7 +1235,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
 
                 #page.locator("input[name='txtAnoFabrica']").fill(anoFabricacion)
                 time.sleep(2)
-                page.locator("input[name='txtDesMarca']").press_sequentially(marcas,delay=100)
+                # page.locator("input[name='txtDesMarca']").press_sequentially(marcas,delay=100)
                 time.sleep(2)
                 if not encontrar_marca(page,marcas):
                     raise ValueError("Marca no encontrada")
@@ -1347,7 +1350,7 @@ def sociedadconyugal(referencia,comprador_info,data,page:Page,browser,inmatricul
                 raise
 
             
-            page.locator("input[name='txtDesMarcaV']").press_sequentially(marcas,delay=200)
+            # page.locator("input[name='txtDesMarcaV']").press_sequentially(marcas,delay=200)
             time.sleep(2)
             if not encontrar_marca1(page,marcas):
                 raise ValueError("Marca no encontrada")
@@ -1523,7 +1526,6 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
                 page.locator("input[name='txtApePateAdmi']").fill(apellido_paterno)
                 if not apellido_materno:
                     page.locator("input[name='chkSinApeMatAdmi']").check()
-                    page.locator("input[name='txtApeMateAdmi']").fill("")
                 else:
                     page.locator("input[name='txtApeMateAdmi']").fill(apellido_materno)
                 
@@ -1606,7 +1608,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
 
             #page.locator("input[name='txtAnoFabrica']").fill(anoFabricacion)
             time.sleep(2)
-            page.locator("input[name='txtDesMarca']").press_sequentially(marcas,delay=100)
+            # page.locator("input[name='txtDesMarca']").press_sequentially(marcas,delay=100)
             time.sleep(2)
             if not encontrar_marca(page,marcas):
                 raise ValueError("Marca no encontrada")
@@ -1724,7 +1726,7 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
             #page.select_option("#ddlClaseV", value="11")
 
 
-            page.locator("input[name='txtDesMarcaV']").press_sequentially(marcas,delay=200)
+            # page.locator("input[name='txtDesMarcaV']").press_sequentially(marcas,delay=200)
             time.sleep(2)
             if not encontrar_marca1(page,marcas):
                 raise ValueError("Marca no encontrada")
@@ -1817,7 +1819,6 @@ def natural_coocomprador(referencia,_co_comprador_info:dict,inicio_comprador,dat
                 page.locator("input[name='txtApePateAdmi']").fill(apellido_paterno)
                 if not apellido_materno:
                     page.locator("input[name='chkSinApeMatAdmi']").check()
-                    page.locator("input[name='txtApeMateAdmi']").fill("")
                 else:
                     page.locator("input[name='txtApeMateAdmi']").fill(apellido_materno)
                 
