@@ -1103,7 +1103,6 @@ reglas_sat = [
 # Paso 2: Correccion casos mapeados
 # ==============================================================================
 
-
 def aplicar_reglas_sat(modelo_api, version_api, traccion_api):
     """
     Recibe los datos crudos. Busca en 'reglas_sat'.
@@ -1114,6 +1113,27 @@ def aplicar_reglas_sat(modelo_api, version_api, traccion_api):
     ver_filtro = (version_api or "").strip().upper()
     trac_filtro = (traccion_api or "").strip().upper()
 
+    # =================================================================
+    # 1. EL ESCUDO PROTECTOR (Modelos Intocables)
+    # =================================================================
+    # Unimos el modelo y la versión para evaluar la cadena completa
+    nombre_completo_api = f"{mod_filtro} {ver_filtro}".strip()
+
+    # Agrega más aquí si el SAT te vuelve a cortar otros modelos en el futuro
+    modelos_intocables = [
+        "CROSSTREK 2.0I AWD CVT PLUS", 
+    ]
+
+    for intocable in modelos_intocables:
+        # Si el modelo intocable está dentro del texto completo de la API
+        if intocable in nombre_completo_api:
+            print(f" Modelo blindado detectado '{intocable}'. Ignorando reglas_sat.")
+            # Lo retornamos crudito, tal cual como entró, ignorando la parte de abajo
+            return mod_filtro, ver_filtro 
+
+    # =================================================================
+    # 2. BÚSQUEDA EN REGLAS SAT (Tu código original)
+    # =================================================================
     # Usamos next() como el .find() de JavaScript leyendo la variable global reglas_sat
     regla_encontrada = next(
         (item for item in reglas_sat
@@ -1132,7 +1152,6 @@ def aplicar_reglas_sat(modelo_api, version_api, traccion_api):
 
     # Si es un carro normal sin problemas, lo dejamos pasar igual
     return mod_filtro, ver_filtro
-
 
 # ==============================================================================
 # Paso 3: Selectores modelo
