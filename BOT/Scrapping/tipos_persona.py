@@ -562,24 +562,22 @@ def juridica_con_representante(referencia, comprador_info: dict, data, page: Pag
             page.keyboard.press('Tab')
 
             # VALIDACIÓN DE LA RAZÓN SOCIAL
-            value_razonsocial = page.locator(
-                "#txtRazoSociAdmi").input_value().strip()
-            print(
-                f"Razón social SAT: '{value_razonsocial}' | API: '{razon_social}'")
+            value_razonsocial = page.locator("#txtRazoSociAdmi").input_value().strip()
+            print(f"Razón social SAT: '{value_razonsocial}' | API: '{razon_social}'")
 
             if value_razonsocial != razon_social:
-                Registrador.warning(
-                    "Discrepancia en razón social. Forzando segunda búsqueda en SUNAT...")
+                Registrador.warning("Discrepancia en razón social. Forzando datos del API...")
                 page.once("dialog", lambda dialog: dialog.accept())
                 page.locator("input[name='cmdBuscaDocuAdmi']").click()
                 page.wait_for_timeout(3000)
-
-                value_razonsocial_nueva = page.locator(
-                    "#txtRazoSociAdmi").input_value().strip()
-                Registrador.info(
-                    f"Nombre oficial confirmado por SUNAT: {value_razonsocial_nueva}")
+                # page.locator("#txtRazoSociAdmi").fill("")
+                time.sleep(1)
+                page.locator("#txtRazoSociAdmi").fill(razon_social)
+                Registrador.info(f"Razon social validad por la api: {razon_social}")
             else:
                 print("✅ La razón social de la empresa coincide.")
+
+
 
             # LLENADO DE DATOS (Solo campos válidos para Empresa, sin apellidos ni nombres)
             page.locator("input[name='txtTelefono1']").fill(
@@ -621,18 +619,28 @@ def juridica_con_representante(referencia, comprador_info: dict, data, page: Pag
             # 2. SELECCIÓN DE DOCUMENTO Y BÚSQUEDA
             page.select_option("#ddlTipoDocuRela", value=data_rep["tipo_doc"])
 
+            # 1. DESBLOQUEO (Solo si es necesario)
             if page.locator("#txtDocuRela").is_disabled():
-                try: page.locator("#btnNuevaBusquedaRel").click()
-                except: pass 
-                
-                page.locator("#txtDocuRela").fill(data_rep["num_doc"])
-                print(f"Documento del representante: {data_rep['num_doc']}")
-                
-                page.once("dialog", lambda d: d.accept())
-                page.locator("#cmdBuscaDocuRel").click()
-                page.wait_for_timeout(2000) 
-
-
+                print("Campo bloqueado. Presionando 'Nueva Búsqueda'...")
+                try: 
+                    page.locator("#btnNuevaBusquedaRel").click()
+                    page.wait_for_timeout(1000) # Pequeña espera para que el SAT reaccione
+                except: 
+                    pass 
+            
+            # 2. BÚSQUEDA GENERAL (Para habilitados y deshabilitados)
+            # Limpiamos por si había algo escrito de un caso anterior
+            page.locator("#txtDocuRela").fill("") 
+            page.locator("#txtDocuRela").fill(data_rep["num_doc"])
+            print(f"Ejecutando búsqueda del representante: {data_rep['num_doc']}")
+            
+            # Manejo de popup y clic en buscar
+            page.once("dialog", lambda d: d.accept())
+            page.locator("#cmdBuscaDocuRel").click()
+            
+            # Espera para que carguen los nombres
+            page.wait_for_timeout(2500)
+            
             # 3. VALIDACIÓN INTELIGENTE (El SAT vs La API)
             sat_pate = page.locator("#txtApePateRela").input_value().strip()
             sat_mate = page.locator("#txtApeMateRela").input_value().strip()

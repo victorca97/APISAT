@@ -1152,28 +1152,10 @@ reglas_sat = [
         "modelo_sat": "BRONCO SPORT BID BEND 4X4 AT"
     },
     {
-        "modelo": "MAZDA3",
-        "version": "MAZDA 3 SPORT CORE 2.0 AT 2WD IPM IV E6B",
-        "f_rodante": "",
-        "modelo_sat": "MAZDA3 SPORT CORE 2.0 AT 2WD IPM IV E6B"
-    },
-    {
-        "modelo": "MAZDA3",
-        "version": "MAZDA 3 SPORT CORE 2.0 AT 2WD IPM IV E6B3",
-        "f_rodante": "",
-        "modelo_sat": "MAZDA3 SPORT CORE 2.0 AT 2WD IPM IV E6B3"
-    },
-    {
         "modelo": "SOLUTO",
         "version": "1.4 AT - LX PLUS",
         "f_rodante": "",
         "modelo_sat": "SOLUTO 1.4 AT  LX PLUS"
-    },
-    {
-        "modelo": "CROSSTREK",
-        "version": "2.0I AWD CVT",
-        "f_rodante": "",
-        "modelo_sat": "CROSSTREK 2.0 AWD CVT"
     },
     {
         "modelo": "T1",
